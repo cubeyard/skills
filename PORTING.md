@@ -44,7 +44,7 @@ node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against
    installs each folder on its own.
 3. **Adapt in place.** Each change is an edit at the spot it concerns, with
    a note right above it. A file that needs no change stays byte-identical
-   (33 of the 58 skills are unchanged, and 534 of 595 mapped files).
+   (33 of the 58 skills are unchanged, and 533 of 595 mapped files).
 4. **Check it mechanically** (`node scripts/check-port.mjs`, below), so that
    "no silent omission" is a test, not a promise.
 
@@ -83,6 +83,7 @@ be confusing without its reason.
 | links resolve where installed | every relative Markdown link stays inside `skills/` and exists |
 | OptChat reads it in one call | each SKILL.md listed to OptChat is at most 30,000 characters (`SKILL_PAGE`) |
 | non-skill upstream files are accounted for | every run fails on an upstream file that is neither mapped nor given a reason (so CI catches a new one) |
+| the handoff rule (M2) | installed text offering an in-thread substitute (sequential roles, a self-review label) fails; so does an installed file whose upstream hands work to another agent while the port names neither a handoff nor OptChat |
 | surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines (a note that mentions `surface:`) are ignored |
 
 ## How cube finds these skills (M5, verified)
@@ -124,19 +125,24 @@ OptChat; reading, running, editing and opening PRs go to a thread. Each
 playbook names its home (cube-mode's Playbooks table). The cost is a seam:
 a playbook that spans both is split at the brief and the report.
 
-**M2. Delegation without nesting.** pstack's subagents are the mechanism,
-not the goal; the goals are (a) keeping bulk out of the deciding context,
-(b) parallel throughput, and (c) independence between the author of a thing
-and its judge. Cube allows exactly one level of delegation, OptChat to
-threads. So: in OptChat, a pstack fan-out is a `spawn` with one task per
-worker. In a thread, each role is run in order by the thread itself, with
-files between roles so the next role reads the previous one's output rather
-than its memory (which preserves (a)), and (b) is given up. Where (c) is the
-whole point, the thread does not pretend: it runs the single-agent form,
-labels it `self-review, not independent`, or reports the fan-out for OptChat.
-Simulating several agents in one context and calling it independent is
-forbidden, since it would counterfeit exactly the property the step exists
-for.
+**M2. Delegation without nesting, and no stand-ins.** pstack's subagents are
+the mechanism, not the goal; the goals are (a) keeping bulk out of the
+deciding context, (b) parallel throughput, and (c) independence between the
+author of a thing and its judge. Cube allows exactly one level of
+delegation, OptChat to threads. The user ruled how a thread meets a step
+that needs another agent: it never plays that agent, neither in parallel
+nor in sequence, and never offers its own pass as a substitute. It reports
+a **handoff** (the tasks as ready briefs, the evidence so far, and how its
+own task continues) and ends its turn; OptChat starts each task as a fresh
+thread and tells the reporting thread the results when its own task goes
+on. A thread is still the delegate its brief names: it does that task end
+to end, with its fixes, continuation and landing, and it may run
+deterministic scripts (levers, not agents). This keeps all three goals
+whole, (c) above all, since nothing counterfeits independence; the price is
+a round trip through OptChat, and machines, wherever a fan-out is needed.
+An earlier revision let a thread run roles in sequence and label its own
+pass `self-review, not independent`; that is removed everywhere, and the
+checker now refuses it.
 
 **M3. Independence from fresh threads.** A verifier, judge, adversary or
 Comment Sicko is valuable because it did not write the thing. Cube's rule
@@ -241,23 +247,23 @@ file is byte-identical. `COVERAGE.md` lists every file.
 | poteto-help | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | cube setup (default source, Settings pin, the four listed skills), modes, troubleshooting rows, pinned guide links |
 | setup-pstack | 1 | 1 | OptChat | M1 M4 M5 M6 M10 | models from `projects`; the role block goes in OptChat's instructions file, which the user saves (gap G2) |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its Cursor path glob was automatic |
-| how | 3 | 1 | | M2 M4 | explorers and explainer: threads in OptChat, ordered passes with files in a thread |
-| why | 13 | 1 (+1 new) | | M2 M4 M10 M11 | the same split; evidence sources cube has; adds the OptChat-chat source playbook |
-| teach | 1 | 1 | | M2 M12 | how and why in order; no image generation |
-| recall | 1 | 1 | | M1 M2 M10 | OptChat's chat and thread histories as the history; live state by a thread |
+| how | 3 | 1 | | M2 M4 | explorers and explainer are threads OptChat starts; a thread hands `how` off |
+| why | 13 | 1 (+1 new) | | M2 M4 M10 M11 | investigators and synthesizer are threads; a thread builds the anchor and hands off; evidence sources cube has; adds the OptChat-chat source playbook |
+| teach | 1 | 1 | | M2 M12 | how and why by handoff; no image generation |
+| recall | 1 | 1 | | M1 M2 M10 | OptChat's chat and thread histories as the history; a thread searches one or two stretches itself and hands off the rest; live state by a thread |
 | ketchup | 1 | 1 | | M1 M10 M12 | OptChat's skill; PR state as last reported, with time |
 | ketchup-video | 1 | 1 | | M1 M11 M12 | rendered by a thread, linked (no inline video) |
-| arena | 1 | 1 | | M1-M4 M11 | OptChat runs candidates and judge; a synthesis thread picks and grafts; an in-thread form labeled self-review |
-| swarm | 1 | 1 | | M1 M2 M4 M11 | OptChat's; a thread runs coverage slices in order |
-| interrogate | 1 | 1 | | M1-M4 M11 | adversary threads on a pushed scope; one labeled pass in a thread |
-| architect | 4 | 2 | | M2 M4 M6 M11 | arena per its cube section; checkpoint by report |
-| reflect | 5 | 1 | | M2-M4 M6 M7 M9-M12 | digest in place of the transcript file; lenses as threads or passes; edits land as a PR in the skill's source, never merged |
-| no-comments | 1 (+1 agent) | 1 (+1) | | M2 M3 M6 M9 M11 | Comment Sicko as a fresh thread committing to its own branch, or a labeled self pass |
+| arena | 1 | 1 | | M1-M4 M11 | OptChat runs candidates and judge; a synthesis thread picks and grafts; a thread frames and hands off (no single-agent arena) |
+| swarm | 1 | 1 | | M1 M2 M4 M11 | OptChat's; a thread frames and hands off |
+| interrogate | 1 | 1 | | M1-M4 M11 | adversary threads on a pushed scope; a thread hands off |
+| architect | 4 | 2 | | M2 M4 M6 M11 | arena by handoff; implements the sketch on the tell; checkpoint by report |
+| reflect | 5 | 1 | | M2-M4 M6 M7 M9-M12 | digest in place of the transcript file; lenses and synthesizer are threads (handoff); a brief counts as use only when it directs a read of the skill; edits land as a PR in the skill's source, never merged |
+| no-comments | 1 (+1 agent) | 1 (+1) | | M2 M3 M6 M9 M11 | Comment Sicko as a fresh thread committing to its own branch, by handoff; steps 2 to 6 continue on the tell |
 | automate-me | 1 | 1 | | M1 M2 M5 M6 M10-M12 | OptChat mines and interviews, a thread drafts; mode skills listed, not hidden |
-| figure-it-out | 1 | 1 | | M1-M3 | fan-out marked for OptChat; judge threads |
+| figure-it-out | 1 | 1 | | M1-M3 | fan-out phases and judges by handoff |
 | show-me-your-work | 3 | 1 | | M3 M4 M10 | trail kept in the report or an artifact; cross-model review by a thread OptChat starts |
 | create-verification-skill | 4 | 1 | | M11 | `.agents/skills/verify-<app>/` |
-| maintain-verification-skill | 1 | 1 | | M2 M6 M11 | source wave in order or as threads |
+| maintain-verification-skill | 1 | 1 | | M2 M6 M11 | one reader thread per feature by handoff |
 | make-bot-ui | 1 | 1 | | M7 M11 M12 | stops: no cube wake endpoint, no secret in a machine, no Tailscale (gap G3); page via `cube service` |
 | statechart | 407 | 1 | | M11 | install mise first; measured working |
 | principle-build-the-lever | 1 | 1 | | M2 M5 | the lever is a committed file named in every brief |
@@ -299,7 +305,7 @@ skills.
 | what | how | result |
 | --- | --- | --- |
 | baseline fidelity | `git rev-parse HEAD:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
-| completeness, notes, cube rules, links, limits | `node scripts/check-port.mjs` | ok: 595 mapped files (61 adapted, 534 unchanged), 2 added, 61 skills, 87 links |
+| completeness, notes, cube rules, links, limits, handoff rule | `node scripts/check-port.mjs` | ok: 595 mapped files (62 adapted, 533 unchanged), 2 added, 61 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 61 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
@@ -327,7 +333,7 @@ None of these is in this PR. Each needs a decision or a cube change.
 | G6 | reasoning effort is not settable per thread | budgets map to model choice only | per-spawn effort |
 | G7 | chat and artifacts cannot play video, and show images as links | ketchup-video and review gates link media | inline media in artifacts |
 | G8 | 61 of the 64 skills a thread can install are used | a user's own sources can add at most 3 new ids (or must disable some) | a higher limit, or hidden skills not counted |
-| G9 | no live model run | how well OptChat and threads follow these skills, and how often the in-thread forms are chosen, is unmeasured | real runs after activation |
+| G9 | no live model run | how well OptChat and threads follow these skills, and how reliably threads hand off instead of doing a fan-out themselves, is unmeasured | real runs after activation |
 | G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | one run each in a thread machine: the depth-1 fetch took 975 ms and 3.4 MB at this head, against 568 ms and 140 KB at the current pin (`d5041ce9`); not repeated, so the spread is unknown | if it matters, move the baseline to its own branch or repository |
 
 ## Naming: option B, chosen by the user
