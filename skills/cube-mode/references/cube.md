@@ -36,7 +36,7 @@ in, or the thread OptChat starts.
 | A follow-up to a running subagent, `resume` | OptChat: `tell(id, message)` for the same task only (**M8**). |
 | `AskQuestion` | OptChat: ask in the chat in plain text, with the options listed. A thread: never waits; it ends its turn with the question and its recommendation in its report (**M6**). |
 | Open a todolist | A thread: the agent's todo tool if it has one, else keep the list in your reply. OptChat: keep the list in your reply or in an artifact you revise. |
-| Run another pstack skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("poteto-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed (**M5**). |
+| Run another pstack skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("cube-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed (**M5**). |
 | `Grep`, `Glob` | `rg` and `find` in a thread's shell. |
 | "Use any MCP tool" | A thread has cube's own tools (artifacts, OptChat's memory read only), `gh` and `git` with cube's credentials, and HTTP(S). Other MCP servers are not there: say which evidence that leaves out (**M11**). |
 
@@ -47,7 +47,7 @@ cube. A field with no row: drop it and say so.
 
 | Cursor field | purpose | cube |
 | --- | --- | --- |
-| `subagent_type: poteto-agent` | the delegate reads poteto-mode first | the brief says "read `~/.cube/skills/poteto-mode/SKILL.md` in full first": [`../agents/poteto-agent.md`](../agents/poteto-agent.md) is the template |
+| `subagent_type: poteto-agent` | the delegate reads cube-mode first | the brief says "read `~/.cube/skills/cube-mode/SKILL.md` in full first": [`../agents/poteto-agent.md`](../agents/poteto-agent.md) is the template |
 | `subagent_type: comment-sicko` | a reviewer that did not write the comments | a fresh thread briefed with [`../../no-comments/agents/comment-sicko.md`](../../no-comments/agents/comment-sicko.md) (**M3**) |
 | `subagent_type: generalPurpose` | a plain worker | a thread whose brief is the worker prompt |
 | `readonly: true` | the worker must not write | the brief says "read only: no edits, no branch, no pull request"; the thread checks `git status` before reporting |
@@ -264,7 +264,7 @@ the skipped step made, leave a placeholder and name it.
 | `cursor-team-kit`: `deslop` | no such skill here: run the **unslop** skill over prose and the **no-comments** skill over code comments, and say `/deslop` was skipped |
 | `cursor-team-kit`: `control-ui`, `control-cli` | the project's own verification skill (`.agents/skills/verify-*`, see **create-verification-skill**); else Playwright's Chromium in the thread (`pnpm test:browser` style), or driving the CLI in the shell |
 | `create-skill` (Cursor's built-in) | the **Authoring a skill** playbook plus cube's rules in cubeyard/skills' README (frontmatter, surface, links) |
-| Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat re-reads poteto-mode when a turn's request needs it |
+| Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat re-reads cube-mode when a turn's request needs it |
 | `/loop` | see M7 |
 | Plan Mode | the Multi-phase plan playbook, written as an artifact |
 | `/visualize`, the image-generation tool, canvases | Mermaid diagrams and tables in an artifact or a reply; no generated images |

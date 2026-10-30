@@ -20,8 +20,13 @@ const args = process.argv.slice(2);
 // Upstream files that live somewhere else in skills/ (cube has no agent
 // definitions: an agent becomes a brief template inside the skill that
 // starts it). Every other upstream skill file keeps its path.
+// Skills whose folder (id) the port renames; every file keeps its path
+// below the folder. The user chose to give the router a cube name
+// (PORTING.md, Naming); the leaves keep upstream's ids.
+const RENAMED = { "poteto-mode": "cube-mode" };
+const renamed = (rel) => { const [id, ...rest] = rel.split("/"); return [RENAMED[id] ?? id, ...rest].join("/"); };
 const RELOCATED = {
-  "agents/poteto-agent.md": "poteto-mode/agents/poteto-agent.md",
+  "agents/poteto-agent.md": "cube-mode/agents/poteto-agent.md",
   "agents/comment-sicko.md": "no-comments/agents/comment-sicko.md",
 };
 // cube's own skills, not ported from pstack.
@@ -64,14 +69,15 @@ if (tree.status === 0 && tree.stdout.trim() !== EXPECTED_TREE) fail(`baseline gi
 const pairs = [];
 for (const rel of baselineFiles) {
   let target;
-  if (rel.startsWith("skills/")) target = rel.slice("skills/".length);
+  if (rel.startsWith("skills/")) target = renamed(rel.slice("skills/".length));
   else if (RELOCATED[rel]) target = RELOCATED[rel];
   else continue; // README, guide, automations, assets: baseline only (PORTING.md)
   pairs.push({ from: rel, to: target });
 }
 // pstack's MIT notice travels with every ported skill folder, since cube
 // installs each folder on its own.
-for (const id of fs.readdirSync(path.join(baseline, "skills")).sort()) pairs.push({ from: "LICENSE", to: `${id}/LICENSE` });
+for (const id of fs.readdirSync(path.join(baseline, "skills")).sort()) pairs.push({ from: "LICENSE", to: `${RENAMED[id] ?? id}/LICENSE` });
+for (const [from, to] of Object.entries(RENAMED)) if (!fs.existsSync(path.join(baseline, "skills", from)) || fs.existsSync(path.join(skillsDir, from))) fail(`RENAMED ${from} -> ${to}: the upstream folder must exist and the old id must be gone from skills/`);
 const mappedTargets = new Set(pairs.map((p) => p.to));
 const skillFiles = walk(skillsDir);
 
@@ -234,7 +240,8 @@ for (const f of skillFiles) {
 
 if (args[0] === "--diff") {
   const id = args[1];
-  const result = spawnSync("git", ["diff", "--no-index", "--color=always", "--", path.join(baseline, "skills", id), path.join(skillsDir, id)], { stdio: "inherit" });
+  const upstreamId = Object.entries(RENAMED).find(([, to]) => to === id)?.[0] ?? id;
+  const result = spawnSync("git", ["diff", "--no-index", "--color=always", "--", path.join(baseline, "skills", upstreamId), path.join(skillsDir, id)], { stdio: "inherit" });
   process.exit(result.status === 1 ? 0 : result.status);
 }
 // Upstream files that are not skills: why each stays in the baseline only.

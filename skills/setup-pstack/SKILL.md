@@ -46,7 +46,7 @@ Every real model written must be in the detected set. `inherit-parent` and `auto
 ### 5. Write the rule
 
 <!-- cube-adapt M4 M10. Intent: write the whole rule each time so re-runs stay idempotent. Cube: the file is the user's and holds other instructions; you cannot write it. Kept: the role labels poteto-mode uses, the budget line, replace-not-append. Now: a block between `<!-- pstack models -->` and `<!-- /pstack models -->` that the user pastes over any earlier one; values are cube model ids. Cost: a manual save. -->
-Give the user one block to put in `<CUBED_STATE>/optchat/AGENTS.md`, replacing any earlier block between the same marker lines, with a `# budget` line with the chosen label and one line per role, using the same labels poteto-mode uses. Shape (put a detected `provider/id` where it says `<judgment model id>`):
+Give the user one block to put in `<CUBED_STATE>/optchat/AGENTS.md`, replacing any earlier block between the same marker lines, with a `# budget` line with the chosen label and one line per role, using the same labels cube-mode uses. Shape (put a detected `provider/id` where it says `<judgment model id>`):
 
 ```
 <!-- pstack models -->

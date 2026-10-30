@@ -10,8 +10,8 @@
    <!-- cube-adapt M10. Intent: the plan lives where the program's runner and the operator can read it. Cube: a thread's files leave with its machine; OptChat and the user read artifacts. Kept: one plan file. Now: write it as an artifact (and commit it only when the operator names a path). Cost: none. -->
    Unless the operator names a path, write the plan as an artifact (`artifact_write`), so OptChat and the user can read and comment on it. Keep every heading and every sub-block in the order shown. One section per PR. One PR is one change with its own evidence (the **sequence-verifiable-units** principle skill). Name the execution playbook in **How to read this**. Pick `playbooks/autopilot-full.md` when the run may merge. Pick `playbooks/autopilot-stack.md` when the operator lands the PRs. A standing program takes `playbooks/orchestrate.md`.
 5. Write under `/technical-writing` in full, then `/unslop`. The body is one Diátaxis mode, how-to. Appendices hold explanation and reference. Each heading states the task or the finding. No long dashes. No mid-sentence colons.
-<!-- cube-adapt M11. Intent: a script checks the plan's structure. Cube: the script is installed at ~/.cube/skills/poteto-mode/scripts/, not in the project's tree. Kept: the check. Now: run it from there on a local copy of the plan. Cost: none. -->
-6. Run `node ~/.cube/skills/poteto-mode/scripts/check-plan.mjs <plan.md>` on a local copy of the plan and fix every line it prints (the **encode-lessons-in-structure** principle skill).
+<!-- cube-adapt M11. Intent: a script checks the plan's structure. Cube: the script is installed at ~/.cube/skills/cube-mode/scripts/, not in the project's tree. Kept: the check. Now: run it from there on a local copy of the plan. Cost: none. -->
+6. Run `node ~/.cube/skills/cube-mode/scripts/check-plan.mjs <plan.md>` on a local copy of the plan and fix every line it prints (the **encode-lessons-in-structure** principle skill).
 <!-- cube-adapt M1. Intent: the planner stops at the plan. Cube: a thread reports and ends its turn; OptChat runs the program on the user's go. Kept: stop. Now: report the artifact and the script's output. Cost: none. -->
 7. Hand back. Report the plan's artifact (or path) and the script's output, then end your turn. Execution starts on the operator's explicit go, under the execution playbook the plan names.
 
@@ -32,7 +32,7 @@ The live block is mandatory. Ten lanes at the PR head drive the real surface thr
 
 One box is one unit of work. Every box names the evidence that checks it. A nested box is a sub-step of the box above it. Check a box only when its evidence exists, a file, a log line, a screenshot, a test run, or a SHA. The body is a how-to. The appendices explain and record.
 
-The program runs `~/.cube/skills/poteto-mode/playbooks/<execution playbook>.md`. <Who merges, and which PR ids are the operator's items that stop at merge-ready.>
+The program runs `~/.cube/skills/cube-mode/playbooks/<execution playbook>.md`. <Who merges, and which PR ids are the operator's items that stop at merge-ready.>
 
 Tests alone are not sufficient verification. A PR is verified only when its unit, live, and perf boxes are all checked.
 
@@ -42,10 +42,10 @@ Tests alone are not sufficient verification. A PR is verified only when its unit
 
 - [ ] State the protocol and this plan to the operator, then stop. Start execution only on the operator's explicit go.
 - [ ] Read these at program start. Re-read them at every tick.
-  - [ ] `~/.cube/skills/poteto-mode/playbooks/<execution playbook>.md`
+  - [ ] `~/.cube/skills/cube-mode/playbooks/<execution playbook>.md`
   - [ ] `~/.cube/skills/swarm/SKILL.md`
   - [ ] `<control skill path>`
-  - [ ] `~/.cube/skills/poteto-mode/playbooks/opening-a-pr.md`
+  - [ ] `~/.cube/skills/cube-mode/playbooks/opening-a-pr.md`
   - [ ] `~/.cube/skills/<each other leaf skill the program uses>`
 - [ ] On the operator's go, run the audit tick at every report and every message of the user, with the tick prompt below. Never leave the cadence to memory.
 - [ ] Use this tick prompt, verbatim. "Re-read the execution playbook. Audit the operation against it and fix drift in this tick. Probe every active lane and judge progress by side effects only. Stand down a stuck lane and dispatch its replacement now. Then post a short status message to the operator in chat only when the audit found a tracked change that no earlier status message reported, such as a PR opened, a code-ready head, a round launched or closed, a verdict, a merge, a stuck agent and the action taken, a blocker added or cleared, or a decision only the operator can make. Name every such change and nothing else. Do not repeat a table, the merged list, or an unchanged blocker. If the audit found none, end the turn with no reply text. Either way, log this tick's row in your decision trail. The row names the items reported, or none."

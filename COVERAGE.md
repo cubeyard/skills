@@ -5,13 +5,13 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | upstream `pstack/` file | `skills/` file | state |
 | --- | --- | --- |
 | agents/comment-sicko.md | no-comments/agents/comment-sicko.md | adapted (4 hunks, 3 notes) |
-| agents/poteto-agent.md | poteto-mode/agents/poteto-agent.md | adapted (3 hunks, 3 notes) |
+| agents/poteto-agent.md | cube-mode/agents/poteto-agent.md | adapted (3 hunks, 3 notes) |
 | skills/architect/SKILL.md | architect/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/architect/references/design-red-flags.md | architect/references/design-red-flags.md | unchanged |
 | skills/architect/references/rationale-template.md | architect/references/rationale-template.md | unchanged |
 | skills/architect/references/runner-prompt.md | architect/references/runner-prompt.md | adapted (1 hunks, 1 notes) |
 | skills/arena/SKILL.md | arena/SKILL.md | adapted (5 hunks, 6 notes) |
-| skills/automate-me/SKILL.md | automate-me/SKILL.md | adapted (14 hunks, 10 notes) |
+| skills/automate-me/SKILL.md | automate-me/SKILL.md | adapted (15 hunks, 11 notes) |
 | skills/benchmark-checklist/SKILL.md | benchmark-checklist/SKILL.md | unchanged |
 | skills/blast-radius/SKILL.md | blast-radius/SKILL.md | unchanged |
 | skills/bro/SKILL.md | bro/SKILL.md | unchanged |
@@ -21,7 +21,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/create-verification-skill/references/feature-map-example/README.md | create-verification-skill/references/feature-map-example/README.md | unchanged |
 | skills/create-verification-skill/references/feature-map-example/create-note.md | create-verification-skill/references/feature-map-example/create-note.md | unchanged |
 | skills/create-verification-skill/references/feature-map-example/search.md | create-verification-skill/references/feature-map-example/search.md | unchanged |
-| skills/figure-it-out/SKILL.md | figure-it-out/SKILL.md | adapted (2 hunks, 2 notes) |
+| skills/figure-it-out/SKILL.md | figure-it-out/SKILL.md | adapted (3 hunks, 3 notes) |
 | skills/how/SKILL.md | how/SKILL.md | adapted (4 hunks, 4 notes) |
 | skills/how/references/explainer-prompt.md | how/references/explainer-prompt.md | adapted (2 hunks, 1 notes) |
 | skills/how/references/explorer-prompt.md | how/references/explorer-prompt.md | adapted (2 hunks, 1 notes) |
@@ -33,52 +33,52 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/maintain-verification-skill/SKILL.md | maintain-verification-skill/SKILL.md | adapted (3 hunks, 3 notes) |
 | skills/make-bot-ui/SKILL.md | make-bot-ui/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/no-comments/SKILL.md | no-comments/SKILL.md | adapted (4 hunks, 3 notes) |
-| skills/poteto-help/SKILL.md | poteto-help/SKILL.md | adapted (24 hunks, 14 notes) |
+| skills/poteto-help/SKILL.md | poteto-help/SKILL.md | adapted (30 hunks, 15 notes) |
 | skills/poteto-help/references/prompting.md | poteto-help/references/prompting.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-help/references/recipes.md | poteto-help/references/recipes.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/SKILL.md | poteto-mode/SKILL.md | adapted (24 hunks, 18 notes) |
-| skills/poteto-mode/playbooks/authoring-a-skill.md | poteto-mode/playbooks/authoring-a-skill.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/autonomous-run.md | poteto-mode/playbooks/autonomous-run.md | adapted (2 hunks, 2 notes) |
-| skills/poteto-mode/playbooks/autopilot-full.md | poteto-mode/playbooks/autopilot-full.md | adapted (6 hunks, 7 notes) |
-| skills/poteto-mode/playbooks/autopilot-stack.md | poteto-mode/playbooks/autopilot-stack.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/babysit.md | poteto-mode/playbooks/babysit.md | adapted (3 hunks, 4 notes) |
-| skills/poteto-mode/playbooks/bug-fix.md | poteto-mode/playbooks/bug-fix.md | adapted (2 hunks, 4 notes) |
-| skills/poteto-mode/playbooks/eval.md | poteto-mode/playbooks/eval.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/feature.md | poteto-mode/playbooks/feature.md | adapted (3 hunks, 4 notes) |
-| skills/poteto-mode/playbooks/hillclimb.md | poteto-mode/playbooks/hillclimb.md | adapted (3 hunks, 3 notes) |
-| skills/poteto-mode/playbooks/investigation.md | poteto-mode/playbooks/investigation.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/multi-phase-plan.md | poteto-mode/playbooks/multi-phase-plan.md | adapted (12 hunks, 7 notes) |
-| skills/poteto-mode/playbooks/opening-a-pr.md | poteto-mode/playbooks/opening-a-pr.md | adapted (3 hunks, 3 notes) |
-| skills/poteto-mode/playbooks/orchestrate.md | poteto-mode/playbooks/orchestrate.md | adapted (5 hunks, 9 notes) |
-| skills/poteto-mode/playbooks/pause-safely.md | poteto-mode/playbooks/pause-safely.md | adapted (2 hunks, 2 notes) |
-| skills/poteto-mode/playbooks/perf-issue.md | poteto-mode/playbooks/perf-issue.md | adapted (2 hunks, 2 notes) |
-| skills/poteto-mode/playbooks/prototype.md | poteto-mode/playbooks/prototype.md | adapted (2 hunks, 3 notes) |
-| skills/poteto-mode/playbooks/refactoring.md | poteto-mode/playbooks/refactoring.md | adapted (1 hunks, 2 notes) |
-| skills/poteto-mode/playbooks/runtime-forensics.md | poteto-mode/playbooks/runtime-forensics.md | adapted (1 hunks, 2 notes) |
-| skills/poteto-mode/playbooks/session-pickup.md | poteto-mode/playbooks/session-pickup.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/shipping.md | poteto-mode/playbooks/shipping.md | adapted (2 hunks, 3 notes) |
-| skills/poteto-mode/playbooks/trace-forensics.md | poteto-mode/playbooks/trace-forensics.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/visual-parity.md | poteto-mode/playbooks/visual-parity.md | adapted (1 hunks, 3 notes) |
-| skills/poteto-mode/playbooks/worktree-cleanup.md | poteto-mode/playbooks/worktree-cleanup.md | adapted (2 hunks, 4 notes) |
-| skills/poteto-mode/references/bugbot-triage.md | poteto-mode/references/bugbot-triage.md | unchanged |
-| skills/poteto-mode/scripts/bootstrap.ts | poteto-mode/scripts/bootstrap.ts | unchanged |
-| skills/poteto-mode/scripts/bun.lock | poteto-mode/scripts/bun.lock | unchanged |
-| skills/poteto-mode/scripts/check-plan.mjs | poteto-mode/scripts/check-plan.mjs | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/scripts/check-plan.test.ts | poteto-mode/scripts/check-plan.test.ts | adapted (2 hunks, 1 notes) |
-| skills/poteto-mode/scripts/package.json | poteto-mode/scripts/package.json | unchanged |
-| skills/poteto-mode/scripts/watch-pr/cli.test.ts | poteto-mode/scripts/watch-pr/cli.test.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/cli.ts | poteto-mode/scripts/watch-pr/cli.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/fakes.test-helper.ts | poteto-mode/scripts/watch-pr/fakes.test-helper.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/github.test.ts | poteto-mode/scripts/watch-pr/github.test.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/github.ts | poteto-mode/scripts/watch-pr/github.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/policy.test.ts | poteto-mode/scripts/watch-pr/policy.test.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/policy.ts | poteto-mode/scripts/watch-pr/policy.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/render.ts | poteto-mode/scripts/watch-pr/render.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/tsconfig.json | poteto-mode/scripts/watch-pr/tsconfig.json | unchanged |
-| skills/poteto-mode/scripts/watch-pr/types.compile.ts | poteto-mode/scripts/watch-pr/types.compile.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/types.ts | poteto-mode/scripts/watch-pr/types.ts | unchanged |
-| skills/poteto-mode/scripts/watch-pr/watch-pr | poteto-mode/scripts/watch-pr/watch-pr | unchanged |
-| skills/poteto-mode/scripts/worktree-audit.sh | poteto-mode/scripts/worktree-audit.sh | unchanged |
+| skills/poteto-help/references/recipes.md | poteto-help/references/recipes.md | adapted (12 hunks, 4 notes) |
+| skills/poteto-mode/SKILL.md | cube-mode/SKILL.md | adapted (25 hunks, 20 notes) |
+| skills/poteto-mode/playbooks/authoring-a-skill.md | cube-mode/playbooks/authoring-a-skill.md | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/playbooks/autonomous-run.md | cube-mode/playbooks/autonomous-run.md | adapted (2 hunks, 2 notes) |
+| skills/poteto-mode/playbooks/autopilot-full.md | cube-mode/playbooks/autopilot-full.md | adapted (6 hunks, 7 notes) |
+| skills/poteto-mode/playbooks/autopilot-stack.md | cube-mode/playbooks/autopilot-stack.md | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/playbooks/babysit.md | cube-mode/playbooks/babysit.md | adapted (3 hunks, 4 notes) |
+| skills/poteto-mode/playbooks/bug-fix.md | cube-mode/playbooks/bug-fix.md | adapted (2 hunks, 4 notes) |
+| skills/poteto-mode/playbooks/eval.md | cube-mode/playbooks/eval.md | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/playbooks/feature.md | cube-mode/playbooks/feature.md | adapted (3 hunks, 4 notes) |
+| skills/poteto-mode/playbooks/hillclimb.md | cube-mode/playbooks/hillclimb.md | adapted (3 hunks, 3 notes) |
+| skills/poteto-mode/playbooks/investigation.md | cube-mode/playbooks/investigation.md | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/playbooks/multi-phase-plan.md | cube-mode/playbooks/multi-phase-plan.md | adapted (12 hunks, 7 notes) |
+| skills/poteto-mode/playbooks/opening-a-pr.md | cube-mode/playbooks/opening-a-pr.md | adapted (4 hunks, 3 notes) |
+| skills/poteto-mode/playbooks/orchestrate.md | cube-mode/playbooks/orchestrate.md | adapted (5 hunks, 9 notes) |
+| skills/poteto-mode/playbooks/pause-safely.md | cube-mode/playbooks/pause-safely.md | adapted (2 hunks, 2 notes) |
+| skills/poteto-mode/playbooks/perf-issue.md | cube-mode/playbooks/perf-issue.md | adapted (2 hunks, 2 notes) |
+| skills/poteto-mode/playbooks/prototype.md | cube-mode/playbooks/prototype.md | adapted (2 hunks, 3 notes) |
+| skills/poteto-mode/playbooks/refactoring.md | cube-mode/playbooks/refactoring.md | adapted (1 hunks, 2 notes) |
+| skills/poteto-mode/playbooks/runtime-forensics.md | cube-mode/playbooks/runtime-forensics.md | adapted (1 hunks, 2 notes) |
+| skills/poteto-mode/playbooks/session-pickup.md | cube-mode/playbooks/session-pickup.md | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/playbooks/shipping.md | cube-mode/playbooks/shipping.md | adapted (2 hunks, 3 notes) |
+| skills/poteto-mode/playbooks/trace-forensics.md | cube-mode/playbooks/trace-forensics.md | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/playbooks/visual-parity.md | cube-mode/playbooks/visual-parity.md | adapted (1 hunks, 3 notes) |
+| skills/poteto-mode/playbooks/worktree-cleanup.md | cube-mode/playbooks/worktree-cleanup.md | adapted (2 hunks, 4 notes) |
+| skills/poteto-mode/references/bugbot-triage.md | cube-mode/references/bugbot-triage.md | unchanged |
+| skills/poteto-mode/scripts/bootstrap.ts | cube-mode/scripts/bootstrap.ts | unchanged |
+| skills/poteto-mode/scripts/bun.lock | cube-mode/scripts/bun.lock | unchanged |
+| skills/poteto-mode/scripts/check-plan.mjs | cube-mode/scripts/check-plan.mjs | adapted (1 hunks, 1 notes) |
+| skills/poteto-mode/scripts/check-plan.test.ts | cube-mode/scripts/check-plan.test.ts | adapted (2 hunks, 1 notes) |
+| skills/poteto-mode/scripts/package.json | cube-mode/scripts/package.json | unchanged |
+| skills/poteto-mode/scripts/watch-pr/cli.test.ts | cube-mode/scripts/watch-pr/cli.test.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/cli.ts | cube-mode/scripts/watch-pr/cli.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/fakes.test-helper.ts | cube-mode/scripts/watch-pr/fakes.test-helper.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/github.test.ts | cube-mode/scripts/watch-pr/github.test.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/github.ts | cube-mode/scripts/watch-pr/github.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/policy.test.ts | cube-mode/scripts/watch-pr/policy.test.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/policy.ts | cube-mode/scripts/watch-pr/policy.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/render.ts | cube-mode/scripts/watch-pr/render.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/tsconfig.json | cube-mode/scripts/watch-pr/tsconfig.json | unchanged |
+| skills/poteto-mode/scripts/watch-pr/types.compile.ts | cube-mode/scripts/watch-pr/types.compile.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/types.ts | cube-mode/scripts/watch-pr/types.ts | unchanged |
+| skills/poteto-mode/scripts/watch-pr/watch-pr | cube-mode/scripts/watch-pr/watch-pr | unchanged |
+| skills/poteto-mode/scripts/worktree-audit.sh | cube-mode/scripts/worktree-audit.sh | unchanged |
 | skills/principle-attack-the-premise/SKILL.md | principle-attack-the-premise/SKILL.md | unchanged |
 | skills/principle-boundary-discipline/SKILL.md | principle-boundary-discipline/SKILL.md | unchanged |
 | skills/principle-build-the-lever/SKILL.md | principle-build-the-lever/SKILL.md | adapted (2 hunks, 2 notes) |
@@ -561,7 +561,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | LICENSE | make-bot-ui/LICENSE | unchanged |
 | LICENSE | no-comments/LICENSE | unchanged |
 | LICENSE | poteto-help/LICENSE | unchanged |
-| LICENSE | poteto-mode/LICENSE | unchanged |
+| LICENSE | cube-mode/LICENSE | unchanged |
 | LICENSE | principle-attack-the-premise/LICENSE | unchanged |
 | LICENSE | principle-boundary-discipline/LICENSE | unchanged |
 | LICENSE | principle-build-the-lever/LICENSE | unchanged |
@@ -599,7 +599,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | LICENSE | typescript-best-practices/LICENSE | unchanged |
 | LICENSE | unslop/LICENSE | unchanged |
 | LICENSE | why/LICENSE | unchanged |
-| (new) | poteto-mode/references/cube.md | added |
+| (new) | cube-mode/references/cube.md | added |
 | (new) | why/references/sources/optchat-chat.md | added |
 | .cursor-plugin/plugin.json | | baseline only: Cursor/agent-plugins packaging; cube installs skills from git folders (M5) |
 | .gitignore | | baseline only: ignores node_modules and logs in the plugin tree |

@@ -53,8 +53,8 @@ Never edit a skill under `~/.cube/skills/` (cube replaces it at every thread sta
 Follow each approved row's Routing exactly:
 
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): the parent does it directly.
-<!-- cube-adapt M12. Intent: substantive edits and new skills follow an authoring loop, not ad-hoc shape. Cube: create-skill is not installed. Kept: a structured authoring pass. Now: poteto-mode's Authoring a skill playbook; a description that did not trigger is tuned against cube's listing (only listed skills are matched by description). Cost: no automated description-optimization loop. -->
-- Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): run poteto-mode's **Authoring a skill** playbook (`../poteto-mode/playbooks/authoring-a-skill.md`).
+<!-- cube-adapt M12. Intent: substantive edits and new skills follow an authoring loop, not ad-hoc shape. Cube: create-skill is not installed. Kept: a structured authoring pass. Now: cube-mode's Authoring a skill playbook; a description that did not trigger is tuned against cube's listing (only listed skills are matched by description). Cost: no automated description-optimization loop. -->
+- Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): run cube-mode's **Authoring a skill** playbook (`../cube-mode/playbooks/authoring-a-skill.md`).
 - `tune description: <skill path>` (the skill exists but didn't trigger when it should have): rewrite its description by the same playbook, and check whether it is listed at all (a `disable-model-invocation: true` skill is matched by nobody; it is reached only by a link).
 - `new skill via create-skill: <kebab-name>` (the synthesizer's label, kept from upstream): write it by the same playbook. Do not invent the shape ad hoc.
 

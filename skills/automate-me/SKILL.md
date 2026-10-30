@@ -8,8 +8,8 @@ disable-model-invocation: true
 
 A guided flow for turning the user's working conventions into a skill agents will follow. The output is one `-mode` skill tailored to them (e.g. `jay-mode`, `priya-mode`).
 
-<!-- cube-adapt M1 M12. Intent: a guided flow over mining, authoring and prose skills. Cube: create-skill is not installed; mining the user's history is OptChat's (it reads the chat and its threads); writing the skill needs a machine and git. Kept: the flow and its guardrails. Now: OptChat mines and interviews; a thread drafts and opens the PR; poteto-mode's Authoring a skill playbook stands in for create-skill. Cost: the flow crosses OptChat and a thread once. -->
-This skill orchestrates three others: an inline mining pass (see step 1), an authoring pass (poteto-mode's **Authoring a skill** playbook; Cursor's `create-skill` is not in cube), and the **unslop** skill (prose discipline). It sequences them. It doesn't replace them. In cube, OptChat runs steps 0 to 3 and gives steps 4 to 6 to one thread with the findings and the user's answers in its brief.
+<!-- cube-adapt M1 M12. Intent: a guided flow over mining, authoring and prose skills. Cube: create-skill is not installed; mining the user's history is OptChat's (it reads the chat and its threads); writing the skill needs a machine and git. Kept: the flow and its guardrails. Now: OptChat mines and interviews; a thread drafts and opens the PR; cube-mode's Authoring a skill playbook stands in for create-skill. Cost: the flow crosses OptChat and a thread once. -->
+This skill orchestrates three others: an inline mining pass (see step 1), an authoring pass (cube-mode's **Authoring a skill** playbook; Cursor's `create-skill` is not in cube), and the **unslop** skill (prose discipline). It sequences them. It doesn't replace them. In cube, OptChat runs steps 0 to 3 and gives steps 4 to 6 to one thread with the findings and the user's answers in its brief.
 
 ## Flow
 
@@ -64,12 +64,13 @@ Group the combined signals into sections. Common ones (use only what applies):
 - **Process**: git worktrees, commits, PRs, review/merge tooling.
 - **Skills**: skill-authoring habits, fix-the-skill-first, proposing new skills.
 
-The **poteto-mode** skill shows the shape. Read it for granularity. Don't copy its content. The user's rules are not the same as poteto-mode's.
+<!-- cube-adapt M5 (rename). Intent: point at pstack's router by its name. Cube: the router is renamed cube-mode (the user's option B). Kept: what the text routes to. Now: /cube-mode and cube-mode. Cost: none. -->
+The **cube-mode** skill shows the shape. Read it for granularity. Don't copy its content. The user's rules are not the same as cube-mode's.
 
 ### 4. Draft the skill
 
-<!-- cube-adapt M5 M11 M12. Intent: author with the host's skill tooling and place the mode where it applies. Cube: create-skill is not installed; a cube skill folder is one level deep (`<path>/<id>/SKILL.md`, the folder name is the id), in the project's .agents/skills or in a skills source repository. Kept: keep an existing location; project by default, personal on request. Now: poteto-mode's Authoring a skill playbook; `.agents/skills/<handle>-mode/` in the project, or `<handle>-mode/` in the user's own skills source for every project. Cost: no category subdirectories: cube reads only `<path>/<id>/`. -->
-Author the skill with poteto-mode's **Authoring a skill** playbook. Placement:
+<!-- cube-adapt M5 M11 M12. Intent: author with the host's skill tooling and place the mode where it applies. Cube: create-skill is not installed; a cube skill folder is one level deep (`<path>/<id>/SKILL.md`, the folder name is the id), in the project's .agents/skills or in a skills source repository. Kept: keep an existing location; project by default, personal on request. Now: cube-mode's Authoring a skill playbook; `.agents/skills/<handle>-mode/` in the project, or `<handle>-mode/` in the user's own skills source for every project. Cost: no category subdirectories: cube reads only `<path>/<id>/`. -->
+Author the skill with cube-mode's **Authoring a skill** playbook. Placement:
 
 - Path: preserve an existing mode skill's location. For a new mode, default to `.agents/skills/<handle>-mode/SKILL.md` in the project (that project's threads list it), or `<handle>-mode/SKILL.md` in the user's own skills source if the user wants it in every project. Cube reads only `<path>/<id>/SKILL.md`, so no category subfolders.
 - Handle: the user's first name or chosen identifier.
@@ -109,6 +110,6 @@ Run a description-optimization loop only if the skill's trigger accuracy turns o
 ## When not to use
 
 <!-- cube-adapt M12. Intent: route task skills elsewhere. Cube: create-skill is not installed. Kept: no mining. Now: the Authoring a skill playbook. Cost: none. -->
-- User wants a task-specific skill (not working conventions): poteto-mode's Authoring a skill playbook alone, no mining required.
+- User wants a task-specific skill (not working conventions): cube-mode's Authoring a skill playbook alone, no mining required.
 - User wants to capture one narrow workflow (e.g. "how I write commit messages"). That's a regular skill, not a mode skill.
 
