@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { DELEGATES, substitutesIn } from "./handoff-patterns.mjs";
+import { retiredConfigIn } from "./model-patterns.mjs";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const baseline = path.join(root, "upstream/pstack");
@@ -23,8 +24,14 @@ const args = process.argv.slice(2);
 // starts it). Every other upstream skill file keeps its path.
 // Skills whose folder (id) the port renames; every file keeps its path
 // below the folder. The user chose to give the router a cube name
-// (PORTING.md, Naming); the leaves keep upstream's ids.
-const RENAMED = { "poteto-mode": "cube-mode" };
+// (PORTING.md, Naming), and its help the matching one; the leaves keep
+// upstream's ids.
+const RENAMED = { "poteto-mode": "cube-mode", "poteto-help": "cube-help" };
+// Upstream skills the port retires on purpose (PORTING.md, Retired): their
+// files stay in the baseline only, and the folder must not come back.
+const RETIRED = {
+  "setup-pstack": "retired: cube needs no model setup; OptChat reads the user's model preference from the chat (cube-mode references/cube.md, Models)",
+};
 const renamed = (rel) => { const [id, ...rest] = rel.split("/"); return [RENAMED[id] ?? id, ...rest].join("/"); };
 const RELOCATED = {
   "agents/poteto-agent.md": "cube-mode/agents/poteto-agent.md",
@@ -65,10 +72,14 @@ const tree = spawnSync("git", ["-C", root, "rev-parse", "HEAD:upstream/pstack"],
 const EXPECTED_TREE = "4719e1c4b4c43bac85d4206a8b41dd2899769c1c";
 if (tree.status === 0 && tree.stdout.trim() !== EXPECTED_TREE) fail(`baseline git tree ${tree.stdout.trim()} is not upstream's ${EXPECTED_TREE}`);
 
-// 2. Every upstream skill file and agent maps to one file under skills/.
+// 2. Every upstream skill file and agent maps to one file under skills/,
+// except a retired skill's.
 const pairs = [];
+const matrix = [];
 for (const rel of baselineFiles) {
   let target;
+  const retired = rel.startsWith("skills/") && RETIRED[rel.split("/")[1]];
+  if (retired) { matrix.push({ from: rel, to: "(none)", state: retired }); continue; }
   if (rel.startsWith("skills/")) target = renamed(rel.slice("skills/".length));
   else if (RELOCATED[rel]) target = RELOCATED[rel];
   else continue; // README, guide, automations, assets: baseline only (PORTING.md)
@@ -76,8 +87,9 @@ for (const rel of baselineFiles) {
 }
 // pstack's MIT notice travels with every ported skill folder, since cube
 // installs each folder on its own.
-for (const id of fs.readdirSync(path.join(baseline, "skills")).sort()) pairs.push({ from: "LICENSE", to: `${RENAMED[id] ?? id}/LICENSE` });
+for (const id of fs.readdirSync(path.join(baseline, "skills")).sort()) if (!RETIRED[id]) pairs.push({ from: "LICENSE", to: `${RENAMED[id] ?? id}/LICENSE` });
 for (const [from, to] of Object.entries(RENAMED)) if (!fs.existsSync(path.join(baseline, "skills", from)) || fs.existsSync(path.join(skillsDir, from))) fail(`RENAMED ${from} -> ${to}: the upstream folder must exist and the old id must be gone from skills/`);
+for (const [id, reason] of Object.entries(RETIRED)) if (!reason || !fs.existsSync(path.join(baseline, "skills", id)) || fs.existsSync(path.join(skillsDir, id)) || Object.values(RENAMED).includes(id)) fail(`RETIRED ${id}: needs a reason, an upstream folder, and no folder in skills/`);
 const mappedTargets = new Set(pairs.map((p) => p.to));
 const skillFiles = walk(skillsDir);
 
@@ -86,7 +98,6 @@ function hunks(from, to) {
   const result = spawnSync("git", ["diff", "--no-index", "--no-color", "-U0", "--", from, to], { encoding: "utf8", maxBuffer: 64 * 2 ** 20 });
   return result.stdout.split("\n").filter((line) => line.startsWith("@@ ")).length;
 }
-const matrix = [];
 for (const { from, to } of pairs) {
   const source = path.join(baseline, from);
   const target = path.join(skillsDir, to);
@@ -177,6 +188,13 @@ if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${byt
 for (const f of skillFiles) {
   if (!f.rel.endsWith(".md") || CUBE_OWN.has(f.rel.split("/")[0])) continue;
   for (const re of substitutesIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: offers a substitute for another agent or a diff OptChat cannot read (${re}); hand off instead (cube.md, Handoff)`);
+}
+// 7. The model rule (references/cube.md, Models): no installed file points
+// at the retired setup or falls back to the host's default model
+// (scripts/model-patterns.mjs, fixtures in check-port.test.mjs).
+for (const f of skillFiles) {
+  if (!f.rel.endsWith(".md")) continue;
+  for (const re of retiredConfigIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: points at the retired model setup or the host default (${re}); follow cube.md, Models`);
 }
 for (const { from, to } of pairs) {
   if (!to.endsWith(".md")) continue;

@@ -1,12 +1,12 @@
 ---
-name: poteto-help
-description: Guides users through pstack setup, /cube-mode, and picking the skill, playbook, or principle for a task. Use only when the user types /poteto-help or asks for pstack help by name.
+name: cube-help
+description: Guides users through /cube-mode, choosing models, and picking the skill, playbook, or principle for a task. Use only when the user types /cube-help, /poteto-help (its pstack name) or /setup-pstack (retired in cube), or asks for cube-mode or pstack help by name.
 metadata:
   cube:
     surface: both
 ---
 
-# Poteto help
+# Cube help
 
 Answer the user's question about pstack, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a pstack run spends real tokens, so let them send the prompt.
 
@@ -26,24 +26,21 @@ Infer the need from the message and the conversation. A named situation, such as
 
 Check the state that changes the answer, and mention it only when it does:
 
-- No `pstack models` block in OptChat's instructions means `/setup-pstack` hasn't run for this user, so every role runs on the host's preferred model. Only OptChat can see that block.
+- No model preference in the chat with OptChat means OptChat asks which models to use before its first spawn (the Models section of [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md)). Only OptChat applies that check.
 - No `verify-*` skill in the project's `.agents/skills` or other app harness means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
 - No formal verification skill in the project means no property is checked past what tests reach. Mention `/create-formal-verification-skill` when the question is about a race, an invariant, or another case tests rarely hit. When one exists and the code it covers changed after the commit it records as last in sync, mention `/maintain-formal-verification-skill` if the question touches that code.
 
-When the model rule is missing and it matters, ask whether the user wants to pick a model for each role and a reasoning budget now. It matters when the user is new, the question is about setup or cost, or the answer depends on which models run. Ask at most once per chat. If the need is also unclear, ask both questions together. Offer two choices:
-
-- Now: give them `/setup-pstack` to type, and answer their question too.
-- Later: answer their question, and add one line saying every role keeps its default model until they run `/setup-pstack`.
+When no preference is stated and it matters (the user is new, the question is about setup or cost, or the answer depends on which models run), say once that there is no setup: they tell OptChat in the chat which provider and model to use, in general, for a role, or for one task. The newest statement wins, OptChat asks when none covers a spawn, and it asks when a newer general statement and an older one for a role leave the intent unclear. `/setup-pstack` is retired in cube; a user who types it gets this answer.
 
 ## Get set up
 
 1. In cube, pstack ships in cube's default skills (cubeyard/skills). New threads get the commit chosen in Settings, Skills (check for update, then use that commit); a running thread keeps the skills it started with.
-2. Run [`/setup-pstack`](../setup-pstack/SKILL.md) in OptChat. It asks for a budget, maps a model to each role, and hands you a block to save in OptChat's instructions file. It applies from OptChat's next request. Then it offers once each to generate a verification skill and a formal verification skill for the project, unless the project already has one.
+2. Say which models to use in the chat with OptChat, naming the provider and model (for example "Opus through Claude Code, not the API"), for every role or for one. Nothing is saved elsewhere: OptChat follows the newest statement and asks when none covers a spawn (the Models section of [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md)). It applies to threads started after that.
 3. Start a real task with `/cube-mode`, a goal, and a check that can pass or fail.
 
-Only four skills are listed for the model to load from the user's words: `cube-mode`, `poteto-help`, `setup-pstack` (OptChat) and `typescript-best-practices` (threads). The others are installed but load only when cube-mode routes to them or the user names them. The [README](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/01-setup.md) have the Cursor details. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
+Only three pstack skills are listed for the model to load from the user's words: `cube-mode` and `cube-help` (OptChat and threads) and `typescript-best-practices` (threads). The others are installed but load only when cube-mode routes to them or the user names them. The [README](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/01-setup.md) have the Cursor details. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
-If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Rerun `/setup-pstack` and pick a smaller budget or cheaper models. A role set to `auto` or `inherit-parent` runs on the host's preferred model. A shorter panel list starts fewer threads, one for each entry. Save `/cube-mode` for work that needs rigor.
+If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Tell OptChat in the chat to use cheaper models, for every role or one, or fewer panel seats; it applies to threads started after that. Save `/cube-mode` for work that needs rigor.
 
 pstack is built for Cursor. In cube, [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps every Cursor name: OptChat starts the threads that pstack's subagents were, and a step that needs a Cursor-only feature, such as Bugbot or Automations, is skipped with a one-line note.
 
@@ -93,12 +90,12 @@ The default answer is `/cube-mode`, which runs most of the others when its steps
 | Vet a performance number before reporting or acting on it | [`/benchmark-checklist`](../benchmark-checklist/SKILL.md) |
 | Run a large or cross-cutting change, or one to review after stepping away | [`/figure-it-out`](../figure-it-out/SKILL.md) |
 | Keep a decision log during a run, and review it afterward | [`/show-me-your-work`](../show-me-your-work/SKILL.md) |
-| Pick a model for each role and a reasoning budget | [`/setup-pstack`](../setup-pstack/SKILL.md) |
+| Pick a model for each role | say it in the chat with OptChat; see Models in [`cube-mode`'s cube.md](../cube-mode/references/cube.md) |
 | Turn their own working habits into a personal mode skill | [`/automate-me`](../automate-me/SKILL.md) |
 | Turn what a finished task taught into skill edits | [`/reflect`](../reflect/SKILL.md) |
 | Stop agents from repeating the same mistakes in this repo | [`/correct`](../correct/SKILL.md) |
 | Build a page whose buttons wake an agent over a webhook (in cube: the page only; no webhook wakes a cube agent yet) | [`/make-bot-ui`](../make-bot-ui/SKILL.md) |
-| Find their way around pstack | `/poteto-help` |
+| Find their way around pstack | `/cube-help` |
 
 If a skill directory next to this one is missing from the table, read its frontmatter and route by its description. The `principle-*` directories are covered under principles below.
 
@@ -140,9 +137,9 @@ Principles are one-rule skills that `/cube-mode` reads and cites in its replies.
 |---|---|
 | The mode stopped applying after a few turns | OptChat reads it per request: say `/cube-mode` again on a new request. A thread keeps it for its task when its brief names it. |
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
-| A new model choice had no effect | The block from `/setup-pstack` must be saved in OptChat's instructions file, and applies to threads started after that; running threads keep their model. |
+| A new model choice had no effect | Say it in the chat with OptChat, with provider and model; it applies to threads started after that, and running threads keep their model. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
-| A skill didn't load on its own | Only the four listed skills load from the user's words (see Get set up). The others load when the user names them or when `/cube-mode` runs them, and it doesn't run every skill. |
+| A skill didn't load on its own | Only the three listed pstack skills load from the user's words (see Get set up). The others load when the user names them or when `/cube-mode` runs them, and it doesn't run every skill. |
 | Parallel agents overwrote each other | Each thread has its own machine; give each its own branch, and never two writers on one branch. |
 | An overnight run moved but finished nothing | A run needs a check that can pass or fail, not a duration. See [guide page 7](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/07-overnight.md). |
 | The reply claims success from a green build | Ask for the real command, flow, stored value, or profile. That's the prove-it-works principle. |
