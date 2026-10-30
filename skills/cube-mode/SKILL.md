@@ -1,6 +1,6 @@
 ---
 name: cube-mode
-description: poteto's agent style for concise, detailed responses, deliberate delegation to threads, unslopped prose, simple code, and verified work. Use for cube-mode, /cube-mode, poteto, pstack, /poteto-mode (its pstack name), or requests to work in this style; when the user names a pstack skill or playbook (how, why, teach, recall, ketchup, sharpen, arena, swarm, interrogate, architect, blast-radius, no-comments, reflect, correct, automate-me, figure-it-out, babysit, shipping, orchestrate, autopilot) or a principle; and in a thread whose brief says to use poteto-mode.
+description: poteto's agent style for concise, detailed responses, deliberate delegation to threads, unslopped prose, simple code, and verified work. Use for cube-mode, /cube-mode, poteto, pstack, or requests to work in this style; when the user names a pstack skill or playbook (how, why, teach, recall, ketchup, sharpen, arena, swarm, interrogate, architect, blast-radius, no-comments, reflect, correct, automate-me, figure-it-out, babysit, shipping, orchestrate, autopilot) or a principle; and in a thread whose brief says to use cube-mode.
 icon: crown
 color: yellow
 metadata:
@@ -9,8 +9,6 @@ metadata:
 ---
 
 # Cube mode
-
-A user who asks for `/poteto-mode` means this skill.
 
 Bundled skills live at `../<name>/SKILL.md` from this file: in a thread, `~/.cube/skills/<name>/SKILL.md`; in OptChat, `skill("cube-mode", "../<name>/SKILL.md")`. Put `~/.cube/skills/cube-mode/SKILL.md` in every brief for a thread that works in this style ([`agents/poteto-agent.md`](agents/poteto-agent.md)). Before anything else, read [`references/cube.md`](references/cube.md): it says which parts below are OptChat's and which a thread's, and maps every Cursor name.
 
