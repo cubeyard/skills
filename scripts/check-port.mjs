@@ -13,6 +13,7 @@ import path from "node:path";
 import process from "node:process";
 import { DELEGATES, substitutesIn } from "./handoff-patterns.mjs";
 import { retiredConfigIn } from "./model-patterns.mjs";
+import { LEGACY_MODE } from "./legacy-patterns.mjs";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const baseline = path.join(root, "upstream/pstack");
@@ -196,6 +197,14 @@ for (const f of skillFiles) {
   if (!f.rel.endsWith(".md")) continue;
   for (const re of retiredConfigIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: points at the retired model setup or the host default (${re}); follow cube.md, Models`);
 }
+// 8. The retired mode name (PORTING.md, Naming): no installed file, of any
+// kind, mentions it (scripts/legacy-patterns.mjs).
+for (const f of skillFiles) {
+  if (f.symlink) continue;
+  fs.readFileSync(path.join(skillsDir, f.rel), "utf8").split("\n").forEach((line, index) => {
+    if (LEGACY_MODE.test(line)) fail(`skills/${f.rel}:${index + 1}: mentions the retired mode name; cube-mode is the only name`);
+  });
+}
 for (const { from, to } of pairs) {
   if (!to.endsWith(".md")) continue;
   const full = path.join(skillsDir, to);
@@ -230,7 +239,7 @@ if (args[0] === "--diff") {
 // Upstream files that are not skills: why each stays in the baseline only.
 const BASELINE_ONLY = [
   [/^README\.md$|^docs\/guide\//, "baseline only: Cursor user docs, not installed; skills link the pinned public copy (M13)"],
-  [/^docs\/harness\//, "baseline only: upstream's Claude Code adapter; poteto-mode/references/cube.md is cube's (M1-M13)"],
+  [/^docs\/harness\//, "baseline only: upstream's Claude Code adapter; cube-mode/references/cube.md is cube's (M1-M13)"],
   [/^automations\//, "baseline only: Cursor Automations (Slack-triggered agents); cube has no trigger that starts an agent (M12, PORTING.md gap G3)"],
   [/^plugin\.json$|^\.cursor-plugin\/|^assets\//, "baseline only: Cursor/agent-plugins packaging; cube installs skills from git folders (M5)"],
   [/^LICENSE$/, "copied unchanged into every ported skill folder (rows above), and named in THIRD_PARTY_NOTICES.md"],

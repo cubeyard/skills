@@ -45,7 +45,7 @@ node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against
    installs each folder on its own.
 3. **Adapt in place.** Each change is an edit at the spot it concerns. A
    file that needs no change stays byte-identical (33 of the 57 ported skills
-   are unchanged, and 532 of 593 mapped files).
+   are unchanged, and 529 of 593 mapped files).
 4. **Check it mechanically** (`node scripts/check-port.mjs`, below), so that
    "no silent omission" is a test, not a promise.
 
@@ -280,7 +280,7 @@ file is byte-identical. `COVERAGE.md` lists every file.
 
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
-| cube-mode (upstream `poteto-mode`) | 43 | 26 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/poteto-agent.md` |
+| cube-mode (upstream `poteto-mode`) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/poteto-agent.md` |
 | cube-help (upstream `poteto-help`) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed pstack skills), models said in the chat, `/setup-pstack` answered as retired, modes, troubleshooting rows, pinned guide links |
 | setup-pstack | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its Cursor path glob was automatic |
@@ -342,7 +342,7 @@ skills.
 | what | how | result |
 | --- | --- | --- |
 | baseline fidelity | `git rev-parse HEAD:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
-| completeness, no port commentary, cube rules, links, limits, handoff rule, model rule | `node scripts/check-port.mjs` | ok: 593 mapped files (61 adapted, 532 unchanged), 2 added, 1 retired skill, 60 skills, 87 links |
+| completeness, no port commentary, cube rules, links, limits, handoff rule, model rule | `node scripts/check-port.mjs` | ok: 593 mapped files (64 adapted, 529 unchanged), 2 added, 1 retired skill, 60 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 60 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
@@ -404,13 +404,14 @@ state a preference.
 The user first asked to adapt *and rename* poteto-mode for cube, then asked
 for every pstack skill copied as is and converted. The options below were put
 to the user, who chose **B**: the router `poteto-mode` is `cube-mode` in cube,
-and every other skill keeps its upstream id. `/poteto-mode` in a user's words
-still triggers it (its description says so). The upstream copy keeps
-`poteto-mode`; `scripts/check-port.mjs` maps it by its `RENAMED` table, so the
-coverage and diff checks treat `upstream/pstack/skills/poteto-mode/*` and
-`skills/cube-mode/*` as one file each. The tool package inside its scripts
-keeps its upstream internal name (`@cursor-skill/poteto-mode-tools`), since
-nothing routes by it. Later the user asked for the help skill to match:
+and every other skill keeps its upstream id. The user later retired the old
+name: cube-mode is the only name, and no installed file mentions the old
+mode name, not even as a trigger or as the tool package's internal name
+(`@cursor-skill/cube-mode-tools`); `scripts/legacy-patterns.mjs` keeps it
+out. The upstream copy keeps `poteto-mode`; `scripts/check-port.mjs` maps it
+by its `RENAMED` table, so the coverage and diff checks treat
+`upstream/pstack/skills/poteto-mode/*` and `skills/cube-mode/*` as one file
+each. Later the user asked for the help skill to match:
 `poteto-help` is `cube-help`, mapped the same way, and `/poteto-help` still
 triggers it. What the
 resolver does (cubeyard/cube `packages/server/src/skills.ts`): sources are read

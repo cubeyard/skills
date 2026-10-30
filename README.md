@@ -16,8 +16,8 @@ poteto's agent workflow stack, ported from Cursor to cube: 57 of its 58
 skills with their references and scripts. `setup-pstack` is retired, since
 cube needs no model setup: OptChat follows the model preference the user
 states in the chat (`skills/cube-mode/references/cube.md`, M4). Start from
-`cube-mode` (pstack's `poteto-mode`) or `cube-help` (pstack's
-`poteto-help`), both renamed for cube and listed to OptChat and threads;
+`cube-mode` or `cube-help`, pstack's router and help renamed for cube and
+listed to OptChat and threads;
 the other pstack skills are installed but hidden, and cube-mode routes to
 them. OptChat takes pstack's lead role
 (routing, briefing, judging, landing order) and threads do its execution;

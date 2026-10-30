@@ -62,11 +62,11 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/poteto-mode/playbooks/visual-parity.md | cube-mode/playbooks/visual-parity.md | adapted (1 hunks) |
 | skills/poteto-mode/playbooks/worktree-cleanup.md | cube-mode/playbooks/worktree-cleanup.md | adapted (2 hunks) |
 | skills/poteto-mode/references/bugbot-triage.md | cube-mode/references/bugbot-triage.md | unchanged |
-| skills/poteto-mode/scripts/bootstrap.ts | cube-mode/scripts/bootstrap.ts | unchanged |
-| skills/poteto-mode/scripts/bun.lock | cube-mode/scripts/bun.lock | unchanged |
+| skills/poteto-mode/scripts/bootstrap.ts | cube-mode/scripts/bootstrap.ts | adapted (1 hunks) |
+| skills/poteto-mode/scripts/bun.lock | cube-mode/scripts/bun.lock | adapted (1 hunks) |
 | skills/poteto-mode/scripts/check-plan.mjs | cube-mode/scripts/check-plan.mjs | adapted (1 hunks) |
 | skills/poteto-mode/scripts/check-plan.test.ts | cube-mode/scripts/check-plan.test.ts | adapted (1 hunks) |
-| skills/poteto-mode/scripts/package.json | cube-mode/scripts/package.json | unchanged |
+| skills/poteto-mode/scripts/package.json | cube-mode/scripts/package.json | adapted (1 hunks) |
 | skills/poteto-mode/scripts/watch-pr/cli.test.ts | cube-mode/scripts/watch-pr/cli.test.ts | unchanged |
 | skills/poteto-mode/scripts/watch-pr/cli.ts | cube-mode/scripts/watch-pr/cli.ts | unchanged |
 | skills/poteto-mode/scripts/watch-pr/fakes.test-helper.ts | cube-mode/scripts/watch-pr/fakes.test-helper.ts | unchanged |
@@ -634,5 +634,5 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | docs/guide/images/router.jpg | | baseline only: Cursor user docs, not installed; skills link the pinned public copy (M13) |
 | docs/guide/images/understanding.jpg | | baseline only: Cursor user docs, not installed; skills link the pinned public copy (M13) |
 | docs/guide/images/verification.jpg | | baseline only: Cursor user docs, not installed; skills link the pinned public copy (M13) |
-| docs/harness/claude-code.md | | baseline only: upstream's Claude Code adapter; poteto-mode/references/cube.md is cube's (M1-M13) |
+| docs/harness/claude-code.md | | baseline only: upstream's Claude Code adapter; cube-mode/references/cube.md is cube's (M1-M13) |
 | plugin.json | | baseline only: Cursor/agent-plugins packaging; cube installs skills from git folders (M5) |

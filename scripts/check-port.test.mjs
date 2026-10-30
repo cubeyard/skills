@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { substitutesIn } from "./handoff-patterns.mjs";
 import { retiredConfigIn } from "./model-patterns.mjs";
+import { legacyModeIn } from "./legacy-patterns.mjs";
 
 // Wordings earlier revisions or reviews found; each must be caught.
 const BAD = [
@@ -68,6 +69,27 @@ test("the port's own model wordings are not caught", () => {
   for (const line of RETIRED_GOOD) assert.deepEqual(retiredConfigIn(line), [], `caught: ${line}`);
 });
 
+// The retired mode name, in any casing or spelling.
+const LEGACY_BAD = [
+  "A user who asks for `/poteto-mode` means this skill.",
+  "Use for /Poteto-Mode (its pstack name).",
+  "work in poteto mode",
+  "POTETO_MODE",
+  "\"name\": \"@cursor-skill/poteto-mode-tools\"",
+];
+const LEGACY_GOOD = [
+  "Use for cube-mode, /cube-mode, poteto, pstack.",
+  "poteto's agent style",
+  "Brief it from agents/poteto-agent.md.",
+];
+
+test("every spelling of the retired mode name is caught", () => {
+  for (const line of LEGACY_BAD) assert.ok(legacyModeIn(line), `not caught: ${line}`);
+});
+test("cube-mode and pstack's other names are not caught", () => {
+  for (const line of LEGACY_GOOD) assert.equal(legacyModeIn(line), false, `caught: ${line}`);
+});
+
 // The whole checker on a scratch copy: a retired skill that comes back, or
 // installed text that sends the user to it, fails the check.
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
@@ -98,4 +120,15 @@ test("port commentary in an installed file fails the checker", () => {
   const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), "\n<!-- cube-adapt M4. Intent: x. -->\n"));
   assert.equal(run.status, 1);
   assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: port commentary/);
+});
+test("the retired mode name in an installed file fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), "\nA user who asks for `/poteto-mode` means cube-mode.\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: mentions the retired mode name/);
+});
+test("the retired mode name in an installed script fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/scripts/bootstrap.ts");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("cube-mode-tools", "poteto-mode-tools")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /cube-mode\/scripts\/bootstrap\.ts:\d+: mentions the retired mode name/);
 });
