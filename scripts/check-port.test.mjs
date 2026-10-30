@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { substitutesIn } from "./handoff-patterns.mjs";
 import { retiredConfigIn } from "./model-patterns.mjs";
-import { legacyModeIn } from "./legacy-patterns.mjs";
+import { BRANDS, REVIEW_BOT, STACK, brandingIn } from "./branding-patterns.mjs";
 
 // Wordings earlier revisions or reviews found; each must be caught.
 const BAD = [
@@ -45,18 +45,17 @@ test("the port's own wordings are not caught", () => {
   for (const line of GOOD) assert.deepEqual(substitutesIn(line), [], `caught: ${line}`);
 });
 
-// The model rule (references/cube.md, Models): setup-pstack is retired and an
-// omitted model is the host default, not the user's choice.
+// The model rule (references/cube.md, Models): the model setup skill is
+// retired (its name is a retired name, below) and an omitted model is the
+// host default, not the user's choice.
 const RETIRED_BAD = [
-  "No `pstack models` block in OptChat's instructions means setup hasn't run.",
-  "Run [`/setup-pstack`](../setup-pstack/SKILL.md) in OptChat.",
   "Use the `arena runners` role line in OptChat's instructions.",
   "An `auto` or `inherit-parent` entry means the host's preferred model.",
   "If that line is missing, omit `model` so the workers run on the host's preferred model.",
   "A role with no line omits model, so the thread runs on the host's preferred model.",
 ];
 const RETIRED_GOOD = [
-  "`/setup-pstack` is retired in cube; a user who types it gets this answer.",
+  "A user who asks for a model setup command gets this answer.",
   "Never omit `model` to dodge the question: the host default can be any model.",
   "When none covers a spawn, ask (Models); never omit `model` in its place.",
   "Pick the worker model from the user's preference that covers `swarm workers`.",
@@ -69,33 +68,83 @@ test("the port's own model wordings are not caught", () => {
   for (const line of RETIRED_GOOD) assert.deepEqual(retiredConfigIn(line), [], `caught: ${line}`);
 });
 
-// The retired mode name, in any casing or spelling.
-const LEGACY_BAD = [
-  "A user who asks for `/poteto-mode` means this skill.",
-  "Use for /Poteto-Mode (its pstack name).",
-  "work in poteto mode",
-  "POTETO_MODE",
-  "\"name\": \"@cursor-skill/poteto-mode-tools\"",
+// The retired names, in any casing or spelling. Fixtures are built from
+// the name list so that this file passes the check itself.
+const [P, C] = BRANDS;
+const S = STACK;
+const B = REVIEW_BOT;
+const cap = (w) => w[0].toUpperCase() + w.slice(1);
+const spread = (w, sep) => [...w].join(sep);
+const BRAND_BAD = [
+  `A user who asks for \`/${P}-mode\` means this skill.`,
+  `Use for /${cap(P)}-Mode (its ${S} name).`,
+  `work in ${P} mode`,
+  `${P.toUpperCase()}_MODE`,
+  `"name": "@${C}-skill/cube-mode-tools"`,
+  `Use for cube-mode, /cube-mode, ${P}.`,
+  `${P}'s agent style`,
+  `Brief it from agents/${P}-agent.md.`,
+  `ported from ${cap(C)} to cube`,
+  `~/.${C}/projects/<slug>/agent-transcripts`,
+  `https://github.com/${C}/plugins/tree/main/`,
+  `Use for cube-mode, /cube-mode, ${S}.`,
+  `Run [\`/setup-${S}\`](../setup-${S}/SKILL.md) in OptChat.`,
+  `No \`${S} models\` block in OptChat's instructions means setup hasn't run.`,
+  `${S.toUpperCase()}_HOME`,
+  `# ${cap(S)} in cube`,
+  spread(S, "."),
+  `readonly is${cap(B)}: boolean;`,
+  `\`${B}ReviewPasses=\${thread.${B}ReviewPasses}\``,
+  `per \`../references/${B}-triage.md\`.`,
+  `8. **${cap(B)} is triaged skeptically, always.**`,
+  `address the ${B.toUpperCase()} comments`,
+  spread(P, "."),
+  spread(C, "-"),
+  spread(P, "\u2011"),
+  spread(C, "\u00ad"),
+  spread(P, "\u200b"),
+  P.replace("o", "\u043e"),
+  C.replace("c", "\u0441"),
+  [...C.toUpperCase()].map((ch) => String.fromCharCode(ch.charCodeAt(0) + 0xfee0)).join(""),
+  `${P.slice(0, 3)}-\n${P.slice(3)}`,
+  `pre${C}`,
 ];
-const LEGACY_GOOD = [
-  "Use for cube-mode, /cube-mode, poteto, pstack.",
-  "poteto's agent style",
-  "Brief it from agents/poteto-agent.md.",
+const BRAND_GOOD = [
+  "cube-mode, Comment Sicko",
+  `an u${S} conflict outranks frontier CI`,
+  `pending${cap("u" + S)} and u${S}-build`,
+  "a cube-mode thread brief",
+  `${C.slice(0, 4)} ${C.slice(4)}`,
+  `${P.slice(0, 3)} ${P.slice(3)}`,
+  "after = page.nextAfter;",
 ];
+const github = "skills/cube-mode/scripts/watch-pr/github.ts";
 
-test("every spelling of the retired mode name is caught", () => {
-  for (const line of LEGACY_BAD) assert.ok(legacyModeIn(line), `not caught: ${line}`);
+test("every spelling of a retired name is caught", () => {
+  for (const line of BRAND_BAD) assert.ok(brandingIn(line).length > 0, `not caught: ${JSON.stringify(line)}`);
 });
-test("cube-mode and pstack's other names are not caught", () => {
-  for (const line of LEGACY_GOOD) assert.equal(legacyModeIn(line), false, `caught: ${line}`);
+test("text without a retired name is not caught", () => {
+  for (const line of BRAND_GOOD) assert.deepEqual(brandingIn(line), [], `caught: ${line}`);
+});
+test("an outside identifier is allowed only in its own file, and nothing else there", () => {
+  const field = `pageInfo { hasNextPage end${cap(C)} }`;
+  assert.deepEqual(brandingIn(field, github), []);
+  assert.equal(brandingIn(field, "skills/cube-mode/SKILL.md").length, 1);
+  assert.equal(brandingIn(`author === "${C}"`, github).length, 1, "the review app's login is no longer exempt");
+  assert.equal(brandingIn(`${cap(C)} built this`, github).length, 1);
+  assert.equal(brandingIn(`author === "${P}"`, github).length, 1);
+});
+test("matches report their line", () => {
+  assert.deepEqual(brandingIn(`one\ntwo ${P}\nthree`).map((m) => m.line), [2]);
 });
 
-// The whole checker on a scratch copy: a retired skill that comes back, or
-// installed text that sends the user to it, fails the check.
+// The whole checker on a scratch copy: a retired skill that comes back,
+// installed text that sends the user to it, a missing or changed MIT notice,
+// or a retired name anywhere in the repository fails the check.
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 function scratch(change) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "check-port-"));
-  for (const name of ["scripts", "skills", "upstream", "COVERAGE.md"]) fs.cpSync(path.join(root, name), path.join(dir, name), { recursive: true });
+  for (const name of ["scripts", "skills", "README.md", "THIRD_PARTY_NOTICES.md"]) fs.cpSync(path.join(root, name), path.join(dir, name), { recursive: true });
   change(dir);
   const run = spawnSync(process.execPath, [path.join(dir, "scripts/check-port.mjs")], { encoding: "utf8" });
   fs.rmSync(dir, { recursive: true, force: true });
@@ -106,29 +155,82 @@ test("the unchanged port passes the checker", () => {
   const run = scratch(() => {});
   assert.equal(run.status, 0, run.stderr);
 });
-test("a retired skill folder that comes back fails the checker", () => {
-  const run = scratch((dir) => fs.cpSync(path.join(dir, "upstream/pstack/skills/setup-pstack"), path.join(dir, "skills/setup-pstack"), { recursive: true }));
+test("the retired model setup skill that comes back fails the checker", () => {
+  const id = `setup-${S}`;
+  const run = scratch((dir) => { fs.mkdirSync(path.join(dir, "skills", id)); fs.writeFileSync(path.join(dir, "skills", id, "SKILL.md"), `---\nname: ${id}\ndescription: x\n---\n`); });
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /RETIRED setup-pstack/);
+  assert.match(run.stderr, /skills\/[^:]+\/SKILL\.md: the path carries a retired name/);
 });
 test("installed text that sends the user to the retired setup fails the checker", () => {
-  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-mode/references/cube.md"), "\nRun `/setup-pstack` to pick models.\n"));
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-mode/references/cube.md"), `\nRun \`/setup-${S}\` to pick models.\n`));
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /cube-mode\/references\/cube\.md: points at the retired model setup/);
+  assert.match(run.stderr, /cube-mode\/references\/cube\.md:\d+: retired name/);
+});
+test("installed text that falls back to the host's model fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-mode/references/cube.md"), "\nIf no preference covers it, omit `model`.\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /cube-mode\/references\/cube\.md: points at the retired model setup or the host default/);
+});
+test("a removed review-bot contract that comes back fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/scripts/watch-pr/types.ts");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("  readonly firstComment: ReviewComment | null;\n}", `  readonly firstComment: ReviewComment | null;\n  readonly is${cap(B)}: boolean;\n}`)));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /watch-pr\/types\.ts:\d+: retired name/);
+});
+test("the removed review-bot rubric that comes back fails the checker", () => {
+  const run = scratch((dir) => fs.writeFileSync(path.join(dir, `skills/cube-mode/references/${B}-triage.md`), "# Triage\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /references\/[^:]+-triage\.md: the path carries a retired name/);
+});
+test("a ported skill without its LICENSE fails the checker", () => {
+  const run = scratch((dir) => fs.rmSync(path.join(dir, "skills/how/LICENSE")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /skills\/how\/LICENSE: missing/);
+});
+test("a changed MIT notice fails the checker", () => {
+  const run = scratch((dir) => fs.writeFileSync(path.join(dir, "skills/how/LICENSE"), fs.readFileSync(path.join(dir, "skills/how/LICENSE"), "utf8").replace("Lauren Tan", "Someone Else")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /skills\/how\/LICENSE: not the MIT notice byte for byte/);
+});
+test("THIRD_PARTY_NOTICES.md without the full MIT notice fails the checker", () => {
+  const file = (dir) => path.join(dir, "THIRD_PARTY_NOTICES.md");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("Copyright (c) 2026 Lauren Tan", "Copyright (c) 2026")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /THIRD_PARTY_NOTICES\.md: must quote the MIT notice in full/);
+});
+test("cube's own skills need no LICENSE", () => {
+  const run = scratch((dir) => assert.equal(fs.existsSync(path.join(dir, "skills/prove-it-works/LICENSE")), false));
+  assert.equal(run.status, 0, run.stderr);
 });
 test("port commentary in an installed file fails the checker", () => {
   const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), "\n<!-- cube-adapt M4. Intent: x. -->\n"));
   assert.equal(run.status, 1);
   assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: port commentary/);
 });
-test("the retired mode name in an installed file fails the checker", () => {
-  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), "\nA user who asks for `/poteto-mode` means cube-mode.\n"));
+test("a retired name in an installed file fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), `\nA user who asks for \`/${P}-help\` means cube-help.\n`));
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: mentions the retired mode name/);
+  assert.match(run.stderr, /skills\/cube-help\/SKILL\.md:\d+: retired name/);
 });
-test("the retired mode name in an installed script fails the checker", () => {
+test("a retired name in an installed script fails the checker", () => {
   const file = (dir) => path.join(dir, "skills/cube-mode/scripts/bootstrap.ts");
-  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("cube-mode-tools", "poteto-mode-tools")));
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("cube-mode-tools", `${C}-tools`)));
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /cube-mode\/scripts\/bootstrap\.ts:\d+: mentions the retired mode name/);
+  assert.match(run.stderr, /skills\/cube-mode\/scripts\/bootstrap\.ts:\d+: retired name/);
+});
+test("a retired name outside skills/ fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "README.md"), `\nPorted from ${cap(C)}.\n`));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /README\.md:\d+: retired name/);
+});
+test("a path with a retired name fails the checker", () => {
+  const run = scratch((dir) => fs.renameSync(path.join(dir, "skills/cube-mode/agents/cube-mode-agent.md"), path.join(dir, `skills/cube-mode/agents/${P}-agent.md`)));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /agents\/[^:]+-agent\.md: the path carries a retired name/);
+});
+test("a retired name beside an allowed identifier fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/scripts/watch-pr/github.ts");
+  const run = scratch((dir) => fs.appendFileSync(file(dir), `\n// ${cap(C)} review app\n`));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /watch-pr\/github\.ts:\d+: retired name/);
 });

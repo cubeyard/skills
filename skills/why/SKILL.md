@@ -89,7 +89,7 @@ Present the synthesizer's output to the user. You may lightly edit for clarity o
 
 The structure is the one in `references/synthesizer-prompt.md`: The Question, The Code in Question, What We Found, What We Can Reasonably Infer, Competing Hypotheses, What We Don't Know, Sources Consulted, Confidence Summary. Adapt as needed, but keep the confidence separation intact, and keep Sources Consulted as one line per investigator, including the ones that returned nothing or were skipped, with the reason.
 
-After Sources Consulted, if the user's `why` question is a precursor to changing this code, convert the lineage findings into a Preserve / Change / Avoid / Risk constraint set for planning the change.
+After Sources Consulted, if the user's `why` question is a first step toward changing this code, convert the lineage findings into a Preserve / Change / Avoid / Risk constraint set for planning the change.
 
 ## Common Failure Modes to Avoid
 

@@ -9,24 +9,23 @@ cube pins this repository to an exact commit; a cube release moves the pin.
 A thread's prompt lists each skill's name and description only. The agent
 reads a `SKILL.md`, and the files it links, when a task needs them.
 
-## pstack
+## cube-mode and its skills
 
-Most skills here are [pstack](https://github.com/cursor/plugins/tree/main/pstack),
-poteto's agent workflow stack, ported from Cursor to cube: 57 of its 58
-skills with their references and scripts. `setup-pstack` is retired, since
-cube needs no model setup: OptChat follows the model preference the user
-states in the chat (`skills/cube-mode/references/cube.md`, M4). Start from
-`cube-mode` or `cube-help`, pstack's router and help renamed for cube and
-listed to OptChat and threads;
-the other pstack skills are installed but hidden, and cube-mode routes to
-them. OptChat takes pstack's lead role
-(routing, briefing, judging, landing order) and threads do its execution;
-`skills/cube-mode/references/cube.md` maps every Cursor name, and no skill
-asks a thread to start another agent.
+Most skills here are ported from an agent workflow stack by Lauren Tan
+(MIT, THIRD_PARTY_NOTICES.md): 57 of its 58 skills with their references
+and scripts. Its model setup skill is retired, since cube needs no model
+setup: OptChat follows the model preference the user states in the chat
+(`skills/cube-mode/references/cube.md`, M4). Start from `cube-mode` or
+`cube-help`, the stack's router and help renamed for cube and listed to
+OptChat and threads; the other ported skills are installed but hidden, and
+cube-mode routes to them. OptChat takes the stack's lead role (routing,
+briefing, judging, landing order) and threads do its execution;
+`skills/cube-mode/references/cube.md` maps the skills' original terms to
+cube's, and no skill asks a thread to start another agent.
 
-`upstream/pstack/` is the unmodified original, which cube never installs.
-[PORTING.md](PORTING.md) explains the method, the mapping rules and the gaps;
-[COVERAGE.md](COVERAGE.md) lists every upstream file and where it went.
+The unmodified original the port started from is kept in this repository's
+history, not its tree (PORTING.md, Baseline).
+[PORTING.md](PORTING.md) explains the method, the mapping rules and the gaps.
 Installed skills read as plain instructions: the reasons for each change live
 in PORTING.md and git history, not in `skills/`. Check the port with:
 
@@ -62,10 +61,12 @@ metadata:
 - The folder name is the skill name: lowercase letters, digits and inner
   hyphens, at most 64 characters. A description is at most 1024 characters.
 - Plain files only: no symlinks or submodules.
-- A ported pstack skill keeps upstream's text except where cube needs a
+- A ported skill keeps upstream's text except where cube needs a
   change; explain the change in PORTING.md, never in the installed file.
   `scripts/check-port.mjs` refuses adaptation notes and mapping-rule labels
-  (M1-M13) under `skills/`.
+  (M1-M13) under `skills/`, a missing or changed MIT notice in a ported
+  skill, and the retired names (two brands and the original stack's name)
+  anywhere in the repository, paths included (`scripts/branding-patterns.mjs`).
 - Link other skills as `../<name>/SKILL.md`. cube installs every skill as
   `~/.cube/skills/<name>/`, so these links keep working, and a user's
   override of `<name>` is what the link reaches.

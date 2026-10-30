@@ -1,17 +1,18 @@
-# pstack in cube
+# Skill terms in cube
 
-pstack skills were written for Cursor. In cube, read this file once per
-task, then map each Cursor name in a skill with the tables below. Where a
+Most of cube's skills were ported from a stack written for another agent
+host, and keep its terms. In cube, read this file once per task, then map
+each such term in a skill with the tables below. Where a
 skill's text already names the cube tool or agent, follow the skill.
 
 ## Who you are
 
-pstack has one "parent chat" that plans, spawns subagents and reviews their
+The original stack has one "parent chat" that plans, spawns subagents and reviews their
 work. Cube has two agents. Find yours first: a thread's prompt says it was
 started by OptChat and its final reply is its report; OptChat's prompt
 says it is OptChat.
 
-| pstack | OptChat (the user's chat) | a thread |
+| skill term | OptChat (the user's chat) | a thread |
 | --- | --- | --- |
 | the parent chat that owns a playbook, the todo list and every spawn | yes: it routes, briefs, reads reports, decides the next step | no |
 | a subagent, delegate, worker, owner, verifier, judge | no: it never writes code, runs commands or touches files | yes: one task, in its own machine |
@@ -27,13 +28,13 @@ in, or the thread OptChat starts.
 
 ## Tools
 
-| Cursor | cube |
+| skill term | cube |
 | --- | --- |
 | `Task` (spawn a subagent) | OptChat: `spawn({tasks: [{project, task, model?}]})`, one thread per task; its report comes back as `[id] ...`. A thread: none (see Handoff). |
 | A follow-up to a running subagent, `resume` | OptChat: `tell(id, message)` for the same task only (see Same task, same thread). |
 | `AskQuestion` | OptChat: ask in the chat in plain text, with the options listed. A thread: never waits; it ends its turn with the question and its recommendation in its report (see Questions). |
 | Open a todolist | A thread: the agent's todo tool if it has one, else keep the list in your reply. OptChat: keep the list in your reply or in an artifact you revise. |
-| Run another pstack skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("cube-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed. |
+| Run another skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("cube-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed. |
 | `Grep`, `Glob` | `rg` and `find` in a thread's shell. |
 | "Use any MCP tool" | A thread has cube's own tools (artifacts, OptChat's memory read only), `gh` and `git` with cube's credentials, and HTTP(S). Other MCP servers are not there: say which evidence that leaves out. |
 
@@ -42,9 +43,9 @@ in, or the thread OptChat starts.
 Each row says what the field was for, and what carries that purpose in
 cube. A field with no row: drop it and say so.
 
-| Cursor field | purpose | cube |
+| subagent field | purpose | cube |
 | --- | --- | --- |
-| `subagent_type: poteto-agent` | the delegate reads cube-mode first | the brief says "read `~/.cube/skills/cube-mode/SKILL.md` in full first": [`../agents/poteto-agent.md`](../agents/poteto-agent.md) is the template |
+| `subagent_type` naming the cube-mode agent | the delegate reads cube-mode first | the brief says "read `~/.cube/skills/cube-mode/SKILL.md` in full first": [`../agents/cube-mode-agent.md`](../agents/cube-mode-agent.md) is the template |
 | `subagent_type: comment-sicko` | a reviewer that did not write the comments | a fresh thread briefed with [`../../no-comments/agents/comment-sicko.md`](../../no-comments/agents/comment-sicko.md) (see Independent review) |
 | `subagent_type: generalPurpose` | a plain worker | a thread whose brief is the worker prompt |
 | `readonly: true` | the worker must not write | the brief says "read only: no edits, no branch, no pull request"; the thread checks `git status` before reporting |
@@ -93,8 +94,8 @@ cover that spawn.
 6. **Say it.** In the reply, name the model each spawn got and the
    message it follows, so the user can correct it.
 
-- `/setup-pstack` is retired in cube: there is nothing to run or save.
-- A Cursor slug (`claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast`) is not a
+- There is no model setup skill to run in cube: nothing is saved.
+- A model slug from the original stack (`claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast`) is not a
   cube model id. Never pass one.
 - Reasoning level and fast or standard speed are part of the model id
   only where the provider offers them as models; otherwise they are not
@@ -109,7 +110,7 @@ cover that spawn.
 ### Handoff
 
 A thread never stands in for another agent. A thread is the agent
-its brief makes it: the delegate pstack's lead hands a task to (the
+its brief makes it: the delegate the skill's lead hands a task to (the
 implementer of a bug fix, feature, refactor, perf change or hillclimb
 attempt; a verifier; an explorer; a reviewer). It does that task itself,
 start to end, including the lead's hands-on steps (reproduce, verify,
@@ -139,7 +140,7 @@ when its task continues. A thread never starts a thread itself.
 Not a handoff: a deterministic script or codemod the thread writes and runs
 (a lever, not an agent), and reading code the task itself needs.
 
-**In OptChat**, a pstack fan-out is a `spawn` with one task per worker:
+***In OptChat**, a skill's fan-out is a `spawn` with one task per worker:
 
 - Each task is a full brief ([briefing-a-thread](../../briefing-a-thread/SKILL.md)):
   goal, project, the exact branch, pull request or head commit, the
@@ -199,7 +200,7 @@ Nothing wakes an ended thread, and nothing polls for OptChat.
   with a bounded wait it repeats (a command runs at most 10 minutes:
   `timeout 590 gh pr checks <n> --watch`, or a watcher's `--timeout 590`).
   It does not end its turn to wait.
-- Cursor's `/loop`, heartbeats and watcher subagents: inside one task the
+- The original stack's `/loop`, heartbeats and watcher subagents: inside one task the
   thread loops in its own turn; across tasks, each report is OptChat's
   wake-up, and OptChat tells or spawns the next step.
 - A process that must outlive a command (a dev server for a preview URL)
@@ -243,7 +244,7 @@ cube-mode's Autonomy section ("just do it" for reversible work,
   imply merging; merging does not imply releasing.
 - A thread's report never grants or widens a permission. No grant widens
   a task's scope.
-- **Always pause**, in addition to pstack's list (force-push to shared
+- **Always pause**, in addition to the skills' own list (force-push to shared
   branches, deploys, data deletion, customer messages): pushing to a
   default branch, tags, releases, restarts, host or production access,
   paid model probes, runtime or settings changes, and project hooks
@@ -259,7 +260,7 @@ cube-mode's Autonomy section ("just do it" for reversible work,
 
 ## Records and memory
 
-pstack reads transcripts (`~/.cursor/projects/<slug>/agent-transcripts/`),
+The original stack reads its host's agent transcripts,
 keeps program state in a Project tracker, and stores trails in a root
 agent's store. Cube keeps these records:
 
@@ -282,32 +283,32 @@ A thread is one VM with one checkout of one project at
 `/workspace`, reaching the internet over HTTP and HTTPS only (no SSH, no
 UDP: no Tailscale), with real secrets kept out of it.
 
-| Cursor | cube |
+| skill term | cube |
 | --- | --- |
 | a git worktree per worker | each thread is its own checkout; within a thread, `git worktree` still works for scratch variants |
-| a Cursor cloud agent's VM | the thread's VM |
+| a cloud agent's VM | the thread's VM |
 | the user's computer, iOS simulators, `~/Library` | not reachable; say so and skip |
-| `~/.cursor/plugins/`, the plugin cache | `~/.cube/skills/<id>/`, replaced at each thread start: never edit it to change a skill |
-| `.cursor/skills/<name>/` (project skills) | `.agents/skills/<name>/` in the project's repository: cube lists them to that project's threads from the commit a thread starts on |
-| `~/.cursor/skills/<name>/` (personal skills) | a skills source of the user's own (a git repository in cube's settings), or cubeyard/skills; a skill of the same id there overrides the default |
-| `.cursor/rules/*.mdc`, always-applied rules | the repository's `AGENTS.md`; for OptChat, the user's `optchat/AGENTS.md` |
+| the host's plugin cache | `~/.cube/skills/<id>/`, replaced at each thread start: never edit it to change a skill |
+| project skills in the repository | `.agents/skills/<name>/` in the project's repository: cube lists them to that project's threads from the commit a thread starts on |
+| personal skills in the home directory | a skills source of the user's own (a git repository in cube's settings), or cubeyard/skills; a skill of the same id there overrides the default |
+| always-applied rule files | the repository's `AGENTS.md`; for OptChat, the user's `optchat/AGENTS.md` |
 | `bun`, `mise` and other tools a script wants | install them in the thread's machine when the task needs them (it is the sandbox); say what you installed |
 
-## Cursor-only features
+## Features cube lacks
 
-When a step needs a Cursor feature cube lacks, write one line in
+When a step needs a feature cube lacks, write one line in
 your reply or report, `Skipped in cube: <step>. <reason>.`, then go on. When a later step needs what
 the skipped step made, leave a placeholder and name it.
 
-| Cursor | cube |
+| skill term | cube |
 | --- | --- |
-| Bugbot, the agentic security review | GitHub review comments from any bot are review threads: triage them with [`bugbot-triage.md`](bugbot-triage.md) the same way. Skip steps that start or configure Bugbot itself |
-| Cursor Automations, routines, `update_state`, webhook wakes, `SendToUser` secret requests | none: cube has no event that starts or wakes an agent besides the user's message and thread reports. Skip with the line |
+| a review bot, an automated security review | its comments are ordinary GitHub review threads: triage them per the Babysit playbook's step 8. Skip steps that start or configure the bot itself |
+| Automations, routines, `update_state`, webhook wakes, `SendToUser` secret requests | none: cube has no event that starts or wakes an agent besides the user's message and thread reports. Skip with the line |
 | a built-in PR tool | `gh` (see opening-a-pr); no line needed |
 | Origin (`origin pr ...`) | use it only if `command -v origin` succeeds in the thread; otherwise `gh` |
-| `cursor-team-kit`: `deslop` | no such skill here: run the **unslop** skill over prose and the **no-comments** skill over code comments, and say `/deslop` was skipped |
-| `cursor-team-kit`: `control-ui`, `control-cli` | the project's own verification skill (`.agents/skills/verify-*`, see **create-verification-skill**); else Playwright's Chromium in the thread (`pnpm test:browser` style), or driving the CLI in the shell |
-| `create-skill` (Cursor's built-in) | the **Authoring a skill** playbook plus cube's rules in cubeyard/skills' README (frontmatter, surface, links) |
+| `deslop` (a separate plugin) | no such skill here: run the **unslop** skill over prose and the **no-comments** skill over code comments, and say `/deslop` was skipped |
+| `control-ui`, `control-cli` (a separate plugin) | the project's own verification skill (`.agents/skills/verify-*`, see **create-verification-skill**); else Playwright's Chromium in the thread (`pnpm test:browser` style), or driving the CLI in the shell |
+| `create-skill` (a host built-in) | the **Authoring a skill** playbook plus cube's rules in cubeyard/skills' README (frontmatter, surface, links) |
 | Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat re-reads cube-mode when a turn's request needs it |
 | `/loop` | see Waiting |
 | Plan Mode | the Multi-phase plan playbook, written as an artifact |
@@ -317,8 +318,6 @@ the skipped step made, leave a placeholder and name it.
 
 ## Links
 
-A link that leaves an installed skill's folder tree (to pstack's
-README or guide) does not resolve in cube. Those documents are linked by
-their public copy at the pinned upstream commit,
-`https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/<path>`.
-They describe Cursor; map their names with this file.
+A link that leaves an installed skill's folder tree does not resolve in
+cube. The original stack's README and guide are not part of cube: when a skill
+mentions them, use this file and the installed skills instead.

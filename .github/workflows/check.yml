@@ -13,8 +13,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # The pstack port: baseline fidelity, a note at every change, cube's
-      # skill rules, links and limits (PORTING.md).
+      # The port: no port commentary, the MIT notice in every ported skill,
+      # cube's skill rules, links and limits, the handoff and model rules,
+      # and no retired name in any path or file (PORTING.md).
       - run: node scripts/check-port.mjs
-      # Fixtures for the handoff patterns the check uses.
+      # Fixtures for the patterns the check uses, and whole-checker runs.
       - run: node --test scripts/check-port.test.mjs

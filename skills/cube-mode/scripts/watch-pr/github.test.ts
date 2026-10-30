@@ -45,8 +45,8 @@ describe("checks fallback chain", () => {
     const reader = fakeReader({
       fastPath: { kind: "unusable", exitCode: 8, stderr: "" },
       rollupPages: [
-        { checks: [passingCheck("first")], endCursor: "next" },
-        { checks: [failedCheck("second")], endCursor: null },
+        { checks: [passingCheck("first")], nextAfter: "next" },
+        { checks: [failedCheck("second")], nextAfter: null },
       ],
     });
     const read = await resolveChecks(reader, context);
@@ -62,7 +62,7 @@ describe("checks fallback chain", () => {
   it("falls back when valid fast-path JSON represented an empty list", async () => {
     const reader = fakeReader({
       fastPath: { kind: "checks", checks: [] },
-      rollupPages: [{ checks: [pendingCheck("fallback")], endCursor: null }],
+      rollupPages: [{ checks: [pendingCheck("fallback")], nextAfter: null }],
     });
     expect((await resolveChecks(reader, context)).checks[0].name).toBe(
       "fallback"
@@ -230,7 +230,14 @@ describe("closed enum parsing", () => {
   });
 });
 
-it("annotates Bugbot threads with distinct review-pass counts", () => {
+it("keeps unresolved threads with their first comment, and nothing else", () => {
+  const comment = (body: string, login: string) => ({
+    body,
+    createdAt: "now",
+    path: null,
+    line: null,
+    author: { login },
+  });
   const response = {
     data: {
       repository: {
@@ -238,51 +245,9 @@ it("annotates Bugbot threads with distinct review-pass counts", () => {
           reviewThreads: {
             pageInfo: { hasNextPage: false, endCursor: null },
             nodes: [
-              {
-                id: "one",
-                isResolved: false,
-                comments: {
-                  nodes: [
-                    {
-                      body: "RUN_ID: run-1",
-                      createdAt: "now",
-                      path: "a.ts",
-                      line: 1,
-                      author: { login: "bugbot" },
-                    },
-                  ],
-                },
-              },
-              {
-                id: "two",
-                isResolved: false,
-                comments: {
-                  nodes: [
-                    {
-                      body: "CURSOR_AUTOMATION_ID: run-2 severity high",
-                      createdAt: "now",
-                      path: null,
-                      line: null,
-                      author: { login: "cursor" },
-                    },
-                  ],
-                },
-              },
-              {
-                id: "resolved",
-                isResolved: true,
-                comments: {
-                  nodes: [
-                    {
-                      body: "RUN_ID: run-3",
-                      createdAt: "now",
-                      path: null,
-                      line: null,
-                      author: { login: "bugbot" },
-                    },
-                  ],
-                },
-              },
+              { id: "one", isResolved: false, comments: { nodes: [comment("RUN_ID: run-1", "review-app")] } },
+              { id: "two", isResolved: false, comments: { nodes: [comment("severity high", "someone")] } },
+              { id: "resolved", isResolved: true, comments: { nodes: [comment("done", "someone")] } },
             ],
           },
         },
@@ -290,9 +255,12 @@ it("annotates Bugbot threads with distinct review-pass counts", () => {
     },
   };
   const threads = buildReviewThreads(parseReviewThreadPage(response).threads);
-  expect(threads).toHaveLength(2);
-  expect(threads.map((thread) => thread.isBugbot)).toEqual([true, true]);
-  expect(threads.map((thread) => thread.bugbotReviewPasses)).toEqual([3, 3]);
+  expect(threads.map((thread) => thread.id)).toEqual(["one", "two"]);
+  expect(threads.map((thread) => Object.keys(thread).sort())).toEqual([
+    ["firstComment", "id"],
+    ["firstComment", "id"],
+  ]);
+  expect(threads[0]?.firstComment?.authorLogin).toBe("review-app");
 });
 
 describe("review thread pagination", () => {
@@ -308,12 +276,12 @@ describe("review thread pagination", () => {
     resolved,
   });
 
-  it("keeps walking pages until the cursor is exhausted", async () => {
+  it("keeps walking pages until the last page", async () => {
     const reader = fakeReader({
       threadPages: [
-        { threads: [thread("one")], endCursor: "next" },
-        { threads: [thread("two")], endCursor: "last" },
-        { threads: [thread("three")], endCursor: null },
+        { threads: [thread("one")], nextAfter: "next" },
+        { threads: [thread("two")], nextAfter: "last" },
+        { threads: [thread("three")], nextAfter: null },
       ],
     });
     const threads = await resolveReviewThreads(reader, context);
@@ -328,49 +296,27 @@ describe("review thread pagination", () => {
   it("sees an unresolved thread that sits past the first page", async () => {
     const reader = fakeReader({
       threadPages: [
-        { threads: [thread("early", true)], endCursor: "next" },
-        { threads: [thread("late")], endCursor: null },
+        { threads: [thread("early", true)], nextAfter: "next" },
+        { threads: [thread("late")], nextAfter: null },
       ],
     });
     const threads = await resolveReviewThreads(reader, context);
     expect(threads.map((item) => item.id)).toEqual(["late"]);
   });
 
-  it("stops after a single page when the cursor is exhausted", async () => {
+  it("stops after a single page when it is the last", async () => {
     const reader = fakeReader({
-      threadPages: [{ threads: [thread("only")], endCursor: null }],
+      threadPages: [{ threads: [thread("only")], nextAfter: null }],
     });
     expect((await resolveReviewThreads(reader, context)).length).toBe(1);
     expect(reader.calls).toEqual(["reviewThreadPage:null"]);
   });
 
-  it("counts Bugbot review passes across every page", async () => {
-    const bugbot = (id: string, runId: string) => ({
-      id,
-      firstComment: {
-        authorLogin: "bugbot",
-        body: `RUN_ID: ${runId}`,
-        path: "a.ts",
-        line: 1,
-        createdAt: "now",
-      },
-      resolved: false,
-    });
-    const reader = fakeReader({
-      threadPages: [
-        { threads: [bugbot("one", "run-1")], endCursor: "next" },
-        { threads: [bugbot("two", "run-2")], endCursor: null },
-      ],
-    });
-    const threads = await resolveReviewThreads(reader, context);
-    expect(threads.map((item) => item.bugbotReviewPasses)).toEqual([2, 2]);
-  });
-
   it("drops resolved threads from later pages too", async () => {
     const reader = fakeReader({
       threadPages: [
-        { threads: [thread("one")], endCursor: "next" },
-        { threads: [thread("two", true)], endCursor: null },
+        { threads: [thread("one")], nextAfter: "next" },
+        { threads: [thread("two", true)], nextAfter: null },
       ],
     });
     expect(

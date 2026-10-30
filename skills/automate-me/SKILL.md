@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 A guided flow for turning the user's working conventions into a skill agents will follow. The output is one `-mode` skill tailored to them (e.g. `jay-mode`, `priya-mode`).
 
-This skill orchestrates three others: an inline mining pass (see step 1), an authoring pass (cube-mode's **Authoring a skill** playbook; Cursor's `create-skill` is not in cube), and the **unslop** skill (prose discipline). It sequences them. It doesn't replace them. In cube, OptChat runs steps 0 to 3 and gives steps 4 to 6 to one thread with the findings and the user's answers in its brief.
+This skill orchestrates three others: an inline mining pass (see step 1), an authoring pass (cube-mode's **Authoring a skill** playbook; a built-in `create-skill` is not in cube), and the **unslop** skill (prose discipline). It sequences them. It doesn't replace them. In cube, OptChat runs steps 0 to 3 and gives steps 4 to 6 to one thread with the findings and the user's answers in its brief.
 
 ## Flow
 
