@@ -44,7 +44,7 @@ node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against
    installs each folder on its own.
 3. **Adapt in place.** Each change is an edit at the spot it concerns, with
    a note right above it. A file that needs no change stays byte-identical
-   (33 of the 58 skills are unchanged, and 540 of 595 mapped files).
+   (33 of the 58 skills are unchanged, and 534 of 595 mapped files).
 4. **Check it mechanically** (`node scripts/check-port.mjs`, below), so that
    "no silent omission" is a test, not a promise.
 
@@ -82,7 +82,8 @@ be confusing without its reason.
 | cube can install it | at most 64 skills, 2000 files, 8 MiB |
 | links resolve where installed | every relative Markdown link stays inside `skills/` and exists |
 | OptChat reads it in one call | each SKILL.md listed to OptChat is at most 30,000 characters (`SKILL_PAGE`) |
-| non-skill upstream files are accounted for | `--matrix` fails on one with no stated reason |
+| non-skill upstream files are accounted for | every run fails on an upstream file that is neither mapped nor given a reason (so CI catches a new one) |
+| surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines (a note that mentions `surface:`) are ignored |
 
 ## How cube finds these skills (M5, verified)
 
@@ -298,7 +299,7 @@ skills.
 | what | how | result |
 | --- | --- | --- |
 | baseline fidelity | `git rev-parse HEAD:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
-| completeness, notes, cube rules, links, limits | `node scripts/check-port.mjs` | ok: 595 mapped files (55 adapted, 540 unchanged), 2 added, 61 skills, 87 links |
+| completeness, notes, cube rules, links, limits | `node scripts/check-port.mjs` | ok: 595 mapped files (61 adapted, 534 unchanged), 2 added, 61 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 61 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
@@ -329,9 +330,37 @@ None of these is in this PR. Each needs a decision or a cube change.
 | G9 | no live model run | how well OptChat and threads follow these skills, and how often the in-thread forms are chosen, is unmeasured | real runs after activation |
 | G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | one run each in a thread machine: the depth-1 fetch took 975 ms and 3.4 MB at this head, against 568 ms and 140 KB at the current pin (`d5041ce9`); not repeated, so the spread is unknown | if it matters, move the baseline to its own branch or repository |
 
+## Naming: options, not yet decided
+
+The user first asked to adapt *and rename* poteto-mode for cube, then asked
+for every pstack skill copied as is and converted. This port keeps every
+upstream id (`poteto-mode`, `how`, `principle-*`, ...). That is a choice with
+consequences in cube's resolver, so it is the user's to confirm. What the
+resolver does (cubeyard/cube `packages/server/src/skills.ts`): sources are read
+default first, then the user's in order; for each id **the last source wins**;
+the union of ids after `skills.disabled` may hold at most **64**, or every
+thread start is refused before a machine is allocated.
+
+| option | what changes | with the old cursor/plugins source still configured | other costs |
+| --- | --- | --- | --- |
+| A. keep upstream ids (this PR) | nothing | its 51 originals override the ported skills of the same id (silently, unported Cursor text); 61 ids, so starts still work | the ids say "poteto", not cube; `--diff` and future upstream updates stay one to one |
+| B. rename only the entry router (`poteto-mode` to a cube name, e.g. `cube-mode`), keep the leaves | one folder renamed, its links and the mentions of `/poteto-mode` updated | 62 ids; the new router is kept, but the 51 leaves it links to are still overridden by the originals | the user-facing name changes; `/poteto-mode` still needs a mention so users who type it are routed |
+| C. rename every skill (a prefix, e.g. `pstack-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
+| D. keep ids, set display names | `name:` differs from the folder (cube shows it in Settings only) | as A | the model never sees display names; upstream itself renamed every skill to its folder name (#702) |
+
+Recommendation: A or B. Under every option the old cursor/plugins source must
+go (G1), and before or in the same save as the new default commit: with A or B
+it would replace ported skills with Cursor text, and with C it would stop every
+thread from starting. The user decides; this PR does not rename.
+
 ## Activating (not done here)
 
 Merging changes nothing a cube runs until the user chooses the new commit in
-Settings, Skills (check for update, then use that commit), and removes the
-old pstack source (G1). New threads and OptChat's next turn then get it;
+Settings, Skills (check for update, then use that commit). In order:
+
+1. Squash-merge, so the as-is copy commit never sits on main to be pinned.
+2. Remove (or disable) the cursor/plugins `df581122` source before, or in the
+   same save as, the new default commit (G1; see Naming for why the order matters).
+3. Keep the user's own sources to at most 3 new ids (G8), or every thread start fails.
+4. Smoke-test with a real model: one OptChat turn and one thread with poteto-mode (G9). New threads and OptChat's next turn then get it;
 OptChat's prompt changes once (cache rewrite), with three more listed skills.

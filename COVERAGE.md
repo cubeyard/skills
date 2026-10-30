@@ -4,13 +4,13 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 
 | upstream `pstack/` file | `skills/` file | state |
 | --- | --- | --- |
-| agents/comment-sicko.md | no-comments/agents/comment-sicko.md | adapted (3 hunks, 3 notes) |
-| agents/poteto-agent.md | poteto-mode/agents/poteto-agent.md | adapted (2 hunks, 2 notes) |
+| agents/comment-sicko.md | no-comments/agents/comment-sicko.md | adapted (4 hunks, 3 notes) |
+| agents/poteto-agent.md | poteto-mode/agents/poteto-agent.md | adapted (3 hunks, 3 notes) |
 | skills/architect/SKILL.md | architect/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/architect/references/design-red-flags.md | architect/references/design-red-flags.md | unchanged |
 | skills/architect/references/rationale-template.md | architect/references/rationale-template.md | unchanged |
 | skills/architect/references/runner-prompt.md | architect/references/runner-prompt.md | adapted (1 hunks, 1 notes) |
-| skills/arena/SKILL.md | arena/SKILL.md | adapted (4 hunks, 5 notes) |
+| skills/arena/SKILL.md | arena/SKILL.md | adapted (5 hunks, 6 notes) |
 | skills/automate-me/SKILL.md | automate-me/SKILL.md | adapted (14 hunks, 10 notes) |
 | skills/benchmark-checklist/SKILL.md | benchmark-checklist/SKILL.md | unchanged |
 | skills/blast-radius/SKILL.md | blast-radius/SKILL.md | unchanged |
@@ -23,8 +23,8 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/create-verification-skill/references/feature-map-example/search.md | create-verification-skill/references/feature-map-example/search.md | unchanged |
 | skills/figure-it-out/SKILL.md | figure-it-out/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/how/SKILL.md | how/SKILL.md | adapted (4 hunks, 4 notes) |
-| skills/how/references/explainer-prompt.md | how/references/explainer-prompt.md | unchanged |
-| skills/how/references/explorer-prompt.md | how/references/explorer-prompt.md | unchanged |
+| skills/how/references/explainer-prompt.md | how/references/explainer-prompt.md | adapted (2 hunks, 1 notes) |
+| skills/how/references/explorer-prompt.md | how/references/explorer-prompt.md | adapted (2 hunks, 1 notes) |
 | skills/in-your-own-words/SKILL.md | in-your-own-words/SKILL.md | unchanged |
 | skills/interrogate/SKILL.md | interrogate/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/ketchup-video/SKILL.md | ketchup-video/SKILL.md | adapted (1 hunks, 1 notes) |
@@ -32,7 +32,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/maintain-formal-verification-skill/SKILL.md | maintain-formal-verification-skill/SKILL.md | unchanged |
 | skills/maintain-verification-skill/SKILL.md | maintain-verification-skill/SKILL.md | adapted (3 hunks, 3 notes) |
 | skills/make-bot-ui/SKILL.md | make-bot-ui/SKILL.md | adapted (2 hunks, 2 notes) |
-| skills/no-comments/SKILL.md | no-comments/SKILL.md | adapted (2 hunks, 2 notes) |
+| skills/no-comments/SKILL.md | no-comments/SKILL.md | adapted (4 hunks, 3 notes) |
 | skills/poteto-help/SKILL.md | poteto-help/SKILL.md | adapted (24 hunks, 14 notes) |
 | skills/poteto-help/references/prompting.md | poteto-help/references/prompting.md | adapted (1 hunks, 1 notes) |
 | skills/poteto-help/references/recipes.md | poteto-help/references/recipes.md | adapted (1 hunks, 1 notes) |
@@ -59,7 +59,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/poteto-mode/playbooks/shipping.md | poteto-mode/playbooks/shipping.md | adapted (2 hunks, 3 notes) |
 | skills/poteto-mode/playbooks/trace-forensics.md | poteto-mode/playbooks/trace-forensics.md | adapted (1 hunks, 1 notes) |
 | skills/poteto-mode/playbooks/visual-parity.md | poteto-mode/playbooks/visual-parity.md | adapted (1 hunks, 3 notes) |
-| skills/poteto-mode/playbooks/worktree-cleanup.md | poteto-mode/playbooks/worktree-cleanup.md | adapted (3 hunks, 3 notes) |
+| skills/poteto-mode/playbooks/worktree-cleanup.md | poteto-mode/playbooks/worktree-cleanup.md | adapted (2 hunks, 4 notes) |
 | skills/poteto-mode/references/bugbot-triage.md | poteto-mode/references/bugbot-triage.md | unchanged |
 | skills/poteto-mode/scripts/bootstrap.ts | poteto-mode/scripts/bootstrap.ts | unchanged |
 | skills/poteto-mode/scripts/bun.lock | poteto-mode/scripts/bun.lock | unchanged |
@@ -81,7 +81,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/poteto-mode/scripts/worktree-audit.sh | poteto-mode/scripts/worktree-audit.sh | unchanged |
 | skills/principle-attack-the-premise/SKILL.md | principle-attack-the-premise/SKILL.md | unchanged |
 | skills/principle-boundary-discipline/SKILL.md | principle-boundary-discipline/SKILL.md | unchanged |
-| skills/principle-build-the-lever/SKILL.md | principle-build-the-lever/SKILL.md | adapted (1 hunks, 1 notes) |
+| skills/principle-build-the-lever/SKILL.md | principle-build-the-lever/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/principle-encode-lessons-in-structure/SKILL.md | principle-encode-lessons-in-structure/SKILL.md | unchanged |
 | skills/principle-exhaust-the-design-space/SKILL.md | principle-exhaust-the-design-space/SKILL.md | unchanged |
 | skills/principle-experience-first/SKILL.md | principle-experience-first/SKILL.md | unchanged |
@@ -104,11 +104,11 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/principle-test-behavior-not-implementation/SKILL.md | principle-test-behavior-not-implementation/SKILL.md | unchanged |
 | skills/principle-type-system-discipline/SKILL.md | principle-type-system-discipline/SKILL.md | unchanged |
 | skills/recall/SKILL.md | recall/SKILL.md | adapted (3 hunks, 4 notes) |
-| skills/reflect/SKILL.md | reflect/SKILL.md | adapted (12 hunks, 8 notes) |
-| skills/reflect/references/divergent-reviewer.md | reflect/references/divergent-reviewer.md | unchanged |
-| skills/reflect/references/judgment-reviewer.md | reflect/references/judgment-reviewer.md | unchanged |
+| skills/reflect/SKILL.md | reflect/SKILL.md | adapted (13 hunks, 9 notes) |
+| skills/reflect/references/divergent-reviewer.md | reflect/references/divergent-reviewer.md | adapted (1 hunks, 1 notes) |
+| skills/reflect/references/judgment-reviewer.md | reflect/references/judgment-reviewer.md | adapted (1 hunks, 1 notes) |
 | skills/reflect/references/synthesizer.md | reflect/references/synthesizer.md | unchanged |
-| skills/reflect/references/tooling-reviewer.md | reflect/references/tooling-reviewer.md | unchanged |
+| skills/reflect/references/tooling-reviewer.md | reflect/references/tooling-reviewer.md | adapted (1 hunks, 1 notes) |
 | skills/setup-pstack/SKILL.md | setup-pstack/SKILL.md | adapted (14 hunks, 8 notes) |
 | skills/sharpen/SKILL.md | sharpen/SKILL.md | unchanged |
 | skills/show-me-your-work/SKILL.md | show-me-your-work/SKILL.md | adapted (5 hunks, 4 notes) |
@@ -521,17 +521,17 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/statechart/scripts/test/tlc.ts | statechart/scripts/test/tlc.ts | unchanged |
 | skills/statechart/scripts/tsconfig.json | statechart/scripts/tsconfig.json | unchanged |
 | skills/statechart/scripts/worker.ts | statechart/scripts/worker.ts | unchanged |
-| skills/swarm/SKILL.md | swarm/SKILL.md | adapted (4 hunks, 3 notes) |
+| skills/swarm/SKILL.md | swarm/SKILL.md | adapted (5 hunks, 4 notes) |
 | skills/tdd/SKILL.md | tdd/SKILL.md | unchanged |
 | skills/teach/SKILL.md | teach/SKILL.md | adapted (2 hunks, 2 notes) |
 | skills/technical-writing/SKILL.md | technical-writing/SKILL.md | unchanged |
 | skills/typescript-best-practices/SKILL.md | typescript-best-practices/SKILL.md | adapted (2 hunks, 1 notes) |
 | skills/typescript-best-practices/references/patterns.md | typescript-best-practices/references/patterns.md | unchanged |
 | skills/unslop/SKILL.md | unslop/SKILL.md | unchanged |
-| skills/why/SKILL.md | why/SKILL.md | adapted (6 hunks, 6 notes) |
+| skills/why/SKILL.md | why/SKILL.md | adapted (8 hunks, 7 notes) |
 | skills/why/references/epistemics.md | why/references/epistemics.md | unchanged |
 | skills/why/references/investigator-prompt.md | why/references/investigator-prompt.md | unchanged |
-| skills/why/references/source-playbook.md | why/references/source-playbook.md | unchanged |
+| skills/why/references/source-playbook.md | why/references/source-playbook.md | adapted (1 hunks, 1 notes) |
 | skills/why/references/sources/code-archaeology.md | why/references/sources/code-archaeology.md | unchanged |
 | skills/why/references/sources/databricks.md | why/references/sources/databricks.md | unchanged |
 | skills/why/references/sources/datadog.md | why/references/sources/datadog.md | unchanged |
