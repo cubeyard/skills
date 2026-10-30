@@ -1,7 +1,12 @@
-// Regression fixtures for the handoff patterns (node --test scripts/check-port.test.mjs).
+// Regression fixtures for the port checks (node --test scripts/check-port.test.mjs).
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { substitutesIn } from "./handoff-patterns.mjs";
+import { retiredConfigIn } from "./model-patterns.mjs";
 
 // Wordings earlier revisions or reviews found; each must be caught.
 const BAD = [
@@ -37,4 +42,60 @@ test("every known substitute wording is caught", () => {
 });
 test("the port's own wordings are not caught", () => {
   for (const line of GOOD) assert.deepEqual(substitutesIn(line), [], `caught: ${line}`);
+});
+
+// The model rule (references/cube.md, Models): setup-pstack is retired and an
+// omitted model is the host default, not the user's choice.
+const RETIRED_BAD = [
+  "No `pstack models` block in OptChat's instructions means setup hasn't run.",
+  "Run [`/setup-pstack`](../setup-pstack/SKILL.md) in OptChat.",
+  "Use the `arena runners` role line in OptChat's instructions.",
+  "An `auto` or `inherit-parent` entry means the host's preferred model.",
+  "If that line is missing, omit `model` so the workers run on the host's preferred model.",
+  "A role with no line omits model, so the thread runs on the host's preferred model.",
+];
+const RETIRED_GOOD = [
+  "`/setup-pstack` is retired in cube; a user who types it gets this answer.",
+  "Never omit `model` to dodge the question: the host default can be any model.",
+  "When none covers a spawn, ask (Models); never omit `model` in its place.",
+  "Pick the worker model from the user's preference that covers `swarm workers`.",
+];
+
+test("every retired model-setup wording is caught", () => {
+  for (const line of RETIRED_BAD) assert.ok(retiredConfigIn(line).length > 0, `not caught: ${line}`);
+});
+test("the port's own model wordings are not caught", () => {
+  for (const line of RETIRED_GOOD) assert.deepEqual(retiredConfigIn(line), [], `caught: ${line}`);
+});
+
+// The whole checker on a scratch copy: a retired skill that comes back, or
+// installed text that sends the user to it, fails the check.
+const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+function scratch(change) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "check-port-"));
+  for (const name of ["scripts", "skills", "upstream", "COVERAGE.md"]) fs.cpSync(path.join(root, name), path.join(dir, name), { recursive: true });
+  change(dir);
+  const run = spawnSync(process.execPath, [path.join(dir, "scripts/check-port.mjs")], { encoding: "utf8" });
+  fs.rmSync(dir, { recursive: true, force: true });
+  return run;
+}
+
+test("the unchanged port passes the checker", () => {
+  const run = scratch(() => {});
+  assert.equal(run.status, 0, run.stderr);
+});
+test("a retired skill folder that comes back fails the checker", () => {
+  const run = scratch((dir) => fs.cpSync(path.join(dir, "upstream/pstack/skills/setup-pstack"), path.join(dir, "skills/setup-pstack"), { recursive: true }));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /RETIRED setup-pstack/);
+});
+test("installed text that sends the user to the retired setup fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-mode/references/cube.md"), "\nRun `/setup-pstack` to pick models.\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /cube-mode\/references\/cube\.md: points at the retired model setup/);
+});
+test("port commentary in an installed file fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), "\n<!-- cube-adapt M4. Intent: x. -->\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: port commentary/);
 });

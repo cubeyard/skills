@@ -5,9 +5,10 @@ is a set of 58 skills and 2 agent definitions written for Cursor: one chat
 that plans, spawns subagents on chosen models and reviews their work. This
 repository ports all of it to cube, where that one chat becomes two agents:
 OptChat, which directs and has no machine, and threads, which each do one
-bounded task in their own machine and report. Nothing is dropped. Every skill
-is here under its own id, with its references, scripts and assets, and every
-change from the original is justified here.
+bounded task in their own machine and report. Nothing is dropped silently.
+57 skills are here, with their references, scripts and assets; one,
+`setup-pstack`, is retired on purpose (Retired, below), and its original
+stays in the baseline. Every change from the original is justified here.
 
 ## Layout
 
@@ -15,7 +16,7 @@ change from the original is justified here.
 upstream/pstack/        pstack as published, byte for byte (git tree 4719e1c4); never installed
 upstream/pstack.sha256  sha256 of each of its 573 files
 upstream/README.md      provenance: repository, commit, why this commit, how to update
-skills/<id>/            what cube installs: 58 ported skills + cube's own 3
+skills/<id>/            what cube installs: 57 ported skills + cube's own 3
 skills/cube-mode/references/cube.md   the cube adapter every ported skill relies on (the rules M1-M13, by section name)
 scripts/check-port.mjs  the checks below; --matrix prints COVERAGE.md, --diff <id> shows a port
 COVERAGE.md             every upstream file and where it went (generated)
@@ -43,8 +44,8 @@ node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against
    pstack's `LICENSE` is copied into every ported folder, because cube
    installs each folder on its own.
 3. **Adapt in place.** Each change is an edit at the spot it concerns. A
-   file that needs no change stays byte-identical (33 of the 58 skills are
-   unchanged, and 533 of 595 mapped files).
+   file that needs no change stays byte-identical (33 of the 57 ported skills
+   are unchanged, and 532 of 593 mapped files).
 4. **Check it mechanically** (`node scripts/check-port.mjs`, below), so that
    "no silent omission" is a test, not a promise.
 
@@ -81,7 +82,8 @@ made it (the port's notes are in git history before the removal);
 | check | how |
 | --- | --- |
 | the baseline is upstream | every file's sha256 against the manifest; the git tree of `upstream/pstack` equals `4719e1c4` |
-| nothing is dropped | each of the 537 upstream skill and agent files, and the license in each of 58 folders, has its file under `skills/` |
+| nothing is dropped silently | each of the 536 upstream skill and agent files outside a retired skill, and the license in each of 57 folders, has its file under `skills/`; a retired skill (`RETIRED`) needs a reason and an upstream folder, and fails if its folder comes back |
+| the model rule (M4) | every installed Markdown file is scanned for wordings that point at the retired setup (`pstack models`, `inherit-parent`, role lines in OptChat's instructions, `setup-pstack` outside a sentence that says it is retired) or fall back to the host's default model (`omit model`, "runs on the host's preferred model"), from `scripts/model-patterns.mjs`, with fixtures in `check-port.test.mjs`; the fixtures also run the whole checker on a scratch copy with the retired folder restored, with setup wording added, and with a `cube-adapt` note added, and each fails. Same limit as the handoff rule: keyword checks |
 | no port commentary | no installed file contains `cube-adapt`, and no installed Markdown file an M1-M13 label |
 | cube can read it | folder id, `name` = id, description 1-1024 characters, surface `thread`/`optchat`/`both`, no symlinks |
 | cube can install it | at most 64 skills, 2000 files, 8 MiB |
@@ -104,8 +106,8 @@ entry points:
 
 | listed to | skills |
 | --- | --- |
-| threads | `cube-mode`, `poteto-help`, `typescript-best-practices`, plus cube's `opening-a-pull-request`, `prove-it-works` |
-| OptChat | `cube-mode`, `poteto-help`, `setup-pstack`, plus cube's `briefing-a-thread` |
+| threads | `cube-mode`, `cube-help`, `typescript-best-practices`, plus cube's `opening-a-pull-request`, `prove-it-works` |
+| OptChat | `cube-mode`, `cube-help`, plus cube's `briefing-a-thread` |
 | nobody (installed; reached by link) | the other 54 |
 
 Measured with cube's own resolver (below): the thread prompt's skill section
@@ -171,15 +173,30 @@ Bug fix, Perf issue, Hillclimb (its kept commits), Refactoring and Feature
 end in this handoff. An earlier revision of this port had the author review
 itself in four of them; a delta review found it and it is fixed.
 
-**M4. Models per role, chosen once.** pstack picks a model per role and
-varies effort per call, so that diverse panels stay diverse and routine work
-stays cheap. In cube the only model choice is `spawn`'s `model`, made by
-OptChat, once per thread. The role table survives intact as lines in the
-user's OptChat instructions (written with `setup-pstack`); Cursor slugs are
-never passed (they are not cube ids); `inherit-parent`/`auto` become "omit
-the model". A panel is diverse only if the user configured distinct models,
-and a skill says so when it is not. Lost: per-call effort and mid-task model
-changes.
+**M4. Models per role, chosen once, from the user's words.** pstack picks
+a model per role and varies effort per call, so that diverse panels stay
+diverse and routine work stays cheap; `/setup-pstack` writes the role table
+once into an always-applied rule. In cube the only model choice is
+`spawn`'s `model`, made by OptChat, once per thread. A first port kept the
+table as a block the user pasted into OptChat's instructions file, since
+OptChat cannot write it (the old gap G2); the user rejected that manual step.
+The abstraction pstack needs is not a file but *a durable statement of the
+user's model choice that the lead reads before each spawn*, and OptChat's
+chat already is one: OptChat reads its view every turn and can zoom older
+lines. So the role table is now the user's own words: OptChat takes the
+newest statement that covers a spawn (general, per role, or for one task),
+matches it in `projects` by provider and id, and asks when none covers it,
+the model is missing or its start fails, or a newer general statement and an
+older per-role one leave the intent unclear (no invented precedence). A
+thread's handoff names the role and may quote the user's model words;
+only OptChat picks the `provider/id`. Omitting `model` is no longer a
+fallback: it picks the host default (Pi's default model, else the catalog's
+first), which can be a provider the user ruled out, such as the Anthropic
+API when they chose Opus through Claude Code. Cursor slugs are never passed.
+A panel is diverse only with families the user accepted, and a skill says so
+when it is not. Lost: per-call effort and mid-task model changes; a fresh
+chat asks once before its first spawn. This rule holds where OptChat reads
+cube-mode; a spawn outside it still follows cube's own default.
 
 **M5. Discovery is explicit.** pstack relies on Cursor's slash menu,
 `disable-model-invocation`, custom modes, `alwaysApply` rules and path
@@ -187,9 +204,9 @@ globs. Cube has one automatic route (a listed description) and one explicit
 route (a link from a skill that was read). The port keeps upstream's
 two-tier design (few entry points, many hidden leaves) and moves each
 trigger onto the route cube has: the user's words name a skill; cube-mode
-and poteto-help list every one; `setup-pstack` and `typescript-best-practices`
-become listed because their Cursor triggers (always-applied, path glob) were
-automatic. A skill is loaded only when an agent decides to read it; nothing
+and cube-help list every one; `typescript-best-practices` becomes listed
+because its Cursor trigger (a path glob) was automatic. `setup-pstack`, the
+other always-applied skill, is retired (M4). A skill is loaded only when an agent decides to read it; nothing
 guarantees it.
 
 **M6. Questions are OptChat's.** pstack's `AskQuestion` blocks a turn on
@@ -264,8 +281,8 @@ file is byte-identical. `COVERAGE.md` lists every file.
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
 | cube-mode (upstream `poteto-mode`) | 43 | 26 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/poteto-agent.md` |
-| poteto-help | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | cube setup (default source, Settings pin, the four listed skills), modes, troubleshooting rows, pinned guide links |
-| setup-pstack | 1 | 1 | OptChat | M1 M4 M5 M6 M10 | models from `projects`; the role block goes in OptChat's instructions file, which the user saves (gap G2) |
+| cube-help (upstream `poteto-help`) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed pstack skills), models said in the chat, `/setup-pstack` answered as retired, modes, troubleshooting rows, pinned guide links |
+| setup-pstack | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its Cursor path glob was automatic |
 | how | 3 | 1 | | M2 M4 | explorers and explainer are threads OptChat starts; a thread hands `how` off |
 | why | 13 | 1 (+1 new) | | M2 M4 M10 M11 | investigators and synthesizer are threads; a thread builds the anchor and hands off; evidence sources cube has; adds the OptChat-chat source playbook |
@@ -325,11 +342,11 @@ skills.
 | what | how | result |
 | --- | --- | --- |
 | baseline fidelity | `git rev-parse HEAD:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
-| completeness, no port commentary, cube rules, links, limits, handoff rule | `node scripts/check-port.mjs` | ok: 595 mapped files (62 adapted, 533 unchanged), 2 added, 61 skills, 87 links |
-| cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 61 skills, 0 skipped; YAML comments in frontmatter parse |
+| completeness, no port commentary, cube rules, links, limits, handoff rule, model rule | `node scripts/check-port.mjs` | ok: 593 mapped files (61 adapted, 532 unchanged), 2 added, 1 retired skill, 60 skills, 87 links |
+| cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 60 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
-| OptChat reads it | cube's `optchatSkills().read` | cube-mode, `../how/SKILL.md`, `references/cube.md`, playbooks, setup-pstack read; a hidden id by name is refused |
+| OptChat reads it | cube's `optchatSkills().read` | cube-mode, cube-help, `../how/SKILL.md`, `references/cube.md`, playbooks read; `../setup-pstack/SKILL.md` and a hidden id by name are refused |
 | cube's own skills tests | `node packages/server/test/skills-test.ts` | ok (unchanged code) |
 | check-plan | `bun test check-plan.test.ts` (adapted fixture) | 7 pass |
 | watch-pr | `bun test watch-pr`; `watch-pr --owner cubeyard --repo cube --pr 311 --status-only` | 54 pass; real PR read as merged |
@@ -337,7 +354,7 @@ skills.
 | statechart | mise install, then `scripts/statechart` on the Counter corpus spec | Java and TLC installed by mise; chart equals the corpus chart |
 | worktree-audit | on a scratch clone with one worktree | classified; transcript scan skipped |
 | show-me-your-work log.sh | one row with a formula-like cell | written, cell quoted |
-| with the old source still configured | `resolveSkills` with cursor/plugins@df581122 after the default | 62 skills; 50 ported skills overridden by the originals, and the old `poteto-mode` back beside `cube-mode` (gap G1) |
+| with the old source still configured | `resolveSkills` with cursor/plugins@df581122 after the default | 63 skills; 48 ported skills overridden by the originals, and the old `poteto-mode`, `poteto-help` and `setup-pstack` back beside `cube-mode` and `cube-help` (gap G1) |
 
 ## Gaps and product changes
 
@@ -345,16 +362,42 @@ None of these is in this PR. Each needs a decision or a cube change.
 
 | | gap | effect | what would close it |
 | --- | --- | --- | --- |
-| G1 | a cube that added cursor/plugins (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 50 of the ported skills (all but `cube-mode`) would be replaced by the unported originals | the user removes that source in Settings, Skills, when activating |
-| G2 | OptChat cannot write its instructions file | `setup-pstack` hands the user a block to paste into `<CUBED_STATE>/optchat/AGENTS.md` | a settings field or tool for OptChat's instructions |
+| G1 | a cube that added cursor/plugins (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 48 of the ported skills (all but `cube-mode` and `cube-help`) would be replaced by the unported originals, and the originals `poteto-mode`, `poteto-help` and `setup-pstack` come back beside them: 63 ids (measured with cube's resolver after the retirement) | the user removes that source in Settings, Skills, when activating |
+| G2 | closed: no model setup is needed | `setup-pstack` is retired; OptChat reads model preferences from the chat (M4) | nothing |
 | G3 | nothing starts or wakes an agent on an event (webhook, schedule, Slack) | `automations/benny` is not ported; `make-bot-ui` stops; audits run at reports, not on the hour | an authenticated wake endpoint whose credential stays in cube's gateway, or scheduled ticks |
 | G4 | OptChat cannot read PR, CI or diff state, nor stop a working thread | Orchestrate and ketchup state PR status as last reported; a looping thread can only be told to stop | read-only forge status for OptChat; a stop tool |
 | G5 | a thread cannot read its own transcript | reflect and the show-me-your-work audit work from a digest | a read-only transcript tool for a thread's own conversation |
 | G6 | reasoning effort is not settable per thread | budgets map to model choice only | per-spawn effort |
 | G7 | chat and artifacts cannot play video, and show images as links | ketchup-video and review gates link media | inline media in artifacts |
-| G8 | 61 of the 64 skills a thread can install are used | a user's own sources can add at most 3 new ids (or must disable some) | a higher limit, or hidden skills not counted |
+| G8 | 60 of the 64 skills a thread can install are used | a user's own sources can add at most 4 new ids (or must disable some) | a higher limit, or hidden skills not counted |
 | G9 | no live model run | how well OptChat and threads follow these skills, and how reliably threads hand off instead of doing a fan-out themselves, is unmeasured | real runs after activation |
 | G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | one run each in a thread machine: the depth-1 fetch took 975 ms and 3.4 MB at this head, against 568 ms and 140 KB at the current pin (`d5041ce9`); not repeated, so the spread is unknown | if it matters, move the baseline to its own branch or repository |
+
+## Retired
+
+`setup-pstack` asked for a reasoning budget, mapped a model to each role,
+and wrote the result into an always-applied rule. In cube that rule could
+only be a block the user pasted by hand into OptChat's instructions file
+(the old G2), and the user rejected that: no new configuration storage, no
+manual file editing, no settings editor. Porting it some other way would add
+a store cube does not need, so it is retired instead (**Subtract Before You
+Add**), and cube-mode's M4 reads the user's own words in the chat. What
+setup did, and where it went:
+
+| setup-pstack step | in cube |
+| --- | --- |
+| detect models | OptChat matches the preference in `projects`, by provider and id (M4) |
+| load current state, re-runs replace | the newest statement in the chat wins; a later one replaces it |
+| budget, per-role map, confirm | the user's words, general or per role; "cheaper" or "strongest" picks among the models they cover; OptChat asks when none covers a spawn |
+| validate | a model not in `projects`, or one whose start fails, makes OptChat ask; no silent fallback |
+| write the rule | nothing to write; the chat is the record |
+| offer a verification and a formal verification skill | unchanged skills (`create-verification-skill`, `create-formal-verification-skill`, their `maintain-*`), offered by cube-mode's UI/CLI gate and cube-help's state checks when the question calls for them |
+
+`scripts/check-port.mjs` lists it in `RETIRED`: its upstream file is shown
+in COVERAGE.md as retired, its folder must not come back, and installed
+text must not send anyone to it (the model rule). A user who types
+`/setup-pstack` reaches `cube-help`, which says it is retired and how to
+state a preference.
 
 ## Naming: option B, chosen by the user
 
@@ -367,7 +410,9 @@ still triggers it (its description says so). The upstream copy keeps
 coverage and diff checks treat `upstream/pstack/skills/poteto-mode/*` and
 `skills/cube-mode/*` as one file each. The tool package inside its scripts
 keeps its upstream internal name (`@cursor-skill/poteto-mode-tools`), since
-nothing routes by it. What the
+nothing routes by it. Later the user asked for the help skill to match:
+`poteto-help` is `cube-help`, mapped the same way, and `/poteto-help` still
+triggers it. What the
 resolver does (cubeyard/cube `packages/server/src/skills.ts`): sources are read
 default first, then the user's in order; for each id **the last source wins**;
 the union of ids after `skills.disabled` may hold at most **64**, or every
@@ -382,7 +427,7 @@ thread start is refused before a machine is allocated.
 
 Under B, with the old cursor/plugins source still configured, `cube-mode`
 itself is safe, but its old `poteto-mode` comes back beside it (hidden, Cursor
-text) and the 50 other ported skills it links to are the unported originals (measured: 62 skills, 50 overridden). So the old
+text) and the 50 other ported skills it links to are the unported originals (measured when B was chosen: 62 skills, 50 overridden; after cube-help and the retirement, 63 and 48, G1). So the old
 source must still go (G1), before or in the same save as the new default
 commit.
 
@@ -394,6 +439,6 @@ Settings, Skills (check for update, then use that commit). In order:
 1. Squash-merge, so the as-is copy commit never sits on main to be pinned.
 2. Remove (or disable) the cursor/plugins `df581122` source before, or in the
    same save as, the new default commit (G1; see Naming for why the order matters).
-3. Keep the user's own sources to at most 3 new ids (G8), or every thread start fails.
+3. Keep the user's own sources to at most 4 new ids (G8), or every thread start fails.
 4. Smoke-test with a real model: one OptChat turn and one thread with cube-mode (G9). New threads and OptChat's next turn then get it;
 OptChat's prompt changes once (cache rewrite), with three more listed skills.

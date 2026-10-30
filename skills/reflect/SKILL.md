@@ -16,14 +16,14 @@ In cube: a thread writes a tight digest of its own session from its context (the
 
 ## 2. Run three reviewers (threads OptChat starts)
 
-OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the role lines below (omit `model` where a line is missing or says `auto` or `inherit-parent`). 
+OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the user's preferences for the roles below, matched per the Models section of `../cube-mode/references/cube.md` (ask when none covers a role). 
 A thread: write the digest, push or attach it, and report a handoff with the three reviewer briefs and the synthesizer brief (`../cube-mode/references/cube.md`, Handoff); end your turn.
 
-| Lens | Role line | Default `model` | Prompt template |
+| Lens | Role | `model` | Prompt template |
 |---|---|---|---|
-| Judgment | `reflect judgment, divergent, synthesizer` | the host's preferred model | `references/judgment-reviewer.md` |
-| Tooling | `reflect tooling` | the host's preferred model | `references/tooling-reviewer.md` |
-| Divergent | `reflect judgment, divergent, synthesizer` | the host's preferred model | `references/divergent-reviewer.md` |
+| Judgment | `reflect judgment, divergent, synthesizer` | the user's preference (Models) | `references/judgment-reviewer.md` |
+| Tooling | `reflect tooling` | the user's preference (Models) | `references/tooling-reviewer.md` |
+| Divergent | `reflect judgment, divergent, synthesizer` | the user's preference (Models) | `references/divergent-reviewer.md` |
 
 Pass each template verbatim, substituting the transcript path or digest where marked. Reviewers return findings in their report (or lens file).
 

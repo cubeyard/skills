@@ -54,29 +54,55 @@ cube. A field with no row: drop it and say so.
 | `cloud_base_branch: <b>` | start from a pushed branch | the brief names the branch or commit to check out first |
 | `run_in_background: true` | don't hold the parent's turn | always so: OptChat's `spawn` returns at once and reports arrive later; OptChat never waits or polls (see Waiting) |
 | `file_attachments` | give the worker files | name repository paths, pull requests or artifact ids in the brief; a thread cannot read another thread's files |
-| `model` | the role's model | `model` on OptChat's `spawn` task, from the role lines (see Models); a thread cannot choose its own |
+| `model` | the role's model | `model` on OptChat's `spawn` task, from the user's words in the chat (see Models); a thread cannot choose its own |
 
 ## Models
 
 Only OptChat chooses a model, once per thread, with `spawn`'s `model`
-(`provider/id`, as `projects` lists them).
+(`provider/id`, as `projects` lists them). There is no setup and no file:
+a role's line is what the user said in the chat about the models that
+cover that spawn.
 
-- The role lines live in the user's OptChat instructions
-  (`<CUBED_STATE>/optchat/AGENTS.md`), written by the user from
-  [`setup-pstack`](../../setup-pstack/SKILL.md). OptChat reads them there
-  every turn.
-- A role with no line, or `inherit-parent` / `auto`: omit `model`, and the
-  thread runs on the host's preferred model.
+1. **Find it.** Read the current view for models, providers or families
+   the user asked for or ruled out: in general, for a role (`bug-fix`,
+   `arena runners`), or for this task. Zoom a line that mentions one when
+   its summary is too coarse to name the provider. The newest statement
+   that covers the spawn wins; one said for a task ends with that task.
+   When a newer general statement and an older one for this role leave
+   the user's intent unclear (did "use Y" replace "bug-fix on X"?), ask;
+   do not invent a precedence.
+2. **Match it exactly.** Find the model in `projects` by provider and id.
+   The same model name under another provider is another choice: "Opus
+   through Claude Code, not the API" is the Claude Code provider's Opus,
+   never the Anthropic API's.
+3. **Ask when it does not hold.** No statement covers the spawn, the
+   preferred model is not in `projects` or its start fails, or two
+   statements conflict: ask the user, with a proposal from `projects`,
+   before you spawn. The answer is the preference from then on; nothing
+   else stores it.
+4. **No silent fallback.** Never switch provider or family on your own,
+   and never read availability as consent. Raise or lower only among the
+   models the user's words cover. Never omit `model` to dodge the
+   question: the host default can be any model.
+5. **Panels.** A panel (arena runners, interrogate reviewers) keeps its
+   point, diverse families, only with families the user accepted. With
+   one, it is N independent tries on that model, and the report says so.
+   A seat that must be of another family (a cross-judge, a verifier) and
+   that no accepted family fills: skip it where the skill allows a skip
+   (arena's judge), and say so; otherwise ask.
+6. **Say it.** In the reply, name the model each spawn got and the
+   message it follows, so the user can correct it.
+
+- `/setup-pstack` is retired in cube: there is nothing to run or save.
 - A Cursor slug (`claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast`) is not a
-  cube model id. Never pass one. Use the role's line, or omit `model` and
-  say so. A panel (arena runners, interrogate reviewers) keeps its point,
-  diverse families, only when the user's lines give distinct models; with
-  one model the panel is N independent tries on that model, and the report
-  says so.
+  cube model id. Never pass one.
 - Reasoning level and fast or standard speed are part of the model id
   only where the provider offers them as models; otherwise they are not
   settable per thread. Say so rather than invent an id.
-- A thread runs on the model it was started with; it never switches.
+- A thread runs on the model it was started with; it never switches. A
+  thread's handoff names the role for each task and may quote the user's
+  model words for it verbatim; it never picks a `provider/id`. OptChat
+  resolves the model here.
 
 ## Delegation
 
