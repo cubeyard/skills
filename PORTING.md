@@ -98,6 +98,8 @@ made it (the port's notes are in git history before the removal);
 | OptChat reads it in one call | each SKILL.md listed to OptChat is at most 30,000 characters (`SKILL_PAGE`) |
 | the handoff rule (M2, M3) | every installed Markdown file is scanned for known substitute wordings (sequential roles, a self-review label, a labeled self pass, "review your own diff", OptChat reading a diff), from `scripts/handoff-patterns.mjs`; regression fixtures (`node --test scripts/check-port.test.mjs`, also in CI) prove each known bad wording is caught and the port's own wordings are not; each of the 43 installed files whose original hands work to another agent (`HANDS_OFF`, computed from the baseline with `DELEGATES`) must name a handoff or OptChat. **Limit:** these are keyword checks. They keep known regressions out but cannot prove the rule; a substitute worded another way passes, so the rule still needs a semantic review |
 | surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines are ignored |
+| named sections resolve | a reference such as ``(`references/cube.md`, Handoff)``, `(briefing-a-thread, Models)` or "the Models section of `<path>`" names a heading or bold label of the file it points at (`scripts/sections.mjs`); a section that moves takes its references along |
+| the role split | `briefing-a-thread` is listed to OptChat only and `cube-mode` to threads only; Models, Follow up, Independent review, Reading a report and Multi-thread workflows are headings in `briefing-a-thread` and nowhere else; it links every skill in `MULTI_THREAD`, and each of those says OptChat drives its threads; it keeps the preamble link, `memory_zoom` and the no-role-play rule, and `cube-mode-agent.md` keeps its role-only and handoff clauses (`REQUIRED`); the handoff patterns add one thread playing all of a workflow's roles, one thread given a whole workflow, and acting as the judge, and now scan cube's own skills too. Scratch-copy fixtures break each and see it fail. **Limit:** structure and keywords, not behavior: a real model may still ignore the brief |
 
 The checks that compared the tree with the baseline (the manifest, every
 upstream file mapped, `COVERAGE.md` current) went with the baseline.
@@ -116,13 +118,14 @@ entry points:
 | listed to | skills |
 | --- | --- |
 | threads | `cube-mode`, `cube-help`, `typescript-best-practices`, plus cube's `opening-a-pull-request`, `prove-it-works` |
-| OptChat | `cube-mode`, `cube-help`, plus cube's `briefing-a-thread` |
+| OptChat | `cube-help`, plus cube's `briefing-a-thread` (Role split) |
 | nobody (installed; reached by link) | the other 54 |
 
-Measured with cube's own resolver (below): the thread prompt's skill section
-is 2,376 bytes and OptChat's 1,923 bytes. `skill("how")` is refused (not
-listed) and `skill("cube-mode", "../how/SKILL.md")` returns it, as
-`references/cube.md` tells OptChat to do.
+Measured with cube's own resolver (below), before the role split: the
+thread prompt's skill section was 2,376 bytes and OptChat's 1,923 bytes.
+`skill("how")` is refused (not listed) and `skill("<listed>", "../how/SKILL.md")`
+returns it; since the role split OptChat reads through
+`skill("briefing-a-thread", "../how/SKILL.md")`, as `references/cube.md` says.
 
 ## The mapping rules
 
@@ -138,7 +141,7 @@ no view of other work. The abstraction the stack depends on is not "a chat" but
 execution with evidence lives*. So every step goes where its capability
 lives: planning, routing, judging across pieces and landing order go to
 OptChat; reading, running, editing and opening PRs go to a thread. Each
-playbook names its home (cube-mode's Playbooks table). The cost is a seam:
+playbook names its home (briefing-a-thread's Pick the role table; Role split). The cost is a seam:
 a playbook that spans both is split at the brief and the report.
 
 **M2. Delegation without nesting, and no stand-ins.** The original stack's subagents are
@@ -293,7 +296,7 @@ changed a few more.
 
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
-| cube-mode (renamed from upstream's router) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); its review-bot rubric later removed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/cube-mode-agent.md` |
+| cube-mode (renamed from upstream's router) | 43 | 30 (+3 new) | threads | M1-M13 | renamed (Naming); its review-bot rubric later removed (Naming); the router, now the thread's half only (Role split): Threads section, a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/cube-mode-agent.md` |
 | cube-help (renamed from upstream's help) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed ported skills), models said in the chat, a request for model setup answered as needing none, modes, troubleshooting rows, links to installed playbooks in place of the guide |
 | model setup skill | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its original path glob was automatic |
@@ -414,6 +417,53 @@ text cannot send anyone to it. A user who asks for a model setup command
 reaches `cube-help`, which says it is retired and how to
 state a preference.
 
+## Role split
+
+The original router is one skill for one lead. The port first kept it whole
+and gave OptChat and a thread each a half inside it (M1), with OptChat's
+rules also spread over `references/cube.md`. The user saw the cost: OptChat
+read cube-mode and its principles for work it never does, and a thread got
+none of what OptChat read. The user's decision: OptChat's whole part lives
+in `briefing-a-thread`, and cube-mode is the thread's working method. No new
+umbrella skill, no copied rule sets.
+
+| responsibility | before | after |
+| --- | --- | --- |
+| goal, decisions, history, model preference | cube-mode Threads, cube.md Models | briefing-a-thread: Before you spawn, Models |
+| role and playbook routing | cube-mode Playbooks table | briefing-a-thread: Pick the role |
+| multi-thread workflows (arena, architect, swarm, how, why, interrogate, reflect, ...) | each skill's own In cube text, cube.md "In OptChat" | briefing-a-thread: Multi-thread workflows (the one owner); each skill keeps its own stages and says OptChat drives them |
+| the brief: role, leaf skills, decisions, grants, evidence, the chat view | briefing-a-thread (four bullets), cube-mode Threads | briefing-a-thread: Write the brief, with `cube-mode-agent.md` naming the role |
+| follow-up, fresh threads, tells | cube-mode Threads, cube.md Same task | briefing-a-thread: Follow up; cube.md keeps the thread's side |
+| independent review, reading reports | cube-mode Threads, cube.md | briefing-a-thread: Independent review, Reading a report; cube.md keeps the author's review handoff |
+| execution, principles, author checks, reports, handoffs | cube-mode, cube.md | unchanged: cube-mode and cube.md |
+| shared name map, Authority, records, environment | cube.md | unchanged: cube.md, read by both |
+
+Why each choice:
+
+- **Surface, not prose.** `cube-mode` is now listed to threads only, so
+  OptChat cannot load it as its own playbook by habit; it reaches a
+  playbook file or a routed skill through `briefing-a-thread`'s links. That
+  enforces the split in metadata instead of another instruction
+  (**Encode Lessons in Structure**), and OptChat's listed skills drop from
+  three to two.
+- **One owner for orchestration.** A multi-thread workflow keeps its own
+  stages in its skill; `briefing-a-thread` holds the generic driver steps
+  once (spawn per role, gather, sequence, synthesize, follow up, review)
+  and lists every such workflow, so neither a worker nor a copy elsewhere
+  runs the whole thing.
+- **Reads do not transfer.** The brief names the role and the leaf skills a
+  thread must read; OptChat cites a principle only for its own decisions,
+  and reports a thread's use of one only from that thread's report (the
+  reflect synthesis that led here).
+- **The chat view.** cube gives every new thread a frozen, coarse view of
+  the chat and `memory_zoom`/`memory_date` (cubeyard/cube
+  `packages/server/src/thread-memory.ts`, `docs/optchat.md`, "The chat in
+  threads"), as context, never instructions. So a brief states every
+  binding decision itself and points to message ids and artifacts for the
+  rest, instead of copying history.
+- **No ceremony.** No mandatory principle reading for OptChat, and no
+  audit of every principle a report cites.
+
 ## Naming
 
 The user first asked to adapt *and rename* the original stack's router for cube, then
@@ -483,3 +533,4 @@ Settings, Skills (check for update, then use that commit). In order:
 3. Keep the user's own sources to at most 4 new ids (G8), or every thread start fails.
 4. Smoke-test with a real model: one OptChat turn and one thread with cube-mode (G9). New threads and OptChat's next turn then get it;
 OptChat's prompt changes once (cache rewrite), with three more listed skills.
+5. The role split changes OptChat's listed skills (cube-mode leaves its list) and every new thread's cube-mode text; smoke-test one OptChat turn that starts a cube-mode thread and one multi-thread workflow (G9).

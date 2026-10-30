@@ -21,6 +21,9 @@ export const SUBSTITUTES = [
   /you own your diff/i,
   /(?<!\b(?:not|never) )\b(run|play|do)s? (the )?(roles|lenses|explorers|investigators|adversar\w+|candidates|workers|slices)\b[^.]{0,30}\b(yourself|itself)\b/i,
   /OptChat(?![^.]*\bcannot\b)[^.]{0,60}\b(reads?|opens?|inspects?)\b[^.]{0,30}\bdiffs?\b/i,
+  /(?<!\b(?:not|never) )\b(run|play|write|do)s? (all|each|every one|both) (of )?(the )?(\w+ ){0,2}(roles|lenses|explorers|investigators|adversar\w+|candidates|workers|slices|reviewers|runners)\b(?![^.]*\bhandoff\b)/i,
+  /(?<!\b(?:not|never) )\b(give|hand)s? one thread (a |the )?(whole|entire)\b/i,
+  /(?<!\b(?:not|never) )\bacts? as (the |its own )?(judge|verifier|reviewer|synthesizer|explainer|adversary)\b/i,
 ];
 export const DELEGATES = /subagent|\bspawn|fan (them )?out|comment-sicko|in parallel|\b(Task) (call|tool|prompt)|`Task`/i;
 export const substitutesIn = (text) => SUBSTITUTES.filter((re) => re.test(text));

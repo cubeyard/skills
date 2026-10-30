@@ -12,6 +12,7 @@ import process from "node:process";
 import { substitutesIn } from "./handoff-patterns.mjs";
 import { retiredConfigIn } from "./model-patterns.mjs";
 import { brandingIn } from "./branding-patterns.mjs";
+import { normalizeSection, resolveSectionTarget, sectionRefsIn, sectionsOf } from "./sections.mjs";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const skillsDir = path.join(root, "skills");
@@ -159,7 +160,7 @@ if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${byt
 // every one whose original hands work to another agent (HANDS_OFF)
 // must say where it goes. Keyword checks cannot prove the rule; they keep known regressions out.
 for (const f of skillFiles) {
-  if (!f.rel.endsWith(".md") || CUBE_OWN.has(f.rel.split("/")[0])) continue;
+  if (!f.rel.endsWith(".md")) continue;
   for (const re of substitutesIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: offers a substitute for another agent or a diff OptChat cannot read (${re}); hand off instead (cube.md, Handoff)`);
 }
 // 5. The model rule (references/cube.md, Models): no installed file points
@@ -204,8 +205,59 @@ for (const f of skillFiles) {
   }
 }
 
+// 8. Named sections: a reference such as "(`references/cube.md`, Handoff)",
+// "(briefing-a-thread, Models)" or "the Models section of `<path>`" must
+// name a heading or a bold paragraph label of the file it points at, so a
+// section that moves takes every reference along (sections.mjs).
+let sectionRefs = 0;
+for (const f of skillFiles) {
+  if (!f.rel.endsWith(".md")) continue;
+  const full = path.join(skillsDir, f.rel);
+  for (const ref of sectionRefsIn(fs.readFileSync(full, "utf8"))) {
+    const target = resolveSectionTarget(ref.target, full, skillsDir, ids);
+    if (!target) continue;
+    sectionRefs++;
+    if (!fs.existsSync(target)) fail(`skills/${f.rel}: refers to section "${ref.section}" of ${ref.target}, which does not resolve`);
+    else if (!sectionsOf(fs.readFileSync(target, "utf8")).has(normalizeSection(ref.section))) fail(`skills/${f.rel}: refers to section "${ref.section}" of ${path.relative(skillsDir, target)}, which has no such heading`);
+  }
+}
+
+// 9. The role split (briefing-a-thread, cube-mode's Threads): OptChat's
+// skill owns orchestration and lists every multi-thread workflow; cube-mode
+// is listed to threads only; the sections OptChat owns exist there once and
+// nowhere else; and each multi-thread workflow says that OptChat drives it.
+const OPTCHAT_SKILL = "briefing-a-thread";
+const OPTCHAT_SECTIONS = ["Models", "Follow up", "Independent review", "Reading a report", "Multi-thread workflows"];
+const MULTI_THREAD = ["arena", "architect", "swarm", "how", "why", "interrogate", "reflect", "no-comments", "figure-it-out", "recall", "automate-me"];
+const surfaces = Object.fromEntries(ids.filter((id) => fs.existsSync(path.join(skillsDir, id, "SKILL.md"))).map((id) => [id, surfaceOf(fs.readFileSync(path.join(skillsDir, id, "SKILL.md"), "utf8"))]));
+if (surfaces[OPTCHAT_SKILL] !== "optchat") fail(`skills/${OPTCHAT_SKILL}: surface must be optchat; it is OptChat's whole part`);
+if (surfaces["cube-mode"] !== "thread") fail("skills/cube-mode: surface must be thread; OptChat routes through briefing-a-thread");
+const owner = path.join(skillsDir, OPTCHAT_SKILL, "SKILL.md");
+const ownerText = fs.existsSync(owner) ? fs.readFileSync(owner, "utf8") : "";
+for (const section of OPTCHAT_SECTIONS) {
+  const homes = skillFiles.filter((f) => f.rel.endsWith(".md") && sectionsOf(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"), { headingsOnly: true }).has(normalizeSection(section))).map((f) => f.rel);
+  if (homes.length !== 1 || homes[0] !== `${OPTCHAT_SKILL}/SKILL.md`) fail(`section "${section}" must be a heading in ${OPTCHAT_SKILL}/SKILL.md only; found in ${homes.join(", ") || "none"}`);
+}
+// The clauses each side's brief depends on: OptChat's brief opens with the
+// thread preamble and points into the chat view instead of copying it; the
+// preamble keeps a thread to its role.
+const REQUIRED = {
+  [`${OPTCHAT_SKILL}/SKILL.md`]: [/\]\(\.\.\/cube-mode\/agents\/cube-mode-agent\.md\)/, /memory_zoom/, /never let one thread play several of its roles/],
+  "cube-mode/agents/cube-mode-agent.md": [/~\/\.cube\/skills\/cube-mode\/SKILL\.md/, /start no other agent/, /report a handoff/, /in the role named below/],
+};
+for (const [rel, patterns] of Object.entries(REQUIRED)) {
+  const file = path.join(skillsDir, rel);
+  const text = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  for (const re of patterns) if (!re.test(text)) fail(`skills/${rel}: lost a clause the role split needs (${re})`);
+}
+for (const id of MULTI_THREAD) {
+  if (!ownerText.includes(`](../${id}/SKILL.md)`)) fail(`skills/${OPTCHAT_SKILL}: the multi-thread workflow ${id} is not listed (Multi-thread workflows)`);
+  const file = path.join(skillsDir, id, "SKILL.md");
+  if (fs.existsSync(file) && !/threads? OptChat (starts|spawns)|OptChat (runs|spawns|starts|drives)|In OptChat|OptChat: [^\n]*\bspawn/.test(fs.readFileSync(file, "utf8"))) fail(`skills/${id}: a multi-thread workflow must say that OptChat drives its threads`);
+}
+
 console.error(`skills: ${ids.length} (${files} files, ${bytes} bytes); listed to threads: ${listed.thread.join(", ") || "none"}; to OptChat: ${listed.optchat.join(", ") || "none"}`);
-console.error(`links: ${links} relative links checked`);
+console.error(`links: ${links} relative links checked, ${sectionRefs} section references`);
 console.error(`branding: ${repoFiles.length} paths and files checked`);
 if (failures.length) { console.error(`\n${failures.length} failures:`); for (const f of failures) console.error(`  ${f}`); process.exit(1); }
 console.error("ok");

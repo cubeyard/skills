@@ -70,7 +70,7 @@ Author the skill with cube-mode's **Authoring a skill** playbook. Placement:
 - Handle: the user's first name or chosen identifier.
 - Frontmatter `description`: trigger on their name + `/<handle>-mode` + "work in their style", not on generic keywords like "write code" or "review PR".
 - Frontmatter formatting: keep `description` as one YAML scalar. Quote it or use `description: >-` with indented continuation lines when punctuation or wrapping requires it.
-- Frontmatter: in cube, leave `disable-model-invocation` out (a hidden skill is listed to nobody), and keep the description narrow (the user's name, `/<handle>-mode`, "work in their style") so it loads only on request. Add `metadata.cube.surface: both` so OptChat can work in it and name it in briefs.
+- Frontmatter: in cube, leave `disable-model-invocation` out (a hidden skill is listed to nobody), and keep the description narrow (the user's name, `/<handle>-mode`, "work in their style") so it loads only on request. Add `metadata.cube.surface: both` so OptChat can read it and name it in briefs.
 
 ### 5. Iterate on prose
 

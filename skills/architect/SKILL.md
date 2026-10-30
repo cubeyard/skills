@@ -28,7 +28,7 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt.
 
-Take the runners from the user's preference for `architect runners` (the Models section of `../cube-mode/references/cube.md`), in place of `arena runners`. If none names them, follow the **arena** skill's Phase A. The runners are threads OptChat starts: a thread at this phase reports the arena handoff per arena's **In cube** section, and implements the synthesized sketch (Phase D) when it is told.
+Take the runners from the user's preference for `architect runners` (the Models section of `../briefing-a-thread/SKILL.md`), in place of `arena runners`. If none names them, follow the **arena** skill's Phase A. The runners are threads OptChat starts: a thread at this phase reports the arena handoff per arena's **In cube** section, and implements the synthesized sketch (Phase D) when it is told.
 
 Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. This is the **exhaust-the-design-space** principle skill made concrete. Whole-shape alternatives, not point fixes inside one shape.
 
