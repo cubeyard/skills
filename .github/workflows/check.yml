@@ -1,0 +1,20 @@
+name: check
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  port:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The pstack port: baseline fidelity, a note at every change, cube's
+      # skill rules, links and limits (PORTING.md).
+      - run: node scripts/check-port.mjs
+      # Fixtures for the handoff patterns the check uses.
+      - run: node --test scripts/check-port.test.mjs

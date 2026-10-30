@@ -9,22 +9,28 @@ cube pins this repository to an exact commit; a cube release moves the pin.
 A thread's prompt lists each skill's name and description only. The agent
 reads a `SKILL.md`, and the files it links, when a task needs them.
 
-## Working in cube
+## pstack
 
-Two skills carry cube's way of working, adapted from
-[poteto-mode](https://github.com/cursor/plugins/tree/main/pstack/skills/poteto-mode) for cube's split between
-OptChat and threads:
+Most skills here are [pstack](https://github.com/cursor/plugins/tree/main/pstack),
+poteto's agent workflow stack, ported whole from Cursor to cube: all 58 skills
+with their references and scripts. Start from `cube-mode` (pstack's `poteto-mode`, renamed for cube; listed to OptChat
+and threads) or `poteto-help`; the other pstack skills are installed but
+hidden, and cube-mode routes to them. OptChat takes pstack's lead role
+(routing, briefing, judging, landing order) and threads do its execution;
+`skills/cube-mode/references/cube.md` maps every Cursor name, and no skill
+asks a thread to start another agent.
 
-- `directing-the-work` (OptChat): route a request to bounded thread
-  tasks, read reports as evidence, have changes reviewed independently and
-  choose the next step or the user's decision.
-- `working-the-task` (threads): work the one assigned task evidence first,
-  inside its scope and permissions, report facts, hypotheses, unknowns and
-  gaps, and end the turn. Its `playbooks/` hold one short procedure per
-  task kind.
+`upstream/pstack/` is the unmodified original, which cube never installs.
+[PORTING.md](PORTING.md) explains the method, the mapping rules and the gaps;
+[COVERAGE.md](COVERAGE.md) lists every upstream file and where it went; every
+change in `skills/` carries a `cube-adapt` note beside it. Check the port with:
 
-Neither starts subagents or keeps a standing worker: OptChat starts
-threads, and each thread hands back to OptChat.
+```sh
+node scripts/check-port.mjs
+```
+
+cube's own skills are `briefing-a-thread` (OptChat), `opening-a-pull-request`
+and `prove-it-works` (threads).
 
 ## Surface
 
@@ -51,6 +57,8 @@ metadata:
 - The folder name is the skill name: lowercase letters, digits and inner
   hyphens, at most 64 characters. A description is at most 1024 characters.
 - Plain files only: no symlinks or submodules.
+- A ported pstack skill keeps upstream's text except where a `cube-adapt`
+  note explains a change; `scripts/check-port.mjs` enforces it.
 - Link other skills as `../<name>/SKILL.md`. cube installs every skill as
   `~/.cube/skills/<name>/`, so these links keep working, and a user's
   override of `<name>` is what the link reaches.
