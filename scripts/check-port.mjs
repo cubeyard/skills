@@ -242,7 +242,7 @@ for (const section of OPTCHAT_SECTIONS) {
 // thread preamble and points into the chat view instead of copying it; the
 // preamble keeps a thread to its role.
 const REQUIRED = {
-  [`${OPTCHAT_SKILL}/SKILL.md`]: [/\]\(\.\.\/cube-mode\/agents\/cube-mode-agent\.md\)/, /memory_zoom/, /never let one thread play several of its roles/],
+  [`${OPTCHAT_SKILL}/SKILL.md`]: [/\]\(\.\.\/cube-mode\/agents\/cube-mode-agent\.md\)/, /memory_zoom/, /never let one thread play several of its roles/, /say which model failed/, /failed or spent its tells, in which case ask the user/, /\*\*Preamble\.\*\*[^\n]*\n- \*\*Goal\.\*\*/],
   "cube-mode/agents/cube-mode-agent.md": [/~\/\.cube\/skills\/cube-mode\/SKILL\.md/, /start no other agent/, /report a handoff/, /in the role named below/],
 };
 for (const [rel, patterns] of Object.entries(REQUIRED)) {

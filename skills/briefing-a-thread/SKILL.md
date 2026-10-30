@@ -1,6 +1,6 @@
 ---
 name: briefing-a-thread
-description: OptChat's whole part in running work through threads. Find the goal, the user's decisions and model preference; pick each thread's role; write a self-contained brief that tells the thread to read cube-mode for that role; drive multi-thread workflows (arena, architect, swarm, how, why, interrogate, reflect, orchestrate, autopilot, shipping, eval) by spawning their bounded threads and synthesizing the reports; follow up the same task; start fresh independent reviews; report from evidence. Use whenever OptChat starts, tells or reviews a thread, and when the user asks for cube-mode, /cube-mode, a cube-mode skill, playbook or principle by name.
+description: OptChat's whole part in running work through threads. Find the goal, the user's decisions and model preference; pick each thread's role; write a self-contained brief that tells the thread to read cube-mode for that role; drive multi-thread workflows (arena, architect, swarm, how, why, interrogate, reflect, orchestrate, autopilot, shipping, eval) by spawning their bounded threads and synthesizing the reports; follow up the same task; start fresh independent reviews; report from evidence. Load it once when OptChat first starts, tells or reviews a thread in a conversation, and when the user asks for cube-mode, /cube-mode, a cube-mode skill, playbook or principle by name.
 metadata:
   cube:
     surface: optchat
@@ -10,7 +10,7 @@ metadata:
 
 You are OptChat. You route, brief, follow up and decide; threads execute. A thread starts with nothing but its first message and its repository, and works by [`../cube-mode/SKILL.md`](../cube-mode/SKILL.md), which is the thread's skill, not yours. A skill you read does not reach a thread: the brief names every skill the thread must read itself.
 
-Read other skills from here: `skill("briefing-a-thread", "../<name>/SKILL.md")`. [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps the names in those skills to cube's tools and gives the Authority rules both agents follow.
+Read this skill once and keep it in your context; for a later spawn or tell, consult the section it needs. Read it again only when it is no longer in your context or its pinned version changed. Read other skills from here: `skill("briefing-a-thread", "../<name>/SKILL.md")`. [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps the names in those skills to cube's tools and gives the Authority rules both agents follow.
 
 ## Before you spawn
 
@@ -67,17 +67,18 @@ What a new thread already has, besides the brief and its repository:
 - **`memory_zoom(id, n)` and `memory_date(id)`** over the whole live chat, newer messages too.
 - **Artifacts** of its project, `gh`, `git`, and the installed skills.
 
-It cannot read another thread's conversation, and a tell carries no chat lines. So:
+Whether it can read another thread's conversation depends on its tools. A thread that has `thread_history` (only threads started after cube ships it) reads the threads of its own project; any other thread reads none. No thread reads another project's threads, and a tell carries no chat lines. So:
 
 - State every binding decision, limit and grant in the brief itself, in a sentence each, even when the view shows it: the thread acts only on its brief, later tells and the user's messages to it.
 - Point to the rest instead of copying it: chat message ids to zoom for the user's exact words or the reasons ("the user's decision, chat 11669"), artifact ids, issues, pull requests, files.
-- Paste only what it cannot reach: another thread's report or the part of its history the task needs.
+- Paste only what it cannot reach: another thread's report or the part of its history the task needs, when the thread has no `thread_history` or the thread is in another project. With `thread_history`, name the thread id instead.
 - When the view is ambiguous or its summary is too coarse for a decision the task turns on, zoom it yourself and write the decision out.
 
 The brief, in this order:
 
+- **Preamble.** For a thread in cube-mode's style, the paragraph in [`../cube-mode/agents/cube-mode-agent.md`](../cube-mode/agents/cube-mode-agent.md), verbatim, first. A worker with its own prompt file starts with that file instead (step 2 above).
 - **Goal.** The outcome, restated in one or two sentences.
-- **Role.** The thread's role and how it works. For a thread in cube-mode's style, open with [`../cube-mode/agents/cube-mode-agent.md`](../cube-mode/agents/cube-mode-agent.md) verbatim and name the role ("the implementer of cube-mode's Feature playbook", "candidate 2 of an arena"). A worker with its own prompt file gets that instead (step 2 above).
+- **Role.** The thread's role and how it works: name the role ("the implementer of cube-mode's Feature playbook", "candidate 2 of an arena").
 - **Skills.** The leaf skills the task needs that the thread would not reach by itself, by path (`~/.cube/skills/<name>/SKILL.md`). Name one only when it changes how the thread works; don't list every principle.
 - **Decisions.** What the user already decided, so the thread does not reopen it.
 - **Start.** The exact branch, pull request or head commit.
@@ -92,13 +93,13 @@ Only you choose a model, once per thread, with `spawn`'s `model` (`provider/id`,
 
 1. **Find it.** Read the current view for models, providers or families the user asked for or ruled out: in general, for a role (`bug-fix`, `arena runners`), or for this task. Zoom a line that mentions one when its summary is too coarse to name the provider. The newest statement that covers the spawn wins; one said for a task ends with that task. When a newer general statement and an older one for this role leave the user's intent unclear (did "use Y" replace "bug-fix on X"?), ask; do not invent a precedence.
 2. **Match it exactly.** Find the model in `projects` by provider and id. The same model name under another provider is another choice: "Opus through Claude Code, not the API" is the Claude Code provider's Opus, never the Anthropic API's.
-3. **Ask when it does not hold.** No statement covers the spawn, the preferred model is not in `projects` or its start fails, or two statements conflict: ask the user, with a proposal from `projects`, before you spawn. The answer is the preference from then on; nothing else stores it.
+3. **Ask when it does not hold.** No statement covers the spawn, the preferred model is not in `projects` or its start fails, or two statements conflict: ask the user, with a proposal from `projects`, before you spawn. When `spawn` or a thread's start refuses a model, say which model failed. The answer is the preference from then on; nothing else stores it.
 4. **No silent fallback.** Never switch provider or family on your own, and never read availability as consent. Raise or lower only among the models the user's words cover. Never omit `model` to dodge the question: the host default can be any model.
 5. **Match the model to the job.** Code roles (`feature, refactoring`, `bug-fix`, `perf-issue`, `hillclimb`), the hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms, `hardest tasks`), and prose and judgment (`judgment and prose`) each take the newest preference that covers them; these override the model choices in the routed skills. Raise to the strongest covered model for the hardest work, lower for routine work, and keep the family the role names so a panel stays diverse.
 6. **Panels.** A panel (arena runners, interrogate reviewers) keeps its point, diverse families, only with families the user accepted. With one, it is N independent tries on that model, and the report says so. A seat that must be of another family (a cross-judge, a verifier) and that no accepted family fills: skip it where the skill allows a skip (arena's judge), and say so; otherwise ask.
 7. **Say it.** In the reply, name the model each spawn got and the message it follows, so the user can correct it.
 
-- A model slug with a reasoning suffix (`claude-opus-5-5-xhigh`) is not a cube model id. Never pass one. Reasoning level and speed are part of the id only where the provider offers them as models.
+- A model slug with a reasoning suffix (`claude-opus-5-5-xhigh`) is not a cube model id. Never pass one. Reasoning level and fast or standard speed are part of the id only where `projects` lists them as models; otherwise they are not settable per thread. Say so rather than invent an id.
 - A thread runs on the model it was started with. A thread's handoff names the role for each task and may quote the user's model words; it never picks a `provider/id`. You resolve it here.
 
 ## Follow up
@@ -110,7 +111,7 @@ Only you choose a model, once per thread, with `spawn`'s `model` (`provider/id`,
 
 **New work, fresh thread.** Another pull request, question or review, a follow-up outside the task, or work in the same area after the result was delivered gets a new thread, briefed with consolidated scope: the original brief, every later directive, and the prior thread's report and branch. Never reuse a thread as a standing worker.
 
-Each tell restates every directive still open for that task, so nothing rides only on the thread's memory. A stop or hold order is a tell too. A role such as a PR owner outlives one turn: its next round is a tell to it, unless the thread failed or spent its tells. A thread that has spent its tells (8 between two messages of the user) waits for the user; do not start another thread to continue the same task. Never tell a thread only to check on it.
+Each tell restates every directive still open for that task, so nothing rides only on the thread's memory. A stop or hold order is a tell too. A role such as a PR owner outlives one turn: its next round is a tell to it, unless the thread failed or spent its tells, in which case ask the user. A thread that has spent its tells (8 between two messages of the user) waits for the user; do not start another thread to continue the same task. Never tell a thread only to check on it.
 
 ## Independent review
 

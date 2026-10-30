@@ -62,18 +62,18 @@ The first port put a `cube-adapt` note (Intent, Cube, Kept, Now, Cost, and
 the rules it applied) above every change. The user reversed that on
 2026-10-30: installed skills must read as operational instructions, not a
 narrated port. The notes are removed, and `skills/` cites no rule by number;
-cube.md names its rules by section instead:
+cube.md and, since the role split, `briefing-a-thread` name the rules by section instead:
 
-| rule | section of `references/cube.md` |
+| rule | section |
 | --- | --- |
 | M1 | Who you are |
 | M2 | Delegation, Handoff |
-| M3 | Delegation, Independent review (and the review handoff) |
-| M4 | Models |
+| M3 | cube.md: Delegation, Review by another thread (and the review handoff); briefing-a-thread: Independent review |
+| M4 | briefing-a-thread: Models |
 | M5 | (discovery; no section, the Tools table's skill row) |
 | M6 | Questions |
 | M7 | Waiting |
-| M8 | Same task, same thread |
+| M8 | cube.md: Same task, same thread (the thread's side); briefing-a-thread: Follow up |
 | M9 | Authority |
 | M10 | Records and memory |
 | M11 | Environment |
@@ -130,7 +130,8 @@ returns it; since the role split OptChat reads through
 ## The mapping rules
 
 `skills/cube-mode/references/cube.md` states each rule operationally, as
-tables an agent applies. This is the reasoning behind each.
+tables an agent applies; OptChat's rules (M3's review start, M4, M8's
+routing) are in `skills/briefing-a-thread/SKILL.md` since the role split. This is the reasoning behind each.
 
 **M1. One lead, two agents.** The original stack's lead is a chat that both judges and
 acts: it plans, reads code, runs repros and spawns delegates. Cube divides
@@ -208,7 +209,7 @@ API when they chose Opus through Claude Code. The original host's model slugs ar
 A panel is diverse only with families the user accepted, and a skill says so
 when it is not. Lost: per-call effort and mid-task model changes; a fresh
 chat asks once before its first spawn. This rule holds where OptChat reads
-cube-mode; a spawn outside it still follows cube's own default.
+briefing-a-thread; a spawn outside it still follows cube's own default.
 
 **M5. Discovery is explicit.** The original stack relies on its host's slash menu,
 `disable-model-invocation`, custom modes, `alwaysApply` rules and path
@@ -339,12 +340,12 @@ are removed; cube-mode replaces them, and their reviewed rules moved here:
 
 | earlier rule | now |
 | --- | --- |
-| route by task kind, the deliverable and what the thread may change | cube-mode's playbook list and home table |
+| route by task kind, the deliverable and what the thread may change | briefing-a-thread, Pick the role; cube-mode's playbook list |
 | permissions reach exactly as far as the user said; standing grants; reports never grant | cube.md, Authority (M9); cube-mode Autonomy |
 | attack the premise; settle facts by experiment | cube-mode Non-negotiables and principles, unchanged |
-| brief: kind, grants, evidence, test bar, stop | cube-mode Threads (OptChat) and cube.md Delegation |
-| read a report as evidence; check the pins | cube.md, Reading a report |
-| review by a thread that wrote nothing; findings to the author; landing in the author thread | cube.md M3, M8; Shipping step 4 |
+| brief: kind, grants, evidence, test bar, stop | briefing-a-thread, Write the brief; cube.md Delegation |
+| read a report as evidence; check the pins | briefing-a-thread, Reading a report |
+| review by a thread that wrote nothing; findings to the author; landing in the author thread | briefing-a-thread, Independent review and Follow up; cube.md, Review by another thread; Shipping step 4 |
 | precedence: system, task (newest first, within its authority), repository, skill | cube.md, Authority |
 | wait in the foreground; promise no later work | cube.md M7 and the report format |
 | thread report: outcome, pins, evidence, facts/hypotheses/unknowns, gaps, decisions | cube.md, the report |

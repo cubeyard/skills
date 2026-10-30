@@ -198,7 +198,7 @@ agent's store. Cube keeps these records:
 | record | who reads it | how |
 | --- | --- | --- |
 | the user's chat with OptChat | OptChat; any thread, read only | OptChat: the view, `zoom(id, n)`, `date(id)`. A thread: its cube memory tools (`memory_zoom`, `memory_date`), when it has them |
-| a thread's conversation | OptChat | `threads`, `history(id)`, `archived_threads(query)` |
+| a thread's conversation | OptChat; a thread that has `thread_history`, for its own project only | OptChat: `threads`, `history(id)`, `archived_threads(query)`. A thread: `thread_history` when its tools list it (only threads started after cube ships it); otherwise only what OptChat puts in its brief or tells |
 | a thread's own work so far | that thread | its context; nothing else |
 | documents the user reads and comments on | OptChat and the project's threads | artifacts (`artifact_write`, `artifact_read`, `artifact_edit`) |
 | code, trails, decision logs | anyone | git: a pushed branch, a pull request, a committed file |
@@ -240,7 +240,7 @@ the skipped step made, leave a placeholder and name it.
 | `deslop` (a separate plugin) | no such skill here: run the **unslop** skill over prose and the **no-comments** skill over code comments, and say `/deslop` was skipped |
 | `control-ui`, `control-cli` (a separate plugin) | the project's own verification skill (`.agents/skills/verify-*`, see **create-verification-skill**); else Playwright's Chromium in the thread (`pnpm test:browser` style), or driving the CLI in the shell |
 | `create-skill` (a host built-in) | the **Authoring a skill** playbook plus cube's rules in cubeyard/skills' README (frontmatter, surface, links) |
-| Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat re-reads briefing-a-thread when a turn's request needs it |
+| Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat keeps briefing-a-thread in its context and reads it again only when it is gone or its version changed |
 | `/loop` | see Waiting |
 | Plan Mode | the Multi-phase plan playbook, written as an artifact |
 | `/visualize`, the image-generation tool, canvases | Mermaid diagrams and tables in an artifact or a reply; no generated images |
