@@ -13,11 +13,11 @@ reads a `SKILL.md`, and the files it links, when a task needs them.
 
 Most skills here are [pstack](https://github.com/cursor/plugins/tree/main/pstack),
 poteto's agent workflow stack, ported whole from Cursor to cube: all 58 skills
-with their references and scripts. Start from `poteto-mode` (listed to OptChat
+with their references and scripts. Start from `cube-mode` (pstack's `poteto-mode`, renamed for cube; listed to OptChat
 and threads) or `poteto-help`; the other pstack skills are installed but
-hidden, and poteto-mode routes to them. OptChat takes pstack's lead role
+hidden, and cube-mode routes to them. OptChat takes pstack's lead role
 (routing, briefing, judging, landing order) and threads do its execution;
-`skills/poteto-mode/references/cube.md` maps every Cursor name, and no skill
+`skills/cube-mode/references/cube.md` maps every Cursor name, and no skill
 asks a thread to start another agent.
 
 `upstream/pstack/` is the unmodified original, which cube never installs.

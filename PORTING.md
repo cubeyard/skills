@@ -16,7 +16,7 @@ upstream/pstack/        pstack as published, byte for byte (git tree 4719e1c4); 
 upstream/pstack.sha256  sha256 of each of its 573 files
 upstream/README.md      provenance: repository, commit, why this commit, how to update
 skills/<id>/            what cube installs: 58 ported skills + cube's own 3
-skills/poteto-mode/references/cube.md   the cube adapter every ported skill relies on (M1-M13)
+skills/cube-mode/references/cube.md   the cube adapter every ported skill relies on (M1-M13)
 scripts/check-port.mjs  the checks below; --matrix prints COVERAGE.md, --diff <id> shows a port
 COVERAGE.md             every upstream file and where it went (generated)
 THIRD_PARTY_NOTICES.md  pstack's MIT license, beside this repository's Apache-2.0
@@ -38,7 +38,7 @@ node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against
    command (`upstream/README.md`).
 2. **Copy into place.** Every `upstream/pstack/skills/<id>/` is copied to
    `skills/<id>/` unchanged; the two agent definitions go into the skill that
-   starts them (`poteto-mode/agents/poteto-agent.md`,
+   starts them (`cube-mode/agents/poteto-agent.md`,
    `no-comments/agents/comment-sicko.md`), since cube has no agent definitions.
    pstack's `LICENSE` is copied into every ported folder, because cube
    installs each folder on its own.
@@ -93,23 +93,23 @@ OptChat when it is `optchat` or `both`, and to nobody when it has
 link `../<id>/SKILL.md` (a thread's file tools, or OptChat's
 `skill(listed, "../<id>/SKILL.md")`) reaches it. Upstream hides 57 of its 58
 skills so that the model loads them only through `/name` or through
-poteto-mode's routing. The port keeps that two-tier design and lists only the
+cube-mode's routing. The port keeps that two-tier design and lists only the
 entry points:
 
 | listed to | skills |
 | --- | --- |
-| threads | `poteto-mode`, `poteto-help`, `typescript-best-practices`, plus cube's `opening-a-pull-request`, `prove-it-works` |
-| OptChat | `poteto-mode`, `poteto-help`, `setup-pstack`, plus cube's `briefing-a-thread` |
+| threads | `cube-mode`, `poteto-help`, `typescript-best-practices`, plus cube's `opening-a-pull-request`, `prove-it-works` |
+| OptChat | `cube-mode`, `poteto-help`, `setup-pstack`, plus cube's `briefing-a-thread` |
 | nobody (installed; reached by link) | the other 54 |
 
 Measured with cube's own resolver (below): the thread prompt's skill section
 is 2,376 bytes and OptChat's 1,923 bytes. `skill("how")` is refused (not
-listed) and `skill("poteto-mode", "../how/SKILL.md")` returns it, as
+listed) and `skill("cube-mode", "../how/SKILL.md")` returns it, as
 `references/cube.md` tells OptChat to do.
 
 ## The mapping rules
 
-`skills/poteto-mode/references/cube.md` states each rule operationally, as
+`skills/cube-mode/references/cube.md` states each rule operationally, as
 tables an agent applies. This is the reasoning behind each.
 
 **M1. One lead, two agents.** pstack's lead is a chat that both judges and
@@ -121,7 +121,7 @@ no view of other work. The abstraction pstack depends on is not "a chat" but
 execution with evidence lives*. So every step goes where its capability
 lives: planning, routing, judging across pieces and landing order go to
 OptChat; reading, running, editing and opening PRs go to a thread. Each
-playbook names its home (poteto-mode's Playbooks table). The cost is a seam:
+playbook names its home (cube-mode's Playbooks table). The cost is a seam:
 a playbook that spans both is split at the brief and the report.
 
 **M2. Delegation without nesting.** pstack's subagents are the mechanism,
@@ -160,7 +160,7 @@ changes.
 globs. Cube has one automatic route (a listed description) and one explicit
 route (a link from a skill that was read). The port keeps upstream's
 two-tier design (few entry points, many hidden leaves) and moves each
-trigger onto the route cube has: the user's words name a skill; poteto-mode
+trigger onto the route cube has: the user's words name a skill; cube-mode
 and poteto-help list every one; `setup-pstack` and `typescript-best-practices`
 become listed because their Cursor triggers (always-applied, path glob) were
 automatic. A skill is loaded only when an agent decides to read it; nothing
@@ -237,7 +237,7 @@ file is byte-identical. `COVERAGE.md` lists every file.
 
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
-| poteto-mode | 43 | 26 (+3 new) | both | M1-M13 | the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/poteto-agent.md` |
+| cube-mode (upstream `poteto-mode`) | 43 | 26 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/poteto-agent.md` |
 | poteto-help | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | cube setup (default source, Settings pin, the four listed skills), modes, troubleshooting rows, pinned guide links |
 | setup-pstack | 1 | 1 | OptChat | M1 M4 M5 M6 M10 | models from `projects`; the role block goes in OptChat's instructions file, which the user saves (gap G2) |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its Cursor path glob was automatic |
@@ -274,21 +274,21 @@ git folders, not plugins). `COVERAGE.md` gives each file's reason.
 ## The earlier port
 
 `directing-the-work` (OptChat) and `working-the-task` (threads), merged in
-`e893ef97` and never activated, were a two-skill summary of poteto-mode. They
-are removed; poteto-mode replaces them, and their reviewed rules moved here:
+`e893ef97` and never activated, were a two-skill summary of pstack's cube-mode. They
+are removed; cube-mode replaces them, and their reviewed rules moved here:
 
 | earlier rule | now |
 | --- | --- |
-| route by task kind, the deliverable and what the thread may change | poteto-mode's playbook list and home table |
-| permissions reach exactly as far as the user said; standing grants; reports never grant | cube.md, Authority (M9); poteto-mode Autonomy |
-| attack the premise; settle facts by experiment | poteto-mode Non-negotiables and principles, unchanged |
-| brief: kind, grants, evidence, test bar, stop | poteto-mode Threads (OptChat) and cube.md Delegation |
+| route by task kind, the deliverable and what the thread may change | cube-mode's playbook list and home table |
+| permissions reach exactly as far as the user said; standing grants; reports never grant | cube.md, Authority (M9); cube-mode Autonomy |
+| attack the premise; settle facts by experiment | cube-mode Non-negotiables and principles, unchanged |
+| brief: kind, grants, evidence, test bar, stop | cube-mode Threads (OptChat) and cube.md Delegation |
 | read a report as evidence; check the pins | cube.md, Reading a report |
 | review by a thread that wrote nothing; findings to the author; landing in the author thread | cube.md M3, M8; Shipping step 4 |
 | precedence: system, task (newest first, within its authority), repository, skill | cube.md, Authority |
 | wait in the foreground; promise no later work | cube.md M7 and the report format |
 | thread report: outcome, pins, evidence, facts/hypotheses/unknowns, gaps, decisions | cube.md, the report |
-| its seven playbooks | poteto-mode's 23 playbooks |
+| its seven playbooks | cube-mode's 23 playbooks |
 
 ## Verification
 
@@ -303,7 +303,7 @@ skills.
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 61 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
-| OptChat reads it | cube's `optchatSkills().read` | poteto-mode, `../how/SKILL.md`, `references/cube.md`, playbooks, setup-pstack read; a hidden id by name is refused |
+| OptChat reads it | cube's `optchatSkills().read` | cube-mode, `../how/SKILL.md`, `references/cube.md`, playbooks, setup-pstack read; a hidden id by name is refused |
 | cube's own skills tests | `node packages/server/test/skills-test.ts` | ok (unchanged code) |
 | check-plan | `bun test check-plan.test.ts` (adapted fixture) | 7 pass |
 | watch-pr | `bun test watch-pr`; `watch-pr --owner cubeyard --repo cube --pr 311 --status-only` | 54 pass; real PR read as merged |
@@ -330,12 +330,18 @@ None of these is in this PR. Each needs a decision or a cube change.
 | G9 | no live model run | how well OptChat and threads follow these skills, and how often the in-thread forms are chosen, is unmeasured | real runs after activation |
 | G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | one run each in a thread machine: the depth-1 fetch took 975 ms and 3.4 MB at this head, against 568 ms and 140 KB at the current pin (`d5041ce9`); not repeated, so the spread is unknown | if it matters, move the baseline to its own branch or repository |
 
-## Naming: options, not yet decided
+## Naming: option B, chosen by the user
 
 The user first asked to adapt *and rename* poteto-mode for cube, then asked
-for every pstack skill copied as is and converted. This port keeps every
-upstream id (`poteto-mode`, `how`, `principle-*`, ...). That is a choice with
-consequences in cube's resolver, so it is the user's to confirm. What the
+for every pstack skill copied as is and converted. The options below were put
+to the user, who chose **B**: the router `poteto-mode` is `cube-mode` in cube,
+and every other skill keeps its upstream id. `/poteto-mode` in a user's words
+still triggers it (its description says so). The upstream copy keeps
+`poteto-mode`; `scripts/check-port.mjs` maps it by its `RENAMED` table, so the
+coverage, diff and note checks treat `upstream/pstack/skills/poteto-mode/*` and
+`skills/cube-mode/*` as one file each. The tool package inside its scripts
+keeps its upstream internal name (`@cursor-skill/poteto-mode-tools`), since
+nothing routes by it. What the
 resolver does (cubeyard/cube `packages/server/src/skills.ts`): sources are read
 default first, then the user's in order; for each id **the last source wins**;
 the union of ids after `skills.disabled` may hold at most **64**, or every
@@ -348,10 +354,11 @@ thread start is refused before a machine is allocated.
 | C. rename every skill (a prefix, e.g. `pstack-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
 | D. keep ids, set display names | `name:` differs from the folder (cube shows it in Settings only) | as A | the model never sees display names; upstream itself renamed every skill to its folder name (#702) |
 
-Recommendation: A or B. Under every option the old cursor/plugins source must
-go (G1), and before or in the same save as the new default commit: with A or B
-it would replace ported skills with Cursor text, and with C it would stop every
-thread from starting. The user decides; this PR does not rename.
+Under B, with the old cursor/plugins source still configured, `cube-mode`
+itself is safe, but its old `poteto-mode` comes back beside it (hidden, Cursor
+text) and the 51 leaves it links to are the unported originals. So the old
+source must still go (G1), before or in the same save as the new default
+commit.
 
 ## Activating (not done here)
 
@@ -362,5 +369,5 @@ Settings, Skills (check for update, then use that commit). In order:
 2. Remove (or disable) the cursor/plugins `df581122` source before, or in the
    same save as, the new default commit (G1; see Naming for why the order matters).
 3. Keep the user's own sources to at most 3 new ids (G8), or every thread start fails.
-4. Smoke-test with a real model: one OptChat turn and one thread with poteto-mode (G9). New threads and OptChat's next turn then get it;
+4. Smoke-test with a real model: one OptChat turn and one thread with cube-mode (G9). New threads and OptChat's next turn then get it;
 OptChat's prompt changes once (cache rewrite), with three more listed skills.
