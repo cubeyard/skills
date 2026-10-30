@@ -83,7 +83,7 @@ be confusing without its reason.
 | links resolve where installed | every relative Markdown link stays inside `skills/` and exists |
 | OptChat reads it in one call | each SKILL.md listed to OptChat is at most 30,000 characters (`SKILL_PAGE`) |
 | non-skill upstream files are accounted for | every run fails on an upstream file that is neither mapped nor given a reason (so CI catches a new one) |
-| the handoff rule (M2) | installed text offering an in-thread substitute (sequential roles, a self-review label) fails; so does an installed file whose upstream hands work to another agent while the port names neither a handoff nor OptChat |
+| the handoff rule (M2, M3) | every installed Markdown file is scanned for known substitute wordings (sequential roles, a self-review label, a labeled self pass, "review your own diff", OptChat reading a diff), from `scripts/handoff-patterns.mjs`; regression fixtures (`node --test scripts/`, also in CI) prove each known bad wording is caught and the port's own wordings are not; an installed file whose upstream hands work to another agent must name a handoff or OptChat. **Limit:** these are keyword checks. They keep known regressions out but cannot prove the rule; a substitute worded another way passes, so the rule still needs a semantic review |
 | surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines (a note that mentions `surface:`) are ignored |
 
 ## How cube finds these skills (M5, verified)
@@ -144,12 +144,27 @@ An earlier revision let a thread run roles in sequence and label its own
 pass `self-review, not independent`; that is removed everywhere, and the
 checker now refuses it.
 
-**M3. Independence from fresh threads.** A verifier, judge, adversary or
+**M3. Independence from fresh threads, including the lead's review.** A verifier, judge, adversary or
 Comment Sicko is valuable because it did not write the thing. Cube's rule
 that a review is done by a thread that neither wrote the change nor reviewed
 something else is the same invariant, so these roles map directly to fresh
 threads OptChat starts, with briefs that name what to judge and the criteria,
 never the author's reasoning.
+
+The lead's own review is part of this. pstack's lead reviews and verifies
+every change its delegate writes. In cube the implementing thread *is* the
+delegate, and OptChat, the lead, has no machine and cannot open a diff, so
+that review cannot stay with either of them. After pushing, the author
+reports a review handoff: one ready brief for a fresh review-and-verification
+thread (the PR, the exact head, the repro or measurement to rerun, the
+playbook's criteria, never the author's reasoning) and ends its turn.
+OptChat starts the reviewer, reads its verdict, and tells findings back to
+the author, whose fixes are the same task; a new head gets a delta review
+from the same reviewer. The author's own checks (tests, its own rerun, a
+reread of the diff) stay, reported as author checks, never as the review.
+Bug fix, Perf issue, Hillclimb (its kept commits), Refactoring and Feature
+end in this handoff. An earlier revision of this port had the author review
+itself in four of them; a delta review found it and it is fixed.
 
 **M4. Models per role, chosen once.** pstack picks a model per role and
 varies effort per call, so that diverse panels stay diverse and routine work
@@ -317,7 +332,7 @@ skills.
 | statechart | mise install, then `scripts/statechart` on the Counter corpus spec | Java and TLC installed by mise; chart equals the corpus chart |
 | worktree-audit | on a scratch clone with one worktree | classified; transcript scan skipped |
 | show-me-your-work log.sh | one row with a formula-like cell | written, cell quoted |
-| with the old source still configured | `resolveSkills` with cursor/plugins@df581122 after the default | 51 ported skills overridden by the originals (gap G1) |
+| with the old source still configured | `resolveSkills` with cursor/plugins@df581122 after the default | 62 skills; 50 ported skills overridden by the originals, and the old `poteto-mode` back beside `cube-mode` (gap G1) |
 
 ## Gaps and product changes
 
@@ -325,7 +340,7 @@ None of these is in this PR. Each needs a decision or a cube change.
 
 | | gap | effect | what would close it |
 | --- | --- | --- | --- |
-| G1 | a cube that added cursor/plugins (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 51 of the ported skills would be replaced by the unported originals | the user removes that source in Settings, Skills, when activating |
+| G1 | a cube that added cursor/plugins (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 50 of the ported skills (all but `cube-mode`) would be replaced by the unported originals | the user removes that source in Settings, Skills, when activating |
 | G2 | OptChat cannot write its instructions file | `setup-pstack` hands the user a block to paste into `<CUBED_STATE>/optchat/AGENTS.md` | a settings field or tool for OptChat's instructions |
 | G3 | nothing starts or wakes an agent on an event (webhook, schedule, Slack) | `automations/benny` is not ported; `make-bot-ui` stops; audits run at reports, not on the hour | an authenticated wake endpoint whose credential stays in cube's gateway, or scheduled ticks |
 | G4 | OptChat cannot read PR, CI or diff state, nor stop a working thread | Orchestrate and ketchup state PR status as last reported; a looping thread can only be told to stop | read-only forge status for OptChat; a stop tool |
@@ -355,8 +370,8 @@ thread start is refused before a machine is allocated.
 
 | option | what changes | with the old cursor/plugins source still configured | other costs |
 | --- | --- | --- | --- |
-| A. keep upstream ids (this PR) | nothing | its 51 originals override the ported skills of the same id (silently, unported Cursor text); 61 ids, so starts still work | the ids say "poteto", not cube; `--diff` and future upstream updates stay one to one |
-| B. rename only the entry router (`poteto-mode` to a cube name, e.g. `cube-mode`), keep the leaves | one folder renamed, its links and the mentions of `/poteto-mode` updated | 62 ids; the new router is kept, but the 50 other ported skills it links to are still overridden by the originals (measured) | the user-facing name changes; `/poteto-mode` still needs a mention so users who type it are routed |
+| A. keep upstream ids (the port before the user chose) | nothing | its 51 originals override the ported skills of the same id (silently, unported Cursor text); 61 ids, so starts still work | the ids say "poteto", not cube; `--diff` and future upstream updates stay one to one |
+| B. rename only the entry router (chosen, this PR) (`poteto-mode` to a cube name, e.g. `cube-mode`), keep the leaves | one folder renamed, its links and the mentions of `/poteto-mode` updated | 62 ids; the new router is kept, but the 50 other ported skills it links to are still overridden by the originals (measured) | the user-facing name changes; `/poteto-mode` still needs a mention so users who type it are routed |
 | C. rename every skill (a prefix, e.g. `pstack-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
 | D. keep ids, set display names | `name:` differs from the folder (cube shows it in Settings only) | as A | the model never sees display names; upstream itself renamed every skill to its folder name (#702) |
 
