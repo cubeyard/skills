@@ -1,8 +1,12 @@
-// Retired branding (PORTING.md, Naming): no path or file in this repository
-// names the two retired brands, in any casing or spelling. The words are
-// spelled backwards here so that this file passes its own check.
+// Retired names (PORTING.md, Naming): no path or file in this repository
+// names the two retired brands or the original stack, in any casing or
+// spelling. The words are spelled backwards here so that this file passes
+// its own check.
 const reverse = (s) => [...s].reverse().join("");
 export const BRANDS = ["otetop", "rosruc"].map(reverse);
+// The stack's name also ends a common word for stacked pull requests
+// ("u" + name), so it matches only where no letter or digit precedes it.
+export const STACK = reverse("kcatsp");
 const [, editorBrand] = BRANDS;
 
 // Look-alike letters that NFKC leaves alone (Cyrillic, Greek), folded to
@@ -18,25 +22,19 @@ const fold = (text) => [...text.normalize("NFKC").toLowerCase()].map((ch) => CON
 // or" is not a match.
 const SEP = String.raw`(?:[-_.·'’­​-‏‐-―⁠−﻿]|-[ \t]*\r?\n[ \t]*)?`;
 const wordPattern = (word) => [...word].join(SEP);
-export const BRANDING = new RegExp(BRANDS.map(wordPattern).join("|"), "g");
+export const BRANDING = new RegExp([...BRANDS.map(wordPattern), `(?<![a-z0-9])${wordPattern(STACK)}`].join("|"), "g");
 
-// The one kind of match a file may keep: an identifier an outside system
-// defines, which cannot be renamed without breaking it. Each entry names
-// the file, the identifier and the reason; nothing else in the file is
-// exempt.
-const quoted = String.raw`(["'])${editorBrand}\1`;
+// The one kind of match a file may keep: a protocol identifier an outside
+// system defines, which cannot be renamed without breaking it. Each entry
+// names the file, the identifier and the reason; nothing else in the file
+// is exempt.
 const pageField = `end${editorBrand}`;
-const automationMarker = `${editorBrand}_automation_id`;
 export const EXTERNAL_IDENTIFIERS = {
   "skills/cube-mode/scripts/watch-pr/github.ts": [
     [pageField, "GitHub GraphQL PageInfo field, read to page review threads and checks"],
-    [quoted, "GitHub login of the Bugbot review app, used to recognise its comments"],
-    [automationMarker, "marker the Bugbot review app writes in a comment, used to count review passes"],
   ],
   "skills/cube-mode/scripts/watch-pr/github.test.ts": [
     [pageField, "GitHub GraphQL PageInfo field in a recorded API response"],
-    [quoted, "GitHub login of the Bugbot review app in a recorded API response"],
-    [automationMarker, "Bugbot comment marker in a recorded API response"],
   ],
 };
 

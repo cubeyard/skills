@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-// Checks the pstack port (PORTING.md): installed files carry no port
-// commentary, skills/ obeys cube's rules, the handoff and model rules hold,
-// and no path or file in the repository carries the retired branding.
+// Checks the port (PORTING.md): installed files carry no port commentary,
+// every ported skill carries the MIT notice, skills/ obeys cube's rules, the
+// handoff and model rules hold, and no path or file in the repository
+// carries a retired name.
 //
 //   node scripts/check-port.mjs            check, exit 1 on any failure
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -14,14 +16,9 @@ import { brandingIn } from "./branding-patterns.mjs";
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const skillsDir = path.join(root, "skills");
 
-// Upstream skills the port retires on purpose (PORTING.md, Retired): the
-// folder must not come back.
-const RETIRED = {
-  "setup-pstack": "retired: cube needs no model setup; OptChat reads the user's model preference from the chat (cube-mode references/cube.md, Models)",
-};
-// cube's own skills, not ported from pstack.
+// cube's own skills, not ported.
 const CUBE_OWN = new Set(["briefing-a-thread", "opening-a-pull-request", "prove-it-works"]);
-// Installed files whose pstack original hands work to another agent
+// Installed files whose original hands work to another agent
 // (handoff-patterns.mjs DELEGATES on the original, PORTING.md, Baseline):
 // each must say where the work goes.
 const HANDS_OFF = [
@@ -41,6 +38,10 @@ const HANDS_OFF = [
   "reflect/references/tooling-reviewer.md", "show-me-your-work/SKILL.md", "swarm/SKILL.md", "teach/SKILL.md",
   "why/SKILL.md", "why/references/investigator-prompt.md", "why/references/source-playbook.md",
 ];
+// The ported skills' MIT notice (THIRD_PARTY_NOTICES.md): every ported folder
+// carries it byte for byte, since cube installs each folder on its own. The
+// sha256 is that of the baseline's LICENSE (PORTING.md, Baseline).
+const MIT_SHA256 = "bc957ca6bee02792566a1a028d105e02e247c6e77cf057061674273da77b200e";
 // Port commentary that must not reach an installed file (PORTING.md,
 // "No notes in installed files"): an adaptation note, or a mapping-rule
 // label (M1-M13) in Markdown. The reasons live in PORTING.md and git history.
@@ -63,7 +64,6 @@ function walk(dir, base = dir) {
   return out.sort((a, b) => (a.rel < b.rel ? -1 : 1));
 }
 
-for (const [id, reason] of Object.entries(RETIRED)) if (!reason || fs.existsSync(path.join(skillsDir, id))) fail(`RETIRED ${id}: needs a reason, and no folder in skills/`);
 const skillFiles = walk(skillsDir);
 
 // 1. Each installed file is a plain file free of port commentary.
@@ -77,7 +77,19 @@ for (const f of skillFiles) {
   });
 }
 
-// 2. cube's rules for a skill folder, as skills.ts reads them.
+// 2. Attribution: each ported folder has the MIT notice, unchanged, and
+// THIRD_PARTY_NOTICES.md quotes the same text in full.
+const sha256 = (text) => createHash("sha256").update(text).digest("hex");
+for (const id of fs.readdirSync(skillsDir).filter((name) => fs.statSync(path.join(skillsDir, name)).isDirectory() && !CUBE_OWN.has(name)).sort()) {
+  const file = path.join(skillsDir, id, "LICENSE");
+  if (!fs.existsSync(file)) fail(`skills/${id}/LICENSE: missing; every ported skill carries the MIT notice (THIRD_PARTY_NOTICES.md)`);
+  else if (sha256(fs.readFileSync(file)) !== MIT_SHA256) fail(`skills/${id}/LICENSE: not the MIT notice byte for byte`);
+}
+const notices = path.join(root, "THIRD_PARTY_NOTICES.md");
+const quoted = fs.existsSync(notices) ? [...fs.readFileSync(notices, "utf8").matchAll(/^```\n([\s\S]*?)^```$/gm)].map((m) => m[1]) : [];
+if (!quoted.some((text) => sha256(text) === MIT_SHA256)) fail("THIRD_PARTY_NOTICES.md: must quote the MIT notice in full, byte for byte");
+
+// 3. cube's rules for a skill folder, as skills.ts reads them.
 function frontmatter(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!m) return null;
@@ -141,10 +153,10 @@ if (ids.length > LIMITS.skills) fail(`${ids.length} skills; a thread installs at
 if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${bytes} bytes; a thread installs at most ${LIMITS.files} and ${LIMITS.bytes}`);
 
 // 4. The handoff rule (references/cube.md, Handoff and Independent review): a thread never
-// stands in for an agent pstack requires, and OptChat never reads a diff.
+// stands in for an agent a skill requires, and OptChat never reads a diff.
 // Every installed Markdown file is scanned for known substitute wordings
 // (scripts/handoff-patterns.mjs, with fixtures in check-port.test.mjs), and
-// every one whose pstack original hands work to another agent (HANDS_OFF)
+// every one whose original hands work to another agent (HANDS_OFF)
 // must say where it goes. Keyword checks cannot prove the rule; they keep known regressions out.
 for (const f of skillFiles) {
   if (!f.rel.endsWith(".md") || CUBE_OWN.has(f.rel.split("/")[0])) continue;
@@ -160,18 +172,18 @@ for (const f of skillFiles) {
 for (const rel of HANDS_OFF) {
   const full = path.join(skillsDir, rel);
   if (!fs.existsSync(full)) fail(`skills/${rel}: listed in HANDS_OFF but missing`);
-  else if (!/handoff|OptChat/i.test(fs.readFileSync(full, "utf8"))) fail(`skills/${rel}: pstack hands work to another agent here, but the port never says where it goes (handoff or OptChat; cube.md, Handoff)`);
+  else if (!/handoff|OptChat/i.test(fs.readFileSync(full, "utf8"))) fail(`skills/${rel}: the original hands work to another agent here, but the port never says where it goes (handoff or OptChat; cube.md, Handoff)`);
 }
-// 6. The retired branding (PORTING.md, Naming): no path and no file in the
-// repository names either retired brand, in any casing or spelling, except
-// an identifier an outside system defines (scripts/branding-patterns.mjs,
-// fixtures in check-port.test.mjs). The repository root is walked, not only
+// 6. Retired names (PORTING.md, Naming): no path and no file in the
+// repository names a retired brand or the original stack, in any casing or
+// spelling, except an identifier an outside system defines
+// (scripts/branding-patterns.mjs, fixtures in check-port.test.mjs). The repository root is walked, not only
 // skills/, so docs, scripts, CI and notices are covered too.
 const repoFiles = walk(root);
 for (const f of repoFiles) {
-  for (const { match } of brandingIn(f.rel)) fail(`${f.rel}: the path carries retired branding (${JSON.stringify(match)}); rename it`);
+  for (const { match } of brandingIn(f.rel)) fail(`${f.rel}: the path carries a retired name (${JSON.stringify(match)}); rename it`);
   if (f.symlink) continue;
-  for (const { line, match } of brandingIn(fs.readFileSync(path.join(root, f.rel), "utf8"), f.rel)) fail(`${f.rel}:${line}: retired branding (${JSON.stringify(match)}); remove it, or list an outside identifier in branding-patterns.mjs`);
+  for (const { line, match } of brandingIn(fs.readFileSync(path.join(root, f.rel), "utf8"), f.rel)) fail(`${f.rel}:${line}: retired name (${JSON.stringify(match)}); remove it, or list an outside identifier in branding-patterns.mjs`);
 }
 
 // 7. Links: a relative link must reach a file cube installs (inside skills/).

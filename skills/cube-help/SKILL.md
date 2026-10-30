@@ -1,6 +1,6 @@
 ---
 name: cube-help
-description: Guides users through /cube-mode, choosing models, and picking the skill, playbook, or principle for a task. Use only when the user types /cube-help or /setup-pstack (retired in cube), or asks for cube-mode or pstack help by name.
+description: Guides users through /cube-mode, choosing models, and picking the skill, playbook, or principle for a task. Use only when the user types /cube-help, or asks for cube-mode or cube skills help by name.
 metadata:
   cube:
     surface: both
@@ -8,11 +8,11 @@ metadata:
 
 # Cube help
 
-Answer the user's question about pstack, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a pstack run spends real tokens, so let them send the prompt.
+Answer the user's question about cube-mode and its skills, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a cube-mode run spends real tokens, so let them send the prompt.
 
-A message that asks for work, such as "use pstack to fix this bug", is not a help question. Read [`cube-mode`](../cube-mode/SKILL.md) and do the work under it.
+A message that asks for work, such as "use cube-mode to fix this bug", is not a help question. Read [`cube-mode`](../cube-mode/SKILL.md) and do the work under it.
 
-This file maps questions to the skills that hold the answers. Those files own the details. Read the file you route to before you quote it, and trust it when it disagrees with this map. The user may not be able to open the installed copies, so give the user a public copy: a skill at `https://github.com/cubeyard/skills/blob/main/skills/` followed by its path. pstack's own README and guide are not part of cube; [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps pstack's names to cube's.
+This file maps questions to the skills that hold the answers. Those files own the details. Read the file you route to before you quote it, and trust it when it disagrees with this map. The user may not be able to open the installed copies, so give the user a public copy: a skill at `https://github.com/cubeyard/skills/blob/main/skills/` followed by its path. The original stack's README and guide are not part of cube; [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps the skills' original terms to cube's.
 
 ## Find out what they need
 
@@ -22,7 +22,7 @@ Infer the need from the message and the conversation. A named situation, such as
 - Start a task with `/cube-mode`
 - Pick a skill for a situation
 - Fix a run that went wrong
-- Make pstack my own
+- Make cube-mode my own
 
 Check the state that changes the answer, and mention it only when it does:
 
@@ -30,19 +30,19 @@ Check the state that changes the answer, and mention it only when it does:
 - No `verify-*` skill in the project's `.agents/skills` or other app harness means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
 - No formal verification skill in the project means no property is checked past what tests reach. Mention `/create-formal-verification-skill` when the question is about a race, an invariant, or another case tests rarely hit. When one exists and the code it covers changed after the commit it records as last in sync, mention `/maintain-formal-verification-skill` if the question touches that code.
 
-When no preference is stated and it matters (the user is new, the question is about setup or cost, or the answer depends on which models run), say once that there is no setup: they tell OptChat in the chat which provider and model to use, in general, for a role, or for one task. The newest statement wins, OptChat asks when none covers a spawn, and it asks when a newer general statement and an older one for a role leave the intent unclear. `/setup-pstack` is retired in cube; a user who types it gets this answer.
+When no preference is stated and it matters (the user is new, the question is about setup or cost, or the answer depends on which models run), say once that there is no setup: they tell OptChat in the chat which provider and model to use, in general, for a role, or for one task. The newest statement wins, OptChat asks when none covers a spawn, and it asks when a newer general statement and an older one for a role leave the intent unclear. A user who asks for a model setup command gets this answer.
 
 ## Get set up
 
-1. In cube, pstack ships in cube's default skills (cubeyard/skills). New threads get the commit chosen in Settings, Skills (check for update, then use that commit); a running thread keeps the skills it started with.
+1. cube-mode and its skills ship in cube's default skills (cubeyard/skills). New threads get the commit chosen in Settings, Skills (check for update, then use that commit); a running thread keeps the skills it started with.
 2. Say which models to use in the chat with OptChat, naming the provider and model (for example "Opus through Claude Code, not the API"), for every role or for one. Nothing is saved elsewhere: OptChat follows the newest statement and asks when none covers a spawn (the Models section of [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md)). It applies to threads started after that.
 3. Start a real task with `/cube-mode`, a goal, and a check that can pass or fail.
 
-Only three pstack skills are listed for the model to load from the user's words: `cube-mode` and `cube-help` (OptChat and threads) and `typescript-best-practices` (threads). The others are installed but load only when cube-mode routes to them or the user names them. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
+Only three of these skills are listed for the model to load from the user's words: `cube-mode` and `cube-help` (OptChat and threads) and `typescript-best-practices` (threads). The others are installed but load only when cube-mode routes to them or the user names them. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
-If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Tell OptChat in the chat to use cheaper models, for every role or one, or fewer panel seats; it applies to threads started after that. Save `/cube-mode` for work that needs rigor.
+If cost is the worry, say where the tokens go and how to spend fewer. cube-mode spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Tell OptChat in the chat to use cheaper models, for every role or one, or fewer panel seats; it applies to threads started after that. Save `/cube-mode` for work that needs rigor.
 
-pstack was built for another agent host. In cube, [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps its names: OptChat starts the threads that pstack's subagents were, and a step that needs a feature cube lacks, such as Bugbot or Automations, is skipped with a one-line note.
+Most of these skills were ported from a stack built for another agent host. [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps its terms: OptChat starts the threads that its subagents were, and a step that needs a feature cube lacks, such as Bugbot or Automations, is skipped with a one-line note.
 
 ## Start a task with `/cube-mode`
 
@@ -95,7 +95,7 @@ The default answer is `/cube-mode`, which runs most of the others when its steps
 | Turn what a finished task taught into skill edits | [`/reflect`](../reflect/SKILL.md) |
 | Stop agents from repeating the same mistakes in this repo | [`/correct`](../correct/SKILL.md) |
 | Build a page whose buttons wake an agent over a webhook (in cube: the page only; no webhook wakes a cube agent yet) | [`/make-bot-ui`](../make-bot-ui/SKILL.md) |
-| Find their way around pstack | `/cube-help` |
+| Find their way around cube-mode | `/cube-help` |
 
 If a skill directory next to this one is missing from the table, read its frontmatter and route by its description. The `principle-*` directories are covered under principles below.
 
@@ -108,11 +108,11 @@ Close calls:
 - `/recall` rebuilds context across recent chats. `/ketchup` covers only this chat since the user's last message. Resuming one specific chat or branch is the Session pickup playbook.
 - `/figure-it-out` designs one rigorous run. The Orchestrate playbook runs a program that spans days and many PRs. The Autonomous run playbook drives one task to a finish condition.
 
-Not in pstack:
+Not in cube-mode:
 
 - `/deslop`, `control-cli`, and `control-ui` ship in a separate plugin that cube does not have (see the table of features cube lacks in `../cube-mode/references/cube.md`).
-- `/loop` and `/create-skill` are built-ins of pstack's original host, not in cube.
-- pstack has no `/orchestrate` skill. Orchestrate is a `/cube-mode` playbook. If the slash menu shows `/orchestrate`, another plugin provides it.
+- `/loop` and `/create-skill` are built-ins of the original stack's host, not in cube.
+- There is no `/orchestrate` skill. Orchestrate is a `/cube-mode` playbook. If the slash menu shows `/orchestrate`, another plugin provides it.
 
 ## Playbooks and principles
 
@@ -127,7 +127,7 @@ Playbooks are step lists inside `/cube-mode`, not skills, so they have no slash 
 
 The Playbooks section of [`cube-mode`](../cube-mode/SKILL.md) lists every playbook, when it applies, and whether OptChat or a thread runs it. The [Opening a PR](../cube-mode/playbooks/opening-a-pr.md), [Babysit](../cube-mode/playbooks/babysit.md) and [Shipping](../cube-mode/playbooks/shipping.md) playbooks cover opening, babysitting, and landing a PR.
 
-pstack has no planning skill, and cube has no Plan Mode. For work that spans phases or stacked PRs, asking `/cube-mode` for a plan runs the [Multi-phase plan playbook](../cube-mode/playbooks/multi-phase-plan.md), which writes the plan and doesn't implement it. For a design question, the Prototype playbook or `/architect` settles it in code first.
+There is no planning skill, and cube has no Plan Mode. For work that spans phases or stacked PRs, asking `/cube-mode` for a plan runs the [Multi-phase plan playbook](../cube-mode/playbooks/multi-phase-plan.md), which writes the plan and doesn't implement it. For a design question, the Prototype playbook or `/architect` settles it in code first.
 
 Principles are one-rule skills that `/cube-mode` reads and cites in its replies. The user rarely invokes one. They steer with the names instead, as in "apply prove it works. show me the real output." Naming `/principle-<name>` makes the agent read `~/.cube/skills/principle-<name>/SKILL.md`. The Principles section of [`cube-mode`](../cube-mode/SKILL.md) lists them.
 
@@ -139,14 +139,14 @@ Principles are one-rule skills that `/cube-mode` reads and cites in its replies.
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
 | A new model choice had no effect | Say it in the chat with OptChat, with provider and model; it applies to threads started after that, and running threads keep their model. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
-| A skill didn't load on its own | Only the three listed pstack skills load from the user's words (see Get set up). The others load when the user names them or when `/cube-mode` runs them, and it doesn't run every skill. |
+| A skill didn't load on its own | Only the three listed skills load from the user's words (see Get set up). The others load when the user names them or when `/cube-mode` runs them, and it doesn't run every skill. |
 | Parallel agents overwrote each other | Each thread has its own machine; give each its own branch, and never two writers on one branch. |
 | An overnight run moved but finished nothing | A run needs a check that can pass or fail, not a duration. See the [Autonomous run playbook](../cube-mode/playbooks/autonomous-run.md). |
 | The reply claims success from a green build | Ask for the real command, flow, stored value, or profile. That's the prove-it-works principle. |
 
 For a run that drifts, [`references/prompting.md`](references/prompting.md) has one-line steers. [`references/recipes.md`](references/recipes.md) has the recipes worth copying.
 
-## Make pstack my own
+## Make cube-mode my own
 
 - [`/automate-me`](../automate-me/SKILL.md) drafts a personal mode skill from the user's own history, to use alongside `/cube-mode`.
 - [`/reflect`](../reflect/SKILL.md) after a session turns its lessons into skill edits the user approves.

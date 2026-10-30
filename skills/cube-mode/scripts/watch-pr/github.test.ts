@@ -230,7 +230,7 @@ describe("closed enum parsing", () => {
   });
 });
 
-it("annotates Bugbot threads with distinct review-pass counts", () => {
+it("annotates Bugbot threads, by login only, with distinct review-pass counts", () => {
   const response = {
     data: {
       repository: {
@@ -259,11 +259,11 @@ it("annotates Bugbot threads with distinct review-pass counts", () => {
                 comments: {
                   nodes: [
                     {
-                      body: "CURSOR_AUTOMATION_ID: run-2 severity high",
+                      body: "RUN_ID: run-2 bugbot severity high",
                       createdAt: "now",
                       path: null,
                       line: null,
-                      author: { login: "cursor" },
+                      author: { login: "review-app" },
                     },
                   ],
                 },
@@ -291,8 +291,8 @@ it("annotates Bugbot threads with distinct review-pass counts", () => {
   };
   const threads = buildReviewThreads(parseReviewThreadPage(response).threads);
   expect(threads).toHaveLength(2);
-  expect(threads.map((thread) => thread.isBugbot)).toEqual([true, true]);
-  expect(threads.map((thread) => thread.bugbotReviewPasses)).toEqual([3, 3]);
+  expect(threads.map((thread) => thread.isBugbot)).toEqual([true, false]);
+  expect(threads.map((thread) => thread.bugbotReviewPasses)).toEqual([2, 2]);
 });
 
 describe("review thread pagination", () => {

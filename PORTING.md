@@ -1,12 +1,12 @@
-# Porting pstack to cube
+# Porting the skills to cube
 
-pstack (Lauren Tan's agent workflow stack, MIT) is a set of 58 skills and 2
+The original stack (Lauren Tan's agent workflow stack, MIT) is a set of 58 skills and 2
 agent definitions written for another agent host: one chat that plans,
 spawns subagents on chosen models and reviews their work. This repository
 ports all of it to cube, where that one chat becomes two agents: OptChat,
 which directs and has no machine, and threads, which each do one bounded
 task in their own machine and report. Nothing is dropped silently. 57 skills
-are here, with their references, scripts and assets; one, `setup-pstack`, is
+are here, with their references, scripts and assets; one, the model setup skill, is
 retired on purpose (Retired, below), and its original stays in the
 baseline. Every change from the original is justified here.
 
@@ -17,12 +17,12 @@ skills/<id>/            what cube installs: 57 ported skills + cube's own 3
 skills/cube-mode/references/cube.md   the cube adapter every ported skill relies on (the rules M1-M13, by section name)
 scripts/check-port.mjs  the checks below
 scripts/branding-patterns.mjs  the retired brand names, spelled so the file passes its own check
-THIRD_PARTY_NOTICES.md  pstack's MIT license, beside this repository's Apache-2.0
+THIRD_PARTY_NOTICES.md  the stack's MIT license, beside this repository's Apache-2.0
 ```
 
 ## Baseline
 
-The port started from an unmodified copy of pstack at its upstream commit
+The port started from an unmodified copy of the stack at its upstream commit
 `4dd1d05818d19792e7cd6e818f1667f95f7e1dbe` (plugin version 0.15.36, 573
 files). The copy, its sha256 manifest, its provenance (`upstream/README.md`)
 and the per-file coverage table (`COVERAGE.md`) were in this repository's
@@ -32,8 +32,8 @@ tree until the user asked that neither retired brand name appear in it
 the copy is byte for byte upstream's:
 
 ```sh
-git rev-parse b052d0d2:upstream/pstack     # 4719e1c4b4c43bac85d4206a8b41dd2899769c1c, upstream's tree
-git diff b052d0d2:upstream/pstack/skills/how HEAD:skills/how   # one port against its original
+git ls-tree -d b052d0d2 upstream/        # one directory, tree 4719e1c4b4c43bac85d4206a8b41dd2899769c1c, upstream's tree
+git diff b052d0d2:upstream/<that directory>/skills/how HEAD:skills/how   # one port against its original
 ```
 
 cube installs only `skills/`, so the original never reached a thread or
@@ -43,12 +43,12 @@ of this repository no longer carries it (G10).
 ## Method
 
 1. **Copy as is.** Commit 1 added the unmodified copy with a sha256 manifest.
-   Its git tree equals upstream's `pstack/` tree (Baseline).
+   Its git tree equals upstream's tree for the stack (Baseline).
 2. **Copy into place.** Every upstream skill folder is copied to
    `skills/<id>/` unchanged; the two agent definitions go into the skill that
    starts them (`cube-mode/agents/cube-mode-agent.md`,
    `no-comments/agents/comment-sicko.md`), since cube has no agent definitions.
-   pstack's `LICENSE` is copied into every ported folder, because cube
+   The original stack's `LICENSE` is copied into every ported folder, because cube
    installs each folder on its own.
 3. **Adapt in place.** Each change is an edit at the spot it concerns. A
    file that needs no change stays byte-identical (33 of the 57 ported skills
@@ -88,10 +88,10 @@ made it (the port's notes are in git history before the removal);
 
 | check | how |
 | --- | --- |
-| a retired skill stays retired | a skill in `RETIRED` needs a reason, and fails if its folder comes back |
-| the model rule (M4) | every installed Markdown file is scanned for wordings that point at the retired setup (`pstack models`, `inherit-parent`, role lines in OptChat's instructions, `setup-pstack` outside a sentence that says it is retired) or fall back to the host's default model (`omit model`, "runs on the host's preferred model"), from `scripts/model-patterns.mjs`, with fixtures in `check-port.test.mjs`; the fixtures also run the whole checker on a scratch copy with the retired folder restored, with setup wording added, and with a `cube-adapt` note added, and each fails. Same limit as the handoff rule: keyword checks |
+| the MIT notice travels with every ported skill | every skill folder outside cube's own three has a `LICENSE` whose sha256 is the baseline's MIT notice (`MIT_SHA256`), and THIRD_PARTY_NOTICES.md quotes that notice in a fenced block byte for byte; deleting `skills/how/LICENSE`, editing a notice, or cutting the copyright line from THIRD_PARTY_NOTICES.md fails (fixtures) |
+| the model rule (M4) | every installed Markdown file is scanned for wordings that point at the retired setup (`inherit-parent`, role lines in OptChat's instructions; the setup skill's name and its models block are retired names, caught by the branding check) or fall back to the host's default model (`omit model`, "runs on the host's preferred model"), from `scripts/model-patterns.mjs`, with fixtures in `check-port.test.mjs`; the fixtures also run the whole checker on a scratch copy with the setup skill's folder restored, with setup wording added, with a host-default fallback added, with a ported LICENSE deleted or changed, with the notice in THIRD_PARTY_NOTICES.md changed, and with a `cube-adapt` note added, and each fails. Same limit as the handoff rule: keyword checks |
 | no port commentary | no installed file contains `cube-adapt`, and no installed Markdown file an M1-M13 label |
-| no retired branding | every path and every file in the repository, not only `skills/`, is checked for the two retired brand names in any casing, after NFKC folding and Cyrillic and Greek look-alike folding, with one punctuation or invisible character, or a hyphenated line break, allowed between letters (`scripts/branding-patterns.mjs`, fixtures in `check-port.test.mjs`). The only exemptions are outside identifiers listed by file in `EXTERNAL_IDENTIFIERS` (Naming). **Limit:** a substring check: a brand split by plain whitespace, encoded, or named by description passes, and an unrelated word that contains a brand fails |
+| no retired name | every path and every file in the repository, not only `skills/`, is checked for the two retired brand names and the original stack's name (only where no letter or digit precedes it, so the stacked-PR word "upstack" passes) in any casing, after NFKC folding and Cyrillic and Greek look-alike folding, with one punctuation or invisible character, or a hyphenated line break, allowed between letters (`scripts/branding-patterns.mjs`, fixtures in `check-port.test.mjs`). The only exemptions are outside identifiers listed by file in `EXTERNAL_IDENTIFIERS` (Naming). **Limit:** a substring check: a brand split by plain whitespace, encoded, or named by description passes, and an unrelated word that contains a brand fails |
 | cube can read it | folder id, `name` = id, description 1-1024 characters, surface `thread`/`optchat`/`both`, no symlinks |
 | cube can install it | at most 64 skills, 2000 files, 8 MiB |
 | links resolve where installed | every relative Markdown link stays inside `skills/` and exists |
@@ -129,11 +129,11 @@ listed) and `skill("cube-mode", "../how/SKILL.md")` returns it, as
 `skills/cube-mode/references/cube.md` states each rule operationally, as
 tables an agent applies. This is the reasoning behind each.
 
-**M1. One lead, two agents.** pstack's lead is a chat that both judges and
+**M1. One lead, two agents.** The original stack's lead is a chat that both judges and
 acts: it plans, reads code, runs repros and spawns delegates. Cube divides
 that by capability: OptChat holds the conversation, the user's grants and
 every thread, but has no machine; a thread has a machine and one task, but
-no view of other work. The abstraction pstack depends on is not "a chat" but
+no view of other work. The abstraction the stack depends on is not "a chat" but
 *a place where judgment across pieces of work lives* and *a place where
 execution with evidence lives*. So every step goes where its capability
 lives: planning, routing, judging across pieces and landing order go to
@@ -141,7 +141,7 @@ OptChat; reading, running, editing and opening PRs go to a thread. Each
 playbook names its home (cube-mode's Playbooks table). The cost is a seam:
 a playbook that spans both is split at the brief and the report.
 
-**M2. Delegation without nesting, and no stand-ins.** pstack's subagents are
+**M2. Delegation without nesting, and no stand-ins.** The original stack's subagents are
 the mechanism, not the goal; the goals are (a) keeping bulk out of the
 deciding context, (b) parallel throughput, and (c) independence between the
 author of a thing and its judge. Cube allows exactly one level of
@@ -167,7 +167,7 @@ something else is the same invariant, so these roles map directly to fresh
 threads OptChat starts, with briefs that name what to judge and the criteria,
 never the author's reasoning.
 
-The lead's own review is part of this. pstack's lead reviews and verifies
+The lead's own review is part of this. The original stack's lead reviews and verifies
 every change its delegate writes. In cube the implementing thread *is* the
 delegate, and OptChat, the lead, has no machine and cannot open a diff, so
 that review cannot stay with either of them. After pushing, the author
@@ -182,14 +182,14 @@ Bug fix, Perf issue, Hillclimb (its kept commits), Refactoring and Feature
 end in this handoff. An earlier revision of this port had the author review
 itself in four of them; a delta review found it and it is fixed.
 
-**M4. Models per role, chosen once, from the user's words.** pstack picks
+**M4. Models per role, chosen once, from the user's words.** The original stack picks
 a model per role and varies effort per call, so that diverse panels stay
-diverse and routine work stays cheap; `/setup-pstack` writes the role table
+diverse and routine work stays cheap; the model setup skill writes the role table
 once into an always-applied rule. In cube the only model choice is
 `spawn`'s `model`, made by OptChat, once per thread. A first port kept the
 table as a block the user pasted into OptChat's instructions file, since
 OptChat cannot write it (the old gap G2); the user rejected that manual step.
-The abstraction pstack needs is not a file but *a durable statement of the
+The abstraction the stack needs is not a file but *a durable statement of the
 user's model choice that the lead reads before each spawn*, and OptChat's
 chat already is one: OptChat reads its view every turn and can zoom older
 lines. So the role table is now the user's own words: OptChat takes the
@@ -207,25 +207,25 @@ when it is not. Lost: per-call effort and mid-task model changes; a fresh
 chat asks once before its first spawn. This rule holds where OptChat reads
 cube-mode; a spawn outside it still follows cube's own default.
 
-**M5. Discovery is explicit.** pstack relies on its host's slash menu,
+**M5. Discovery is explicit.** The original stack relies on its host's slash menu,
 `disable-model-invocation`, custom modes, `alwaysApply` rules and path
 globs. Cube has one automatic route (a listed description) and one explicit
 route (a link from a skill that was read). The port keeps upstream's
 two-tier design (few entry points, many hidden leaves) and moves each
 trigger onto the route cube has: the user's words name a skill; cube-mode
 and cube-help list every one; `typescript-best-practices` becomes listed
-because its original trigger (a path glob) was automatic. `setup-pstack`, the
+because its original trigger (a path glob) was automatic. The model setup skill, the
 other always-applied skill, is retired (M4). A skill is loaded only when an agent decides to read it; nothing
 guarantees it.
 
-**M6. Questions are OptChat's.** pstack's `AskQuestion` blocks a turn on
+**M6. Questions are OptChat's.** The original stack's `AskQuestion` blocks a turn on
 the human. In cube only OptChat talks to the user, and a thread that asks
-must end its turn. pstack already wants questions rare (settle facts by
+must end its turn. The stack already wants questions rare (settle facts by
 experiment, decide what a grant covers); the port keeps every rule about
 when to ask, and maps the act of asking to OptChat in chat, or a thread's
 report with options and a recommendation.
 
-**M7. Waking up.** pstack's `/loop`, watcher subagents and heartbeats
+**M7. Waking up.** The original stack's `/loop`, watcher subagents and heartbeats
 exist because the agent must notice an event later. In cube nothing wakes an
 ended thread and OptChat never polls; OptChat's wake-ups are thread reports
 and the user's messages. So a wait inside a task is a bounded foreground
@@ -235,24 +235,24 @@ outlive a command is a `cube service`, only when the brief allows. Lost: a
 timed audit. A thread that stalls silently is noticed at the next report or
 message, not on the hour.
 
-**M8. Continuity.** pstack gives a fix round to a fresh subagent because
+**M8. Continuity.** The original stack gives a fix round to a fresh subagent because
 interrupt-chained resumes drop directives. Cube keeps a task's own steps
 (fixes, review findings on its PR, landing) with the author thread, which
 holds the checkout, and gives every new task a fresh thread. Both aim at the
 same invariant, that the agent doing the work has the complete current
-directive. The port takes cube's routing and keeps pstack's safeguard: each
+directive. The port takes cube's routing and keeps the original stack's safeguard: each
 tell restates every directive still open.
 
-**M9. Authority.** pstack's Autonomy section says "just do it" for
+**M9. Authority.** The original stack's Autonomy section says "just do it" for
 reversible work and "always pause" for irreversible writes. Cube adds scope:
 a grant reaches exactly as far as the user said, a thread's authority is its
-brief, and a report never grants. The port keeps pstack's split and its
+brief, and a report never grants. The port keeps the original stack's split and its
 anti-sycophancy rule, adds cube's reserved actions to the pause list
 (default-branch pushes, tags, releases, restarts, host access, paid probes,
 settings, hooks), and carries the earlier port's reviewed rules on standing
 grants and instruction precedence.
 
-**M10. Records.** pstack reads transcripts, keeps program state in a
+**M10. Records.** The original stack reads transcripts, keeps program state in a
 tracker and trails in an agent store. Cube's records are OptChat's chat
 (`zoom`, `date`; threads read it with memory tools), each thread's
 conversation (OptChat's `history`), artifacts, and git. A file in a thread's
@@ -268,7 +268,7 @@ prerequisites map onto that. Measured: `bun` (for `watch-pr`) and `mise`
 (for `statechart`) install in a thread machine; Tailscale (UDP) and a webhook
 sender key (a secret) cannot be there.
 
-***M12. Features cube lacks.** The original host's products: Bugbot,
+**M12. Features cube lacks.** The original host's products: Bugbot,
 Automations, `SendToUser`, a separate team plugin (`deslop`, `control-ui`,
 `control-cli`), `create-skill`,
 Plan Mode, `/visualize`, image generation, canvases. Where cube has an
@@ -279,10 +279,10 @@ cube: <step>. <reason>.`, the convention upstream itself uses for Claude
 Code.
 
 **M13. Links.** A link out of an installed skill folder does not resolve
-in cube. pstack's README and guide are user documentation for the original
+in cube. The original stack's README and guide are user documentation for the original
 host: they stay in the baseline, and installed skills no longer link them.
 cube-help points at the installed skills and playbooks that hold the same
-answers, and cube.md maps pstack's names.
+answers, and cube.md maps the original stack's names.
 
 ## Coverage by skill
 
@@ -294,8 +294,8 @@ changed a few more.
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
 | cube-mode (renamed from upstream's router) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/cube-mode-agent.md` |
-| cube-help (renamed from upstream's help) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed pstack skills), models said in the chat, `/setup-pstack` answered as retired, modes, troubleshooting rows, links to installed playbooks in place of the guide |
-| setup-pstack | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
+| cube-help (renamed from upstream's help) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed ported skills), models said in the chat, a request for model setup answered as needing none, modes, troubleshooting rows, links to installed playbooks in place of the guide |
+| model setup skill | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its original path glob was automatic |
 | how | 3 | 1 | | M2 M4 | explorers and explainer are threads OptChat starts; a thread hands `how` off |
 | why | 13 | 1 (+1 new) | | M2 M4 M10 M11 | investigators and synthesizer are threads; a thread builds the anchor and hands off; evidence sources cube has; adds the OptChat-chat source playbook |
@@ -331,7 +331,7 @@ file's reason.
 ## The earlier port
 
 `directing-the-work` (OptChat) and `working-the-task` (threads), merged in
-`e893ef97` and never activated, were a two-skill summary of pstack's cube-mode. They
+`e893ef97` and never activated, were a two-skill summary of the original stack's router. They
 are removed; cube-mode replaces them, and their reviewed rules moved here:
 
 | earlier rule | now |
@@ -356,12 +356,12 @@ skills.
 
 | what | how | result |
 | --- | --- | --- |
-| baseline fidelity | `git rev-parse b052d0d2:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
+| baseline fidelity | `git ls-tree -d b052d0d2 upstream/`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
 | completeness, no port commentary, cube rules, links, limits, handoff rule, model rule | `node scripts/check-port.mjs` | ok: 593 mapped files (64 adapted, 529 unchanged), 2 added, 1 retired skill, 60 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 60 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
-| OptChat reads it | cube's `optchatSkills().read` | cube-mode, cube-help, `../how/SKILL.md`, `references/cube.md`, playbooks read; `../setup-pstack/SKILL.md` and a hidden id by name are refused |
+| OptChat reads it | cube's `optchatSkills().read` | cube-mode, cube-help, `../how/SKILL.md`, `references/cube.md`, playbooks read; the setup skill's `SKILL.md` and a hidden id by name are refused |
 | cube's own skills tests | `node packages/server/test/skills-test.ts` | ok (unchanged code) |
 | check-plan | `bun test check-plan.test.ts` (adapted fixture) | 7 pass |
 | watch-pr | `bun test watch-pr`; `watch-pr --owner cubeyard --repo cube --pr 311 --status-only` | 54 pass; real PR read as merged |
@@ -369,7 +369,7 @@ skills.
 | statechart | mise install, then `scripts/statechart` on the Counter corpus spec | Java and TLC installed by mise; chart equals the corpus chart |
 | worktree-audit | on a scratch clone with one worktree | classified; transcript scan skipped |
 | show-me-your-work log.sh | one row with a formula-like cell | written, cell quoted |
-| with the old source still configured | `resolveSkills` with the original pstack source (`df581122`) after the default | 63 skills; 48 ported skills overridden by the originals, and the original router, help and `setup-pstack` back beside `cube-mode` and `cube-help` (gap G1) |
+| with the old source still configured | `resolveSkills` with the original stack's source (`df581122`) after the default | 63 skills; 48 ported skills overridden by the originals, and the original router, help and the model setup skill back beside `cube-mode` and `cube-help` (gap G1) |
 
 ## Gaps and product changes
 
@@ -377,8 +377,8 @@ None of these is in this PR. Each needs a decision or a cube change.
 
 | | gap | effect | what would close it |
 | --- | --- | --- | --- |
-| G1 | a cube that added the original pstack repository (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 48 of the ported skills (all but `cube-mode` and `cube-help`) would be replaced by the unported originals, and the original router, help and `setup-pstack` come back beside them, under their old names: 63 ids (measured with cube's resolver after the retirement) | the user removes that source in Settings, Skills, when activating |
-| G2 | closed: no model setup is needed | `setup-pstack` is retired; OptChat reads model preferences from the chat (M4) | nothing |
+| G1 | a cube that added the original stack's repository (`df581122`, its skills folder) as a skills source keeps it after the default updates; the last source wins | 48 of the ported skills (all but `cube-mode` and `cube-help`) would be replaced by the unported originals, and the original router, help and the model setup skill come back beside them, under their old names: 63 ids (measured with cube's resolver after the retirement) | the user removes that source in Settings, Skills, when activating |
+| G2 | closed: no model setup is needed | the model setup skill is retired; OptChat reads model preferences from the chat (M4) | nothing |
 | G3 | nothing starts or wakes an agent on an event (webhook, schedule, Slack) | `automations/benny` is not ported; `make-bot-ui` stops; audits run at reports, not on the hour | an authenticated wake endpoint whose credential stays in cube's gateway, or scheduled ticks |
 | G4 | OptChat cannot read PR, CI or diff state, nor stop a working thread | Orchestrate and ketchup state PR status as last reported; a looping thread can only be told to stop | read-only forge status for OptChat; a stop tool |
 | G5 | a thread cannot read its own transcript | reflect and the show-me-your-work audit work from a digest | a read-only transcript tool for a thread's own conversation |
@@ -390,7 +390,7 @@ None of these is in this PR. Each needs a decision or a cube change.
 
 ## Retired
 
-`setup-pstack` asked for a reasoning budget, mapped a model to each role,
+The model setup skill asked for a reasoning budget, mapped a model to each role,
 and wrote the result into an always-applied rule. In cube that rule could
 only be a block the user pasted by hand into OptChat's instructions file
 (the old G2), and the user rejected that: no new configuration storage, no
@@ -399,7 +399,7 @@ a store cube does not need, so it is retired instead (**Subtract Before You
 Add**), and cube-mode's M4 reads the user's own words in the chat. What
 setup did, and where it went:
 
-| setup-pstack step | in cube |
+| setup step | in cube |
 | --- | --- |
 | detect models | OptChat matches the preference in `projects`, by provider and id (M4) |
 | load current state, re-runs replace | the newest statement in the chat wins; a later one replaces it |
@@ -408,27 +408,29 @@ setup did, and where it went:
 | write the rule | nothing to write; the chat is the record |
 | offer a verification and a formal verification skill | unchanged skills (`create-verification-skill`, `create-formal-verification-skill`, their `maintain-*`), offered by cube-mode's UI/CLI gate and cube-help's state checks when the question calls for them |
 
-`scripts/check-port.mjs` lists it in `RETIRED`: its folder must not come back, and installed
-text must not send anyone to it (the model rule). A user who types
-`/setup-pstack` reaches `cube-help`, which says it is retired and how to
+Its name is a retired name (Naming): `scripts/check-port.mjs` fails on a
+folder, path or text that names it, so it cannot come back and installed
+text cannot send anyone to it. A user who asks for a model setup command
+reaches `cube-help`, which says it is retired and how to
 state a preference.
 
 ## Naming
 
-The user first asked to adapt *and rename* pstack's router for cube, then
-asked for every pstack skill copied as is and converted. The options below
+The user first asked to adapt *and rename* the original stack's router for cube, then
+asked for every skill of the stack copied as is and converted. The options below
 were put to the user, who chose **B**: the router is `cube-mode` in cube, and
 every other skill keeps its upstream id. Later the user asked for the help
 skill to match, and it is `cube-help`.
 
 Then the user ruled that the two retired brand names (the author's handle
-and the original host's name) are mentioned nowhere: not as a trigger or
+and the original host's name) are mentioned nowhere, and later that the
+original stack's own name goes too, replaced by cube's terms: not as a trigger or
 alias, not in a file or path name, not in docs, manifests, tests or the
 reference copy. So the old slash commands no longer trigger anything (a user
 types `/cube-mode` or `/cube-help`), the router's agent brief is
 `agents/cube-mode-agent.md`, the script packages are `@cube-skill/*`, the
 baseline left the tree (Baseline), and `scripts/check-port.mjs` refuses
-either name in any path or file of the repository
+any of the three in any path or file of the repository
 (`scripts/branding-patterns.mjs`, which spells them backwards so it passes
 its own check). Behavior that depended on the names keeps working:
 
@@ -439,30 +441,31 @@ its own check). Behavior that depended on the names keeps working:
 | `worktree-audit.sh` | scanned the original host's transcript directory, which never exists in a thread machine | scans `WORKTREE_AUDIT_TRANSCRIPTS` when it is set; unset, the scan is skipped as before |
 | `watch-pr` | internal page fields named after GraphQL's page field | `nextAfter`; the GraphQL query still reads GitHub's own field |
 | `check-plan.mjs` | a loop index named for its job | `from` |
+| skill text naming the stack | the stack's name as a product ("its skills", "use it", "make it my own") | "cube-mode", "cube's skills", "the original stack" where the text is about the source; cube.md's tables say "skill term" |
+| the model setup skill | named as retired in cube-help and cube.md, with a `RETIRED` check | not named; cube-help answers a request for model setup; the branding check keeps the name out, folder included |
+| statechart recorded TLC logs | absolute paths of the author's checkout | the same paths under this repository's name; the parsers ignore them (same 264 pass before and after) |
+| `watch-pr` Bugbot recognition | a login containing "bugbot", or the original host's app login with its comment markers; pass keys from `RUN_ID` or the host's automation id | a login containing "bugbot"; pass keys from `RUN_ID`. The host's app is no longer recognised: its threads are ordinary review threads, without pass counts |
 
-`EXTERNAL_IDENTIFIERS` lists by file the only matches the check allows,
-identifiers an outside system defines, all in `watch-pr/github.ts` and its
-recorded test responses: GitHub GraphQL's `PageInfo` page field, which a
-query must name to page through review threads and checks, and the GitHub
-login and comment marker of the Bugbot review app, which `watch-pr` uses to
-recognise Bugbot threads and count their review passes. Renaming them would
-break paging or Bugbot triage; dropping Bugbot recognition would make its
-threads ordinary review threads without pass counts. That is the user's
-call, not a rename.
+`EXTERNAL_IDENTIFIERS` lists by file the only matches the check allows:
+GitHub GraphQL's `PageInfo` page field, in `watch-pr/github.ts` and its
+recorded test responses, which a query must name to page through review
+threads and checks. It is a protocol field, not branding, and renaming it
+would break paging. The user chose to drop the Bugbot recognition that
+needed the original host's identifiers rather than exempt them.
 
 What the resolver does (cubeyard/cube `packages/server/src/skills.ts`):
 sources are read default first, then the user's in order; for each id **the
 last source wins**; the union of ids after `skills.disabled` may hold at most
 **64**, or every thread start is refused before a machine is allocated.
 
-| option | what changes | with the original pstack source still configured | other costs |
+| option | what changes | with the original stack's source still configured | other costs |
 | --- | --- | --- | --- |
 | A. keep upstream ids (the port before the user chose) | nothing | its 51 originals override the ported skills of the same id (silently, unported text); 61 ids, so starts still work | the ids carry the author's handle, not cube; diffs and future upstream updates stay one to one |
 | B. rename only the entry router (chosen) to a cube name, `cube-mode`, keep the leaves | one folder renamed, its links and the mentions of the old command updated | 62 ids; the new router is kept, but the 50 other ported skills it links to are still overridden by the originals (measured) | the user-facing name changes |
-| C. rename every skill (a prefix, e.g. `pstack-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
+| C. rename every skill (a prefix, e.g. `ported-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
 | D. keep ids, set display names | `name:` differs from the folder (cube shows it in Settings only) | as A | the model never sees display names; upstream itself renamed every skill to its folder name (#702) |
 
-Under B, with the original pstack source still configured, `cube-mode`
+Under B, with the original stack's source still configured, `cube-mode`
 itself is safe, but the original router comes back beside it (hidden,
 unported text) and the 50 other ported skills it links to are the unported
 originals (measured when B was chosen: 62 skills, 50 overridden; after
@@ -475,7 +478,7 @@ Merging changes nothing a cube runs until the user chooses the new commit in
 Settings, Skills (check for update, then use that commit). In order:
 
 1. Squash-merge, so the as-is copy commit never sits on main to be pinned.
-2. Remove (or disable) the original pstack source (`df581122`) before, or in the
+2. Remove (or disable) the original stack's source (`df581122`) before, or in the
    same save as, the new default commit (G1; see Naming for why the order matters).
 3. Keep the user's own sources to at most 4 new ids (G8), or every thread start fails.
 4. Smoke-test with a real model: one OptChat turn and one thread with cube-mode (G9). New threads and OptChat's next turn then get it;
