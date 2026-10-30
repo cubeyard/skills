@@ -301,7 +301,7 @@ skills.
 | completeness, notes, cube rules, links, limits | `node scripts/check-port.mjs` | ok: 595 mapped files (55 adapted, 540 unchanged), 2 added, 61 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 61 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
-| cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them | 2,464-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
+| cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
 | OptChat reads it | cube's `optchatSkills().read` | poteto-mode, `../how/SKILL.md`, `references/cube.md`, playbooks, setup-pstack read; a hidden id by name is refused |
 | cube's own skills tests | `node packages/server/test/skills-test.ts` | ok (unchanged code) |
 | check-plan | `bun test check-plan.test.ts` (adapted fixture) | 7 pass |
@@ -327,7 +327,7 @@ None of these is in this PR. Each needs a decision or a cube change.
 | G7 | chat and artifacts cannot play video, and show images as links | ketchup-video and review gates link media | inline media in artifacts |
 | G8 | 61 of the 64 skills a thread can install are used | a user's own sources can add at most 3 new ids (or must disable some) | a higher limit, or hidden skills not counted |
 | G9 | no live model run | how well OptChat and threads follow these skills, and how often the in-thread forms are chosen, is unmeasured | real runs after activation |
-| G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | thread start fetches more | measure; if it matters, move the baseline to its own branch or repository |
+| G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | one run each in a thread machine: the depth-1 fetch took 975 ms and 3.4 MB at this head, against 568 ms and 140 KB at the current pin (`d5041ce9`); not repeated, so the spread is unknown | if it matters, move the baseline to its own branch or repository |
 
 ## Activating (not done here)
 
