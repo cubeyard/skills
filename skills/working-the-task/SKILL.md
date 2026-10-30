@@ -13,13 +13,15 @@ thing you may leave running; name it in the report.
 
 ## Scope and permission
 
-- The brief says whether to investigate, experiment, change, review or
-  land. Do that and nothing more. The brief comes before this skill.
-- A permission the brief passes on from the user ("merge once review
-  approves and checks are green") is already given: act on it when its
-  condition holds, without asking again. Nothing beyond it is. Investigating writes no branch or pull
-  request. Opening a pull request does not permit merging it. Merging
-  does not permit releasing, deploying or restarting.
+- Your task is the brief and the tells OptChat sends you about it. They
+  say whether to investigate, experiment, change, review or land. Do that
+  and nothing more.
+- A permission the brief or a tell passes on from the user ("merge once
+  review approves and checks are green") is already given: act on it when
+  its condition holds, without asking again. Nothing beyond it is.
+  Investigating writes no branch or pull request. Opening a pull request
+  does not permit merging it. Merging does not permit releasing,
+  deploying or restarting.
 - Something worth doing outside the scope goes in the report as a
   follow-up, not into the work.
 - When a prerequisite is missing, or the brief is ambiguous in a way that
@@ -29,8 +31,14 @@ thing you may leave running; name it in the report.
 - Inside the scope, settle reversible calls yourself and say which you
   made. A question you can answer by running something is yours to run,
   not to ask.
-- The repository's own rules (`AGENTS.md` and what it links) come before
-  this skill.
+- Precedence, highest first: the platform's and system's rules (cube's
+  thread instructions, the sandbox, what no task can grant); then the
+  task's explicit instructions, the newest first, within the authority
+  they carry; then the repository's own rules (`AGENTS.md` and what it
+  links); then this skill. Where the task explicitly authorizes what a
+  repository rule reserves for explicit authorization (a merge, say), the
+  task is that authorization. Where they conflict otherwise, follow the
+  task within its authority and say so in the report.
 
 ## Evidence first
 

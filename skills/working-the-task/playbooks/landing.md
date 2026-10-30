@@ -1,8 +1,10 @@
 # Land
 
-Only when the brief says to merge. Land exactly what was reviewed.
+Only when the brief or a later tell from OptChat says to merge, or
+passes on a grant from the user that covers this merge. Land exactly
+what was reviewed.
 
-1. Check the live pull request against the brief: head commit, tree,
+1. Check the live pull request against the task: head commit, tree,
    base, mergeability and checks. Any difference from what the review
    approved is drift: stop and report it.
 2. If the base moved and a rebase is needed, rebase, then prove the patch
