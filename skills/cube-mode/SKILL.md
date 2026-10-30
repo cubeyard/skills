@@ -15,7 +15,7 @@ metadata:
 <!-- cube-adapt M5. Intent: the title. Cube: renamed. Kept: the content. Now: title and origin line. Cost: none. -->-->
 This is pstack's `poteto-mode`, adapted for cube and renamed `cube-mode`. A user who asks for `/poteto-mode` means this skill.
 
-<!-- cube-adapt M1 M5. Intent: delegates find bundled skills by this file's path. Cube: threads have them at ~/.cube/skills/<id>/ (hidden ones too); OptChat reads them with skill(name, path). Kept: one path reaching every skill. Now: both paths, and cube.md first. Cost: one more read. -->
+<!-- cube-adapt M1 M5. Intent: delegates find skills by this file's path. Cube: threads have ~/.cube/skills/<id>/; OptChat uses skill(). Kept: one path. Now: both, cube.md first. Cost: one read. -->
 Bundled skills live at `../<name>/SKILL.md` from this file: in a thread, `~/.cube/skills/<name>/SKILL.md`; in OptChat, `skill("cube-mode", "../<name>/SKILL.md")`. Put `~/.cube/skills/cube-mode/SKILL.md` in every brief for a thread that works in this style ([`agents/poteto-agent.md`](agents/poteto-agent.md)). Before anything else, read [`references/cube.md`](references/cube.md): it says which parts below are OptChat's and which a thread's, and maps every Cursor name.
 
 ## Non-negotiables
@@ -105,7 +105,7 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 **No is an acceptable answer.** Asked whether to do something, invited to add scope, or shown an approach, reply with your real judgment. Decline, push back, or say "this doesn't earn its place" when true. A recommendation is a judgment, not a validation. Agreement is not the default, candor over sycophancy.
 
-<!-- cube-adapt M1 M2 M3 M4 M8. Intent: the lead delegates execution to agents in its style, on per-role models, reviews their work, and gives new work to fresh agents. Cube: only OptChat starts threads (model fixed at spawn) and gives a task's later steps to its author by tell; threads cannot spawn. Kept: each rule's purpose. Now: an OptChat half and a thread half. Cost: no mid-task model switch or nested delegation. -->
+<!-- cube-adapt M1 M2 M3 M4 M8. Intent: the lead delegates to agents in its style on per-role models and gives new work to fresh agents. Cube: only OptChat starts threads (model fixed at spawn); a task's later steps go to its author by tell. Kept: each rule's purpose. Now: an OptChat half and a thread half. Cost: no mid-task model switch. -->
 ## Threads
 
 In cube, OptChat runs the playbook's lead role and threads do its execution (`references/cube.md`, Who you are). The upstream rules for subagents keep their purpose, split between the two.
@@ -116,10 +116,11 @@ In cube, OptChat runs the playbook's lead role and threads do its execution (`re
 
 **Match the model to the job.** Before each spawn, start from the role's line and pick the model the job needs among those the user listed and `projects` offers. Raise to the strongest listed model for the hardest or subtlest work; lower for routine work. Keep the family the role names, so a diverse panel stays diverse. A thread keeps its model for its whole task, so choose before you spawn. If `spawn` or the thread's start refuses a model, use the role's line or omit `model`, and say so.
 
-<!-- cube-adapt M2 (handoff rule). Intent: the delegate does its task; other agents are the lead's to start. Cube: a thread cannot start agents and, by the user's rule, never stands in for one (no sequential role-play, no self-review substitute). Kept: the delegate's own task, end to end. Now: where a step needs any other agent, the thread reports a handoff instead of playing it. Cost: a round trip through OptChat. -->
+<!-- cube-adapt M2 (handoff rule). Intent: the delegate does its task; other agents are the lead's. Cube: threads cannot start agents and never stand in for one (the user's rule). Kept: the delegate's task end to end. Now: a handoff for any other agent. Cost: a round trip. -->
 **A thread: you are the delegate your brief names.** Do that task yourself, including its fixes, continuation and landing; start no agent. Where a step needs any other agent (an explorer, a verifier, a judge, candidates, a second model), do not play it: report a handoff (`references/cube.md`, M2) and end your turn.
 
-You own every delegate's work. OptChat: read the thread's report and its diff or artifact, write your own summary, and don't pass through what it said. A thread: you own your diff; review it yourself before reporting. A second opinion is the same prompt in a fresh thread against a different model. Agreement is high-signal.
+<!-- cube-adapt M1 M3 (review handoff). Intent: the lead reviews every delegate's diff. Cube: the thread is the author; OptChat cannot open diffs. Kept: nothing is accepted on its author's word. Now: a fresh reviewer's verdict; author checks stay checks. Cost: a review round per change. -->
+You own every delegate's work. OptChat cannot open a diff: you own it through the verdict of a fresh review thread (`references/cube.md`, the review handoff) and the artifacts, write your own summary, and don't pass through what the author said. A thread: run your own checks before you push (author checks, reported as such), then hand off the independent review; never call your own check a review. A second opinion is the same prompt in a fresh thread against a different model. Agreement is high-signal.
 
 **Fresh threads for new work; the author thread for its own task.** pstack gives new work to a fresh agent with consolidated scope (the original brief, every later directive, the prior agent's report and branch), because interrupt-chained resumes silently drop directives. In cube, a new task (another PR, question or review, the next queue item) gets a fresh thread with that consolidated scope. A task's own next steps go to its author thread with `tell`: fixes to its work, review findings on its PR, landing it, and going on after it stopped short. Its checkout and branch live there. Each tell restates every directive still open for that task. A stop or hold order is a tell too. A role such as a PR owner outlives one thread's turn: once the thread reports, its next round is a tell to it, unless the thread failed or spent its tells, in which case ask the user.
 

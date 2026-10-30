@@ -1,7 +1,7 @@
 ### Bug fix
 
 <!-- cube-adapt M1 M2 M4. Intent: the lead keeps judgment while a delegate on the role's model writes the code. Cube: a thread cannot start a delegate; OptChat chose this thread's model from the role line when it spawned it. Kept: the lead's planning, review and verification, and the role's model. Now: the thread writes the code itself, then reviews its own diff before verifying; independent review comes from a fresh thread OptChat starts. Cost: no second model inside the task. -->
-**You own this task. Plan, review, verify.** In cube you are the thread that does the investigation and the fix; keep the lead's discipline over your own work (the Threads section).
+**You own this task. Plan, review, verify.** In cube you are the thread that does the investigation and the fix, under the lead's discipline for planning and evidence; the lead's review and verification of the fix is a fresh thread you hand off to (step 7).
 
 Be scientific. Every shipped line traces to runtime evidence. Belt-and-suspenders that "might help" is a hypothesis, not a fix. It does not ship. When evidence refutes a hypothesis, revert what it motivated. The smallest change the evidence justifies ships, nothing more.
 
@@ -14,6 +14,8 @@ Don't guess. Drive a long or stubborn hunt as a loop inside your own turn, with 
 4. Verify on the same surface. The original repro now passes. "Inconclusive" or wrong-surface is not a pass. Flag it. Unit tests show branch behavior, not bug absence.
 5. Stage the commits so the failing repro lands before the fix in git history. See the **tdd** skill for the failing-test-first cadence when the bug has a cheap local test path. Skip it when the test would be expensive, integration-heavy, or unclear.
    This is the canonical **sequence-verifiable-units** principle skill, the failing test first and the fix on top.
+<!-- cube-adapt M3 (review handoff). Intent: the lead verifies the delegate's fix on the same surface and reviews it. Cube: the implementing thread is the delegate, so the lead's review would be the author reviewing itself; OptChat, the lead, has no machine and cannot open a diff or rerun a repro. Kept: verification on the same surface by an agent that did not write the fix. Now: step 4 stays as the author's check; step 7 hands off the independent review and verification. Cost: a round through OptChat before the fix is accepted. -->
 6. Run **Opening a PR**.
+7. Hand off the independent review and verification (`../references/cube.md`, the review handoff): the reviewer reruns the failing-then-passing repro at the PR head. End your turn; fixes come back as tells.
 
 **Reply:** what was broken, root cause, fix, how you verified. Paste failing-then-passing repro output verbatim.

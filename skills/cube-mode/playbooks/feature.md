@@ -17,7 +17,9 @@
 6. Rebase into small, ordered commits. Stack follow-ups.
    Use the **sequence-verifiable-units** principle skill, building, verifying, and committing each small unit before the next.
 7. If the design is contested, `interrogate` before shipping.
+<!-- cube-adapt M3 (review handoff). Intent: the lead reviews and verifies the delegate's implementation. Cube: the implementing thread is the delegate, so the lead's review would be the author reviewing itself; OptChat, the lead, has no machine and cannot open a diff or rerun a repro. Kept: an agent that did not write the code verifies it on the real surface. Now: step 9 hands off the review; step 5 stays as the author's check. Cost: a round through OptChat. -->
 8. Run **Opening a PR**.
+9. Hand off the independent review and verification (`../references/cube.md`, the review handoff): the reviewer drives the change on the matching surface at the PR head. End your turn; fixes come back as tells.
 
 <!-- cube-adapt M2 M8. Intent: coupled code has one owner; only independent artifacts fan out; a new phase gets a fresh owner rather than chained interrupts. Cube: the owner is one thread and cannot fan out; only OptChat starts threads. Kept: single owner for coupled work, fan-out only for independent artifacts, the checkpoint rewrite. Now: the owner thread does its own task; any fan-out goes to OptChat as a handoff, a new phase to a fresh thread, fixes within a phase as tells to the owner. Cost: no internal fan-out after the blocking phase. -->
 Code-coupled work (one feature, one migration) goes to a single owner thread with the checkpoint inline. That owner works its phases in order; it does not fan out. OptChat's fan-out is for slices that produce independent artifacts (audits, cross-subsystem investigations, competing experiments). Rewrite the checkpoint at phase boundaries. OptChat gives a new phase to a fresh thread rather than chaining interrupts.

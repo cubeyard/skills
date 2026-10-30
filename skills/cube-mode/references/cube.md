@@ -91,7 +91,8 @@ its brief makes it: the delegate pstack's lead hands a task to (the
 implementer of a bug fix, feature, refactor, perf change or hillclimb
 attempt; a verifier; an explorer; a reviewer). It does that task itself,
 start to end, including the lead's hands-on steps (reproduce, verify,
-review its own diff before reporting) and the task's own continuation,
+check its own diff before pushing, an author check that never stands in
+for the independent review, which is a handoff: see M3) and the task's own continuation,
 fixes and landing.
 
 Wherever a skill, playbook or template requires *another* agent (spawn,
@@ -138,6 +139,9 @@ verification, judging or cross-model pass is done by a thread that neither
 wrote the change nor reviewed something else, started by OptChat. Its
 brief names what to review, the head commit and the criteria, never the
 author's reasoning.
+
+<!-- cube-adapt M2 M3 (review handoff). Intent: the lead reviews and verifies what its delegate wrote, so writing and judging are two agents. Cube: the implementing thread is the delegate, so the lead's review would be the author reviewing itself; OptChat, the lead, has no machine and cannot open a diff or rerun a repro. Kept: two agents for every change: the author, and a reviewer that reruns the evidence. Now: after pushing, the author hands off one fresh review-and-verification thread and ends its turn; findings return by tell. Cost: one more round through OptChat, and one machine, per change. -->
+**The review handoff.** pstack's lead reviews and verifies every delegate's change itself. In cube the delegate is the thread that wrote the change, so that review goes to a fresh thread. When the change is pushed, the author reports a handoff (M2) with one ready brief for a review-and-verification thread: the PR and its exact head SHA, the repro, measurement or pin to rerun on the real surface, the criteria (the playbook's own bar: the repro passes, the number moves past noise, behavior is unchanged), what the reviewer may not do (no edits, no pushes) and the verdict it returns (`PASS`, `PASS+NOTES` or `FAIL` with evidence). Never the author's reasoning. Then the author ends its turn. OptChat starts the reviewer, reads its verdict, and tells findings back to the author, whose fixes are the same task; a new head gets a delta review by the same reviewer thread. The author's own checks before pushing (tests, its own rerun of the repro, a reread of the diff) stay: they are author checks, reported as such, never the review.
 
 **M8. Same task, same thread.** pstack gives a fix round, retry or follow-up
 to a fresh subagent with the consolidated scope, because chained resumes

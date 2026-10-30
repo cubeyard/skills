@@ -1,7 +1,7 @@
 ---
 name: no-comments
-# cube-adapt M2 M3. Intent: a fresh Comment Sicko judges the comments. Cube: it is a thread OptChat starts, or a labeled self pass. Kept: the fresh reviewer. Now: the description names both. Cost: none.
-description: "Get a Comment Sicko pass (a fresh thread, or a labeled self pass), fix accepted findings, and offer encodings for claimed constraints."
+# cube-adapt M2 M3. Intent: a fresh Comment Sicko judges the comments. Cube: it is a fresh thread OptChat starts, requested by handoff; never the author's own pass. Kept: the fresh reviewer. Now: the description says so. Cost: a round trip.
+description: "Get a Comment Sicko pass from a fresh thread (by handoff, never your own pass), fix accepted findings, and offer encodings for claimed constraints."
 disable-model-invocation: true
 ---
 
