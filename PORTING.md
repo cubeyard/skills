@@ -7,7 +7,7 @@ repository ports all of it to cube, where that one chat becomes two agents:
 OptChat, which directs and has no machine, and threads, which each do one
 bounded task in their own machine and report. Nothing is dropped. Every skill
 is here under its own id, with its references, scripts and assets, and every
-change from the original is marked where it happens and justified.
+change from the original is justified here.
 
 ## Layout
 
@@ -16,7 +16,7 @@ upstream/pstack/        pstack as published, byte for byte (git tree 4719e1c4); 
 upstream/pstack.sha256  sha256 of each of its 573 files
 upstream/README.md      provenance: repository, commit, why this commit, how to update
 skills/<id>/            what cube installs: 58 ported skills + cube's own 3
-skills/cube-mode/references/cube.md   the cube adapter every ported skill relies on (M1-M13)
+skills/cube-mode/references/cube.md   the cube adapter every ported skill relies on (the rules M1-M13, by section name)
 scripts/check-port.mjs  the checks below; --matrix prints COVERAGE.md, --diff <id> shows a port
 COVERAGE.md             every upstream file and where it went (generated)
 THIRD_PARTY_NOTICES.md  pstack's MIT license, beside this repository's Apache-2.0
@@ -42,32 +42,39 @@ node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against
    `no-comments/agents/comment-sicko.md`), since cube has no agent definitions.
    pstack's `LICENSE` is copied into every ported folder, because cube
    installs each folder on its own.
-3. **Adapt in place.** Each change is an edit at the spot it concerns, with
-   a note right above it. A file that needs no change stays byte-identical
-   (33 of the 58 skills are unchanged, and 533 of 595 mapped files).
+3. **Adapt in place.** Each change is an edit at the spot it concerns. A
+   file that needs no change stays byte-identical (33 of the 58 skills are
+   unchanged, and 533 of 595 mapped files).
 4. **Check it mechanically** (`node scripts/check-port.mjs`, below), so that
    "no silent omission" is a test, not a promise.
 
-### Notes
+### No notes in installed files
 
-Every change from the baseline carries a note within 15 lines above it (or
-above the fenced block it sits in), in the file's own comment syntax:
-`<!-- cube-adapt ... -->` in Markdown, `# cube-adapt ...` in YAML
-frontmatter and shell, `// cube-adapt ...` in TypeScript and JavaScript.
-Each note gives five things, and the checker refuses a note that lacks one:
+The first port put a `cube-adapt` note (Intent, Cube, Kept, Now, Cost, and
+the rules it applied) above every change. The user reversed that on
+2026-10-30: installed skills must read as operational instructions, not a
+narrated port. The notes are removed, and `skills/` cites no rule by number;
+cube.md names its rules by section instead:
 
-| label | says |
+| rule | section of `references/cube.md` |
 | --- | --- |
-| `Intent:` | what the original was for, in pstack's own terms |
-| `Cube:` | the cube fact that stops it working as written |
-| `Kept:` | the principle that survives the change |
-| `Now:` | the concrete mapping |
-| `Cost:` | what is lost or what it costs |
+| M1 | Who you are |
+| M2 | Delegation, Handoff |
+| M3 | Delegation, Independent review (and the review handoff) |
+| M4 | Models |
+| M5 | (discovery; no section, the Tools table's skill row) |
+| M6 | Questions |
+| M7 | Waiting |
+| M8 | Same task, same thread |
+| M9 | Authority |
+| M10 | Records and memory |
+| M11 | Environment |
+| M12 | Cursor-only features |
+| M13 | Links |
 
-The note cites the mapping rules (M1-M13, below) it applies. Notes are read
-by the agents too: they explain the reason for an instruction at the place it
-applies, which is what upstream's own authoring rule asks of a rule that would
-be confusing without its reason.
+The reason for each change is the mapping rules below and the commit that
+made it (the port's notes are in git history before the removal);
+`node scripts/check-port.mjs --diff <id>` shows the change itself.
 
 ### What the checker enforces
 
@@ -75,16 +82,14 @@ be confusing without its reason.
 | --- | --- |
 | the baseline is upstream | every file's sha256 against the manifest; the git tree of `upstream/pstack` equals `4719e1c4` |
 | nothing is dropped | each of the 537 upstream skill and agent files, and the license in each of 58 folders, has its file under `skills/` |
-| no silent change | `git diff --no-index -U0` per file; every hunk needs an own note in reach |
-| every note is complete | the five labels |
-| new files explain themselves | a file with no upstream counterpart needs a note |
+| no port commentary | no installed file contains `cube-adapt`, and no installed Markdown file an M1-M13 label |
 | cube can read it | folder id, `name` = id, description 1-1024 characters, surface `thread`/`optchat`/`both`, no symlinks |
 | cube can install it | at most 64 skills, 2000 files, 8 MiB |
 | links resolve where installed | every relative Markdown link stays inside `skills/` and exists |
 | OptChat reads it in one call | each SKILL.md listed to OptChat is at most 30,000 characters (`SKILL_PAGE`) |
 | non-skill upstream files are accounted for | every run fails on an upstream file that is neither mapped nor given a reason (so CI catches a new one) |
 | the handoff rule (M2, M3) | every installed Markdown file is scanned for known substitute wordings (sequential roles, a self-review label, a labeled self pass, "review your own diff", OptChat reading a diff), from `scripts/handoff-patterns.mjs`; regression fixtures (`node --test scripts/check-port.test.mjs`, also in CI) prove each known bad wording is caught and the port's own wordings are not; an installed file whose upstream hands work to another agent must name a handoff or OptChat. **Limit:** these are keyword checks. They keep known regressions out but cannot prove the rule; a substitute worded another way passes, so the rule still needs a semantic review |
-| surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines (a note that mentions `surface:`) are ignored |
+| surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines are ignored |
 
 ## How cube finds these skills (M5, verified)
 
@@ -320,7 +325,7 @@ skills.
 | what | how | result |
 | --- | --- | --- |
 | baseline fidelity | `git rev-parse HEAD:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
-| completeness, notes, cube rules, links, limits, handoff rule | `node scripts/check-port.mjs` | ok: 595 mapped files (62 adapted, 533 unchanged), 2 added, 61 skills, 87 links |
+| completeness, no port commentary, cube rules, links, limits, handoff rule | `node scripts/check-port.mjs` | ok: 595 mapped files (62 adapted, 533 unchanged), 2 added, 61 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 61 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
 | cube installs it | `skillInstallScripts` run in bash, as a thread machine runs them, fetching the pushed head from GitHub over HTTPS | 2,486-byte script (limit 8,192); installed tree equals `skills/` byte for byte, exec bits too |
@@ -359,7 +364,7 @@ to the user, who chose **B**: the router `poteto-mode` is `cube-mode` in cube,
 and every other skill keeps its upstream id. `/poteto-mode` in a user's words
 still triggers it (its description says so). The upstream copy keeps
 `poteto-mode`; `scripts/check-port.mjs` maps it by its `RENAMED` table, so the
-coverage, diff and note checks treat `upstream/pstack/skills/poteto-mode/*` and
+coverage and diff checks treat `upstream/pstack/skills/poteto-mode/*` and
 `skills/cube-mode/*` as one file each. The tool package inside its scripts
 keeps its upstream internal name (`@cursor-skill/poteto-mode-tools`), since
 nothing routes by it. What the

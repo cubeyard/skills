@@ -1,4 +1,5 @@
-// The handoff rule (skills/cube-mode/references/cube.md, M2 and M3) as
+// The handoff rule (skills/cube-mode/references/cube.md, Handoff and
+// Independent review) as
 // keyword patterns. These catch wordings that offer a thread's own pass in
 // place of another agent, or ask OptChat to read a diff it cannot open.
 // They are a regression net, not a proof: a substitute worded some other
@@ -22,6 +23,4 @@ export const SUBSTITUTES = [
   /OptChat(?![^.]*\bcannot\b)[^.]{0,60}\b(reads?|opens?|inspects?)\b[^.]{0,30}\bdiffs?\b/i,
 ];
 export const DELEGATES = /subagent|\bspawn|fan (them )?out|comment-sicko|in parallel|\b(Task) (call|tool|prompt)|`Task`/i;
-// The prose a check reads: a file without its cube-adapt notes.
-export const prose = (text) => text.split("\n").filter((line) => !line.includes("cube-adapt")).join("\n");
-export const substitutesIn = (text) => SUBSTITUTES.filter((re) => re.test(prose(text)));
+export const substitutesIn = (text) => SUBSTITUTES.filter((re) => re.test(text));

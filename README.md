@@ -22,8 +22,9 @@ asks a thread to start another agent.
 
 `upstream/pstack/` is the unmodified original, which cube never installs.
 [PORTING.md](PORTING.md) explains the method, the mapping rules and the gaps;
-[COVERAGE.md](COVERAGE.md) lists every upstream file and where it went; every
-change in `skills/` carries a `cube-adapt` note beside it. Check the port with:
+[COVERAGE.md](COVERAGE.md) lists every upstream file and where it went.
+Installed skills read as plain instructions: the reasons for each change live
+in PORTING.md and git history, not in `skills/`. Check the port with:
 
 ```sh
 node scripts/check-port.mjs
@@ -57,8 +58,10 @@ metadata:
 - The folder name is the skill name: lowercase letters, digits and inner
   hyphens, at most 64 characters. A description is at most 1024 characters.
 - Plain files only: no symlinks or submodules.
-- A ported pstack skill keeps upstream's text except where a `cube-adapt`
-  note explains a change; `scripts/check-port.mjs` enforces it.
+- A ported pstack skill keeps upstream's text except where cube needs a
+  change; explain the change in PORTING.md, never in the installed file.
+  `scripts/check-port.mjs` refuses adaptation notes and mapping-rule labels
+  (M1-M13) under `skills/`.
 - Link other skills as `../<name>/SKILL.md`. cube installs every skill as
   `~/.cube/skills/<name>/`, so these links keep working, and a user's
   override of `<name>` is what the link reaches.

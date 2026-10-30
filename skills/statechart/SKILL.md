@@ -18,7 +18,6 @@ Work in a scratch folder outside the repo. Write a TLA+ spec and its config. The
 
 `scripts/statechart.ts` is TypeScript, so run it with a runtime that can execute TypeScript.
 
-<!-- cube-adapt M11. Intent: the first run fetches its own TLC and Java. Cube: a thread's machine has node but no mise; it reaches the network over HTTPS. Kept: the self-installing first run. Now: install mise first when it is missing; measured in a cube thread: mise 2026.10.22, then this script installed Java and TLC and checked the Counter corpus spec, matching its committed chart. Cost: one extra install, a few minutes on a fresh machine. -->
 The first run installs TLC and Java with mise and needs the network. In a cube thread, mise is not installed: if `command -v mise` fails, run `curl -fsSL https://mise.run | sh` and put `~/.local/bin` on `PATH` first, and say so.
 
 ## Write the spec

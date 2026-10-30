@@ -39,12 +39,10 @@ Use the helper `scripts/log.sh <logfile> <phase> <decision> <why> <evidence> <re
 
 Log decision points and checkpoints, not every action: a fork chosen, a unit completed with its verification result, a pivot or revert with its trigger, a blocker surfaced, a gate fixed. For loop runs, one row per iteration. Skip the trivial and self-evident.
 
-<!-- cube-adapt M10. Intent: a run is one agent's conversation. Cube: in cube a run is one thread (its later turns included) or one OptChat task. Kept: the run boundary and the start rows. Now: a new thread, or a pickup, starts a new run; its evidence names the thread id. Cost: none. -->
 A run is one agent conversation, including its later turns and any summary of it (in cube, one thread). A pickup, a replacement thread, or a new chat starts a new run. When a run adds to a log that already has rows, its first row has phase `start`, and so does its first row after another run's `start` row. So a run that comes back to a log in a later turn first reads the log's last rows to see whether another run wrote since. A `start` row names the `ts` range of the rows before it that this run did not write, and its evidence names this run, such as its agent id. Use phase `start` for nothing else.
 
 ## Where it lives
 
-<!-- cube-adapt M10. Intent: an uncommitted working log by default. Cube: an untracked file leaves with the thread's machine and no other agent sees it. Kept: uncommitted by default, committed when stakes need it. Now: keep it out of git while working, and put it in the report or an artifact before the thread ends. Cost: none. -->
 By default the log is a working artifact, not committed. Keep it at `decisions.tsv` in the work dir, or `.audit/<task-slug>.tsv` when several efforts run at once, and leave it out of git. In cube, attach it to your report or an artifact before you end, since the machine leaves with the thread.
 
 Commit it only when the work is ambitious enough that a reviewer needs the trail to trust the result.
@@ -56,7 +54,6 @@ Commit it only when the work is ambitious enough that a reviewer needs the trail
 
 ## Audit the log against the transcript
 
-<!-- cube-adapt M10. Intent: audit the log against the real transcript of this run. Cube: a thread cannot read its transcript file; its own context is the record; OptChat can read a thread's history(id). Kept: the audit against what happened, this run only. Now: a thread audits against its context and the evidence pointers; OptChat audits a thread's log against history(id). Cost: a thread's audit relies on its own memory of the run. -->
 At the end of the run, before handing back, check the log told the truth. A thread checks it against its own context and every evidence pointer (its transcript file is out of its reach); OptChat checks a thread's log against `history(id)`. Read nothing outside this run. Walk this run's rows against what actually happened. Each stretch of them begins at one of this run's `start` rows, or at the first row if this run created the log, and ends at the next `start` row of another run:
 
 - Check that every row maps to a real decision or action.
@@ -67,7 +64,6 @@ Correct the log, not the story. The audit never edits or removes a row, even an 
 
 ## Cross-model review of the trail
 
-<!-- cube-adapt M3 M4. Intent: a reviewer from another model family scans the trail; self-review is no substitute. Cube: only OptChat starts a reviewer (a thread on another model, with the trail and history(id) pasted); a thread cannot. Kept: cross-family review, the flags, the Attention section with the reviewer's model. Now: a thread commits or attaches its trail and reports that the review is pending; OptChat starts the reviewer thread. Until it runs, the Attention section says `reviewed by: none yet (cross-model review pending)`. Cost: the review arrives after the run's own report. -->
 Before handing back, have a reviewer on a different model family from the one that did the work scan the trail. Self-review is not a substitute. In cube a thread cannot start one: attach or commit the trail and say in your report that cross-model review is pending; OptChat starts the reviewer thread with the trail and the run's `history(id)`. The reviewer flags what the user should pay attention to. Not a redo of the work, a scan for what's suboptimal or risky.
 
 - Decisions logged with weak or absent evidence.

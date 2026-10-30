@@ -1,4 +1,3 @@
-<!-- cube-adapt M10 M11 (new file). Intent: each evidence category gets a source playbook adapted from source-playbook.md's examples, and real-time deliberation that never reached a doc is a category of its own. Cube: the user's deliberation with cube happens in their one chat with OptChat, which a thread reads only through its memory tools (a summary view, zoom, date), read only; Slack and its kin are usually not reachable. Kept: the real-time chat category and the slack.md shape (how to search it, common pitfalls). Now: this playbook, for OptChat's chat. Cost: it covers one person's chat with an agent, not a team's channels; say so in Sources Consulted. -->
 # OptChat's chat
 
 The user's chat with OptChat is where they asked for work, weighed options, and decided. Thread reports appear in it too, tagged `work`, never as the user's words.

@@ -10,7 +10,6 @@ When the task matches no playbook, design one. The deliverable before any code i
 
 ## Start
 
-<!-- cube-adapt M5 (rename). Intent: point at pstack's router by its name. Cube: the router is renamed cube-mode (the user's option B). Kept: what the text routes to. Now: /cube-mode and cube-mode. Cost: none. -->
 Open a todolist whose first item is to read the Principles section of the **cube-mode** skill. Then add the phases below as todos.
 
 ## Phase A: Frame
@@ -29,8 +28,7 @@ Decompose into atomic, independently-landable units. Sequence riskiest-unknown-f
 
 - Build the verification harness before the work, with the baseline captured from the pre-change state, so the check reads as "old value vs new value".
 - For one-way-door design decisions, run the **architect** skill (it runs **arena**). Skip it for mechanical work whose shape is already concrete. A second arena over a settled design is over-engineering (the **laziness-protocol** principle skill).
-<!-- cube-adapt M1 M2. Intent: parallel workers across seams, each with its own branch. Cube: workers are threads only OptChat starts. Kept: seams only, separate branches, don't over-fan. Now: the designed playbook marks the fan-out phases; the thread hands them off and runs only its own phases (M2 handoff rule). Cost: none. -->
-- Decide what fans out. Parallelize only across seams, and give each worker its own branch (the **separate-before-serializing-shared-state** principle skill). In cube, workers are threads OptChat starts: mark in the designed phase list which phases fan out, and report them as a handoff (`../cube-mode/references/cube.md` M2); a thread runs only its own phases. Don't over-fan.
+- Decide what fans out. Parallelize only across seams, and give each worker its own branch (the **separate-before-serializing-shared-state** principle skill). In cube, workers are threads OptChat starts: mark in the designed phase list which phases fan out, and report them as a handoff (`../cube-mode/references/cube.md`, Handoff); a thread runs only its own phases. Don't over-fan.
 - Write the designed phase list down. That list is what the human reviews.
 
 Then execute the design. Add its steps to the todolist as concrete items between the Phase C and Phase D entries. Run each under the Phase C loop discipline, and weave the Phase D log through them, a row as each step lands, rather than saving the whole trail for the end.
@@ -40,7 +38,6 @@ Then execute the design. Add its steps to the todolist as concrete items between
 Each unit is an experiment. State the hypothesis, make the smallest change, measure against the predicate on the real artifact, keep it if it advanced, revert it if it didn't. Apply the **sequence-verifiable-units** principle skill, verifying each unit before starting the next instead of batching checks at the end.
 
 - Verify by inspecting the artifact, never a self-report. When something passes too easily, suspect the observation method before the system.
-<!-- cube-adapt M3. Intent: delegated work gets a judge. Cube: a judge is a fresh thread OptChat starts; in a thread, your own check is self-review. Kept: the judge and the gate rules. Now: judge threads by handoff; your own check never stands in for one. Cost: none. -->
 - Pair delegated work with a judge (a fresh thread OptChat starts, requested by handoff; your own check never stands in for it). If a worker games the gate, reset and harden the contract. If the gate itself is wrong, fix the gate in its own change rather than routing around it.
 - A verdict is VERIFIED, NOT VERIFIED, or INCONCLUSIVE. Inconclusive is not a pass. Don't hide a negative.
 
