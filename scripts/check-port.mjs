@@ -170,6 +170,21 @@ function frontmatter(text) {
   }
   return out;
 }
+// metadata.cube.surface as YAML nests it, ignoring comment lines (a
+// cube-adapt note may mention "surface:").
+function surfaceOf(text) {
+  const block = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
+  const lines = block.split("\n").filter((l) => l.trim() && !/^\s*#/.test(l));
+  let path = [];
+  for (const line of lines) {
+    const m = /^(\s*)([A-Za-z0-9_-]+):\s*(.*?)\s*$/.exec(line);
+    if (!m) continue;
+    const depth = m[1].length;
+    path = [...path.filter((p) => p.depth < depth), { depth, key: m[2] }];
+    if (path.map((p) => p.key).join(".") === "metadata.cube.surface") return m[3].replace(/^["']|["']$/g, "");
+  }
+  return "thread";
+}
 const ids = fs.readdirSync(skillsDir).filter((name) => fs.statSync(path.join(skillsDir, name)).isDirectory()).sort();
 const listed = { thread: [], optchat: [] };
 let files = 0, bytes = 0;
@@ -183,7 +198,7 @@ for (const id of ids) {
   if (!fm.name || fm.name.length > LIMITS.name) fail(`skills/${id}: name must be 1 to ${LIMITS.name} characters`);
   if (fm.name && fm.name !== id) fail(`skills/${id}: name ${fm.name} is not the folder name`);
   if (!fm.description || fm.description.length > LIMITS.description) fail(`skills/${id}: description must be 1 to ${LIMITS.description} characters (${fm.description?.length})`);
-  const surface = /surface:\s*(\w+)/.exec(/^---[\s\S]*?\n---/.exec(text)[0])?.[1] ?? "thread";
+  const surface = surfaceOf(text);
   if (!["thread", "optchat", "both"].includes(surface)) fail(`skills/${id}: surface ${surface}`);
   const hidden = fm["disable-model-invocation"] === "true";
   if (!hidden && surface !== "optchat") listed.thread.push(id);
@@ -231,6 +246,12 @@ const BASELINE_ONLY = [
   [/^LICENSE$/, "copied unchanged into every ported skill folder (rows above), and named in THIRD_PARTY_NOTICES.md"],
   [/^\.gitignore$/, "baseline only: ignores node_modules and logs in the plugin tree"],
 ];
+// Every upstream file outside skills/ and agents/ needs a stated reason
+// (checked on every run, so CI catches a new upstream file).
+for (const rel of baselineFiles) {
+  if (rel.startsWith("skills/") || RELOCATED[rel]) continue;
+  if (!BASELINE_ONLY.some(([re]) => re.test(rel))) fail(`baseline ${rel}: neither mapped into skills/ nor explained in BASELINE_ONLY`);
+}
 // COVERAGE.md is this table; it must not go stale.
 const table = [];
 const row = (line) => table.push(line);
@@ -248,7 +269,6 @@ if (args.includes("--matrix")) {
   for (const rel of baselineFiles) {
     if (rel.startsWith("skills/") || RELOCATED[rel]) continue;
     const reason = BASELINE_ONLY.find(([re]) => re.test(rel));
-    if (!reason) fail(`baseline ${rel}: neither mapped nor explained`);
     console.log(`| ${rel} | | ${reason ? reason[1] : "UNEXPLAINED"} |`);
   }
 }
