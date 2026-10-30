@@ -17,4 +17,4 @@ jobs:
       # skill rules, links and limits (PORTING.md).
       - run: node scripts/check-port.mjs
       # Fixtures for the handoff patterns the check uses.
-      - run: node --test scripts/
+      - run: node --test scripts/check-port.test.mjs

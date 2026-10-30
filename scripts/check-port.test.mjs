@@ -1,4 +1,4 @@
-// Regression fixtures for the handoff patterns (node --test scripts/).
+// Regression fixtures for the handoff patterns (node --test scripts/check-port.test.mjs).
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { substitutesIn } from "./handoff-patterns.mjs";
