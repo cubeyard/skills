@@ -1,6 +1,5 @@
 # Explainer Prompt Template
 
-<!-- cube-adapt M2. Intent: the explainer gets this prompt with the explorers' findings. Cube: the explainer is a thread or a pass. Kept: the template. Now: the words. Cost: none. -->
 Build the explainer's prompt from this template (a thread's brief, which OptChat sends). Fill in the placeholders.
 
 ---

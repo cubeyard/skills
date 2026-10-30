@@ -1,6 +1,5 @@
 # Architect runner prompt
 
-<!-- cube-adapt M2 M11. Intent: each runner works in isolation on the same inputs. Cube: a runner is a thread on its own branch, started by OptChat. Kept: independence between candidates. Now: the branch the orchestrator names. Cost: none. -->
 The orchestrator passes this file through to every candidate runner during Phase B and fills in the variable inputs around it: the task, the Phase A grounding artifacts, the isolated working location, and where to write outputs. In cube, a runner is a thread on its own branch. What matters is independence between candidates.
 
 You are producing one candidate design in architect's parallel exploration. Read the **architect** skill in full first. That's the workflow you're inside. Output a candidate design package: type sketch, function signatures, module map, and prose rationale shaped per [`rationale-template.md`](rationale-template.md).

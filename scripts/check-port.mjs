@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Checks the pstack port (PORTING.md): the baseline is upstream byte for
-// byte, every upstream file has a home in skills/, every change from the
-// baseline carries a cube-adapt note, and skills/ obeys cube's rules.
+// byte, every upstream file has a home in skills/, installed files carry no
+// port commentary, and skills/ obeys cube's rules.
 //
 //   node scripts/check-port.mjs            check, exit 1 on any failure
 //   node scripts/check-port.mjs --matrix   also print the file coverage table
@@ -11,7 +11,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { DELEGATES, prose, substitutesIn } from "./handoff-patterns.mjs";
+import { DELEGATES, substitutesIn } from "./handoff-patterns.mjs";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const baseline = path.join(root, "upstream/pstack");
@@ -32,11 +32,10 @@ const RELOCATED = {
 };
 // cube's own skills, not ported from pstack.
 const CUBE_OWN = new Set(["briefing-a-thread", "opening-a-pull-request", "prove-it-works"]);
-// The five parts every adaptation note gives (PORTING.md, "Notes").
-const LABELS = ["Intent:", "Cube:", "Kept:", "Now:", "Cost:"];
-// A hunk is covered by a note inside it or at most REACH lines above it
-// (a note cannot sit inside a fenced block or a YAML scalar).
-const REACH = 15;
+// Port commentary that must not reach an installed file (PORTING.md,
+// "No notes in installed files"): an adaptation note, or a mapping-rule
+// label (M1-M13) in Markdown. The reasons live in PORTING.md and git history.
+const COMMENTARY = [/cube-adapt/, /\bM(?:1[0-3]|[1-9])\b/];
 // cube's limits (cubeyard/cube packages/server/src/skills.ts).
 const LIMITS = { skills: 64, files: 2000, bytes: 8 * 2 ** 20, description: 1024, name: 64 };
 const ID = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
@@ -82,26 +81,10 @@ for (const [from, to] of Object.entries(RENAMED)) if (!fs.existsSync(path.join(b
 const mappedTargets = new Set(pairs.map((p) => p.to));
 const skillFiles = walk(skillsDir);
 
-// 3. Each changed file: every hunk is covered by a complete note.
-function notes(text) {
-  const found = [];
-  text.split("\n").forEach((line, index) => { if (line.includes("cube-adapt")) found.push({ line: index + 1, text: line }); });
-  return found;
-}
-// A note may wrap over a few lines (an HTML comment); join until it closes.
-function noteText(lines, start) {
-  let text = lines[start - 1];
-  for (let i = start; i < Math.min(lines.length, start + 8) && !/-->|\*\/|^\s*$/.test(text.split("\n").at(-1)) && text.includes("<!--"); i++) text += `\n${lines[i]}`;
-  return text;
-}
+// 3. Each changed file is counted; each installed file is free of port commentary.
 function hunks(from, to) {
   const result = spawnSync("git", ["diff", "--no-index", "--no-color", "-U0", "--", from, to], { encoding: "utf8", maxBuffer: 64 * 2 ** 20 });
-  const out = [];
-  for (const line of result.stdout.split("\n")) {
-    const m = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/.exec(line);
-    if (m) out.push({ newStart: Number(m[3]), newCount: m[4] === undefined ? 1 : Number(m[4]) });
-  }
-  return out;
+  return result.stdout.split("\n").filter((line) => line.startsWith("@@ ")).length;
 }
 const matrix = [];
 for (const { from, to } of pairs) {
@@ -109,52 +92,17 @@ for (const { from, to } of pairs) {
   const target = path.join(skillsDir, to);
   if (!fs.existsSync(target)) { fail(`${from}: no adapted file at skills/${to}`); matrix.push({ from, to, state: "MISSING" }); continue; }
   if (sha256(source) === sha256(target)) { matrix.push({ from, to, state: "unchanged" }); continue; }
-  const lines = fs.readFileSync(target, "utf8").split("\n");
-  const upstreamNotes = new Set(notes(fs.readFileSync(source, "utf8")).map((n) => n.text));
-  const own = notes(lines.join("\n")).filter((n) => !upstreamNotes.has(n.text));
-  for (const n of own) {
-    const text = noteText(lines, n.line);
-    const missing = LABELS.filter((label) => !text.includes(label));
-    if (missing.length) fail(`skills/${to}:${n.line}: cube-adapt note lacks ${missing.join(" ")}`);
-  }
-  const all = hunks(source, target);
-  // Fenced blocks in Markdown: a note cannot sit inside one (a plan
-  // skeleton is copied verbatim), so a note just above the fence covers it.
-  const fences = [];
-  if (to.endsWith(".md")) {
-    let open = null;
-    lines.forEach((line, index) => {
-      const m = /^(`{3,}|~{3,})/.exec(line.trim());
-      if (!m) return;
-      if (!open) open = { start: index + 1, mark: m[1] };
-      else if (line.trim().startsWith(open.mark) && line.trim() === line.trim().match(/^[`~]+/)[0]) { fences.push({ start: open.start, end: index + 1 }); open = null; }
-    });
-  }
-  let covered = 0;
-  for (const h of all) {
-    // A pure deletion has newCount 0 and sits after line newStart.
-    let first = h.newStart;
-    const last = h.newCount === 0 ? h.newStart : h.newStart + h.newCount - 1;
-    const fence = fences.find((f) => first > f.start && last < f.end);
-    if (fence) first = fence.start;
-    const ok = own.some((n) => n.line >= first - REACH && n.line <= last);
-    if (ok) covered++;
-    else fail(`skills/${to}:${first}: a change from the baseline with no cube-adapt note within ${REACH} lines above it`);
-  }
-  matrix.push({ from, to, state: `adapted (${all.length} hunks, ${own.length} notes)`, covered });
+  matrix.push({ from, to, state: `adapted (${hunks(source, target)} hunks)` });
 }
-// Files with no upstream counterpart: cube's own skills, or new port files that explain themselves.
 for (const f of skillFiles) {
   if (f.symlink) { fail(`skills/${f.rel}: a symlink; cube installs plain files only`); continue; }
-  if (mappedTargets.has(f.rel) || CUBE_OWN.has(f.rel.split("/")[0])) continue;
+  if (!mappedTargets.has(f.rel) && !CUBE_OWN.has(f.rel.split("/")[0])) matrix.push({ from: "(new)", to: f.rel, state: "added" });
   const text = fs.readFileSync(path.join(skillsDir, f.rel), "utf8");
-  const n = notes(text);
-  if (!n.length) fail(`skills/${f.rel}: new in the port but has no cube-adapt note`);
-  else {
-    const missing = LABELS.filter((label) => !noteText(text.split("\n"), n[0].line).includes(label));
-    if (missing.length) fail(`skills/${f.rel}:${n[0].line}: cube-adapt note lacks ${missing.join(" ")}`);
-  }
-  matrix.push({ from: "(new)", to: f.rel, state: "added" });
+  const rules = f.rel.endsWith(".md") ? COMMENTARY : COMMENTARY.slice(0, 1);
+  text.split("\n").forEach((line, index) => {
+    const hit = rules.find((re) => re.test(line));
+    if (hit) fail(`skills/${f.rel}:${index + 1}: port commentary (${hit}); put the reason in PORTING.md, not in an installed file`);
+  });
 }
 
 // 4. cube's rules for a skill folder, as skills.ts reads them.
@@ -177,8 +125,7 @@ function frontmatter(text) {
   }
   return out;
 }
-// metadata.cube.surface as YAML nests it, ignoring comment lines (a
-// cube-adapt note may mention "surface:").
+// metadata.cube.surface as YAML nests it, ignoring comment lines.
 function surfaceOf(text) {
   const block = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
   const lines = block.split("\n").filter((l) => l.trim() && !/^\s*#/.test(l));
@@ -221,7 +168,7 @@ for (const id of listed.optchat) {
 if (ids.length > LIMITS.skills) fail(`${ids.length} skills; a thread installs at most ${LIMITS.skills}`);
 if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${bytes} bytes; a thread installs at most ${LIMITS.files} and ${LIMITS.bytes}`);
 
-// 6. The handoff rule (references/cube.md, M2 and M3): a thread never
+// 6. The handoff rule (references/cube.md, Handoff and Independent review): a thread never
 // stands in for an agent pstack requires, and OptChat never reads a diff.
 // Every installed Markdown file is scanned for known substitute wordings
 // (scripts/handoff-patterns.mjs, with fixtures in check-port.test.mjs), and
@@ -229,13 +176,13 @@ if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${byt
 // goes. Keyword checks cannot prove the rule; they keep known regressions out.
 for (const f of skillFiles) {
   if (!f.rel.endsWith(".md") || CUBE_OWN.has(f.rel.split("/")[0])) continue;
-  for (const re of substitutesIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: offers a substitute for another agent or a diff OptChat cannot read (${re}); hand off instead (M2, M3)`);
+  for (const re of substitutesIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: offers a substitute for another agent or a diff OptChat cannot read (${re}); hand off instead (cube.md, Handoff)`);
 }
 for (const { from, to } of pairs) {
   if (!to.endsWith(".md")) continue;
   const full = path.join(skillsDir, to);
   if (!fs.existsSync(full)) continue;
-  if (DELEGATES.test(fs.readFileSync(path.join(baseline, from), "utf8")) && !/handoff|OptChat/i.test(prose(fs.readFileSync(full, "utf8")))) fail(`skills/${to}: upstream hands work to another agent here, but the port never says where it goes (handoff or OptChat, M2)`);
+  if (DELEGATES.test(fs.readFileSync(path.join(baseline, from), "utf8")) && !/handoff|OptChat/i.test(fs.readFileSync(full, "utf8"))) fail(`skills/${to}: upstream hands work to another agent here, but the port never says where it goes (handoff or OptChat; cube.md, Handoff)`);
 }
 
 // 5. Links: a relative link must reach a file cube installs (inside skills/).

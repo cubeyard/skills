@@ -1,6 +1,5 @@
 # Explorer Prompt Template
 
-<!-- cube-adapt M2. Intent: each explorer gets this prompt and knows others cover other slices. Cube: an explorer is a thread OptChat starts or a pass a thread runs. Kept: the template and the focus rule. Now: the words. Cost: none. -->
 Build each explorer's prompt from this template (a thread's brief, which OptChat sends). Fill in the placeholders.
 
 ---

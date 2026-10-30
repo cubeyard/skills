@@ -8,8 +8,7 @@ disable-model-invocation: true
 ---
 # How to make a bot UI
 
-<!-- cube-adapt M11 M12. Intent: a page whose buttons wake an agent: a local server holds a sender key and POSTs JSON to a Cursor webhook routine, the page is shared on Tailscale, and the wake treats the body as untrusted data. Cube: cube has no event that wakes an agent except the user's message and thread reports: no routines, no webhook, no update_state, no SendToUser secret request. Real secrets never enter a thread's machine, so no sender key may live there. A thread reaches the internet over HTTP(S) only, so Tailscale cannot run; a lasting URL is `cube service`, private to the user's cube. Kept: the shape of the page and server, the untrusted-body rule, the one-try POST with a timeout, the probe before announcing, the secret discipline. Now: the skill stops before anything that needs a wake target or a secret, says so, and offers what cube can do: build the page and serve it with `cube service` when the brief allows. Cost: the bot cannot be woken from cube until cube has an authenticated endpoint that starts or tells a thread with the key held by cube's gateway; PORTING.md records that product gap. -->
-**In cube this skill cannot finish.** Nothing a page can call wakes a cube agent, and a thread's machine must never hold a sender key. So: build the page and its server if the brief asks, serve it with `cube service start` only when the brief allows a preview, and stop before every step below that creates a routine, requests or stores a key, installs Tailscale, or handles a wake. Say `Skipped in cube: <step>. <reason>.` for each. The rest of this file is the upstream design, kept for when cube gains a wake endpoint.
+**In cube this skill cannot finish.** Nothing a page can call wakes a cube agent, and a thread's machine must never hold a sender key. So: build the page and its server if the brief asks, serve it with `cube service start` only when the brief allows a preview, and stop before every step below that creates a routine, requests or stores a key, installs Tailscale, or handles a wake. Say `Skipped in cube: <step>. <reason>.` for each. The rest of this file applies once cube gains a wake endpoint.
 
 Build a page the user clicks. A server on this computer POSTs JSON to a webhook routine. The bot wakes with that JSON. Keep the sender key on the server. Do not put the sender key in the browser, in chat, or in this skill.
 
@@ -57,7 +56,6 @@ After the user submits the secret, you do not see the value. The value is in tha
 
 Store `{url, key}` in that UI's own directory. Buttons POST to this local server. The local server, not the browser, POSTs to the Grok Bot webhook.
 
-<!-- cube-adapt M7 M11. Intent: the page must be reachable from the user's devices. Cube: a thread's server is reachable only as a cube service, which listens on 0.0.0.0 and gets a URL from cube. Kept: bind 0.0.0.0. Now: `cube service start NAME --port PORT -- COMMAND` when the brief allows; never Tailscale. Cost: the URL is the user's cube URL, not a tailnet one. -->
 Bind the server to `0.0.0.0:<port>`, not `127.0.0.1`. In cube, run it with `cube service start <name> --port <port> -- <command>` (only when the brief allows a preview) and give the user the URL it prints; never install Tailscale in a thread.
 
 The server POSTs to the webhook URL with:

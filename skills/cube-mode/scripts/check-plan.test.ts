@@ -8,7 +8,6 @@ const checker = join(import.meta.dir, "check-plan.mjs");
 const rule =
 	"Tests alone are not sufficient verification. A PR is verified only when its unit, live, and perf boxes are all checked.";
 
-// cube-adapt M5 M7. Intent: the fixture is the smallest plan check-plan.mjs accepts. Cube: the program markers changed with the cube skeleton. Kept: the same fixture. Now: its marker line names ~/.cube/skills/ and the report-driven tick. Cost: none.
 const validPlan = `# Demo
 
 ## How to read this

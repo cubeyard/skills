@@ -30,7 +30,6 @@ const GOOD = [
   "Report a handoff with one brief per worker and end your turn.",
   "Migrate one component at a time.",
   "A thread frames it and reports a handoff; it does not run the slices itself.",
-  "<!-- cube-adapt M2. Intent: x. Cube: a thread runs the roles itself. Kept: y. Now: z. Cost: none. -->",
 ];
 
 test("every known substitute wording is caught", () => {

@@ -1,7 +1,6 @@
 ---
 name: maintain-verification-skill
 description: "Periodic pass that keeps a project's verification skill and feature map honest: a source reading per feature, one live session driving every feature, at most one PR of proven corrections. Use for /maintain-verification-skill or \"audit the verify skill\"."
-# cube-adapt M2. Intent: per-feature source readers run in parallel. Cube: a thread reads them in order; OptChat may start readers as threads. Kept: one reading per feature. Now: the description no longer promises parallel readers. Cost: none.
 disable-model-invocation: true
 ---
 
@@ -23,13 +22,11 @@ Only edit the verification skill's own directory (its SKILL.md, features/, and a
 
 ## Pass
 
-<!-- cube-adapt M6 M11. Intent: find the one target, ask when ambiguous. Cube: project skills are in `.agents/skills/`; a thread asks by reporting. Kept: the search and the stop. Now: `.agents/skills/verify-*/`; several candidates go in the report. Cost: none. -->
 0. **Locate the target.** Find the verification skill to maintain: the project-local skill whose body has launch/drive sections and a feature map (usually `.agents/skills/verify-*/`). Several candidates → report them and ask which one; none → stop and point at `/create-verification-skill` instead of inventing a target.
 
 1. **Index hygiene.** Read the feature map README and glob its sibling files. Fix missing, extra, duplicate, or dead entries. Lightweight; no generated inventory.
 
-<!-- cube-adapt M2. Intent: one read-only reader per feature, so each explanation is fresh and the coordinator's context holds only the returns. Cube: a thread cannot spawn. Kept: one reading per feature, read only, the return shape. Now: one fresh read-only thread per feature by handoff; continue at step 3 on the tell (M2 handoff rule). Cost: a round trip and one machine per feature. -->
-2. **Source wave.** One read-only reader per feature file, each a fresh thread: report a handoff with one brief per feature (`../cube-mode/references/cube.md` M2) and continue at step 3 when OptChat tells you the returns. Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Readers never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
+2. **Source wave.** One read-only reader per feature file, each a fresh thread: report a handoff with one brief per feature (`../cube-mode/references/cube.md`, Handoff) and continue at step 3 when OptChat tells you the returns. Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Readers never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
 
 3. **Reconcile.** Every feature file has a returned summary. Merge overlapping recipes into as few app states as practical. Spot-check cited drift; don't re-prove clean claims. Sweep recent churn for user-facing surfaces missing from the map — require a concrete source path before calling one missing.
 

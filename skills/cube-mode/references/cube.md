@@ -1,11 +1,8 @@
-<!-- cube-adapt M1-M13 (new file). Intent: pstack names Cursor's tools, fields and products, and upstream ships one harness file per non-Cursor host (docs/harness/claude-code.md) that maps each name once. Cube: cube splits pstack's single "chat that spawns subagents" into OptChat (directs, has no machine) and threads (one bounded task each, cannot spawn), and has no Cursor products. Kept: upstream's own pattern, one table per kind of name, read once and applied everywhere, plus the reviewed cube rules of the earlier port (directing-the-work, working-the-task), which this file replaces. Now: every adapted skill links here; PORTING.md gives the reasoning behind each rule M1-M13. Cost: one more file to read before a pstack run; a name with no row still needs judgment. -->
-
 # pstack in cube
 
 pstack skills were written for Cursor. In cube, read this file once per
-task, then map each Cursor name in a skill with the tables below. A cube
-note in a skill (`<!-- cube-adapt ... -->`) already did the mapping for that
-spot; follow the skill text where it carries one.
+task, then map each Cursor name in a skill with the tables below. Where a
+skill's text already names the cube tool or agent, follow the skill.
 
 ## Who you are
 
@@ -18,10 +15,10 @@ says it is OptChat.
 | --- | --- | --- |
 | the parent chat that owns a playbook, the todo list and every spawn | yes: it routes, briefs, reads reports, decides the next step | no |
 | a subagent, delegate, worker, owner, verifier, judge | no: it never writes code, runs commands or touches files | yes: one task, in its own machine |
-| "spawn N in one message" | `spawn` with N tasks in one call | not possible: report a handoff (M2) |
+| "spawn N in one message" | `spawn` with N tasks in one call | not possible: report a handoff (see Handoff) |
 | the human, the operator | the user, in the chat | the user only through OptChat |
 
-**M1.** A playbook step that plans, routes, judges or lands across
+A playbook step that plans, routes, judges or lands across
 several pieces of work belongs to OptChat. A step that reads code, runs a
 command, edits files or opens a pull request belongs to a thread. When a
 playbook's lead "delegates implementation to a subagent", in cube the
@@ -32,13 +29,13 @@ in, or the thread OptChat starts.
 
 | Cursor | cube |
 | --- | --- |
-| `Task` (spawn a subagent) | OptChat: `spawn({tasks: [{project, task, model?}]})`, one thread per task; its report comes back as `[id] ...`. A thread: none (**M2**). |
-| A follow-up to a running subagent, `resume` | OptChat: `tell(id, message)` for the same task only (**M8**). |
-| `AskQuestion` | OptChat: ask in the chat in plain text, with the options listed. A thread: never waits; it ends its turn with the question and its recommendation in its report (**M6**). |
+| `Task` (spawn a subagent) | OptChat: `spawn({tasks: [{project, task, model?}]})`, one thread per task; its report comes back as `[id] ...`. A thread: none (see Handoff). |
+| A follow-up to a running subagent, `resume` | OptChat: `tell(id, message)` for the same task only (see Same task, same thread). |
+| `AskQuestion` | OptChat: ask in the chat in plain text, with the options listed. A thread: never waits; it ends its turn with the question and its recommendation in its report (see Questions). |
 | Open a todolist | A thread: the agent's todo tool if it has one, else keep the list in your reply. OptChat: keep the list in your reply or in an artifact you revise. |
-| Run another pstack skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("cube-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed (**M5**). |
+| Run another pstack skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("cube-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed. |
 | `Grep`, `Glob` | `rg` and `find` in a thread's shell. |
-| "Use any MCP tool" | A thread has cube's own tools (artifacts, OptChat's memory read only), `gh` and `git` with cube's credentials, and HTTP(S). Other MCP servers are not there: say which evidence that leaves out (**M11**). |
+| "Use any MCP tool" | A thread has cube's own tools (artifacts, OptChat's memory read only), `gh` and `git` with cube's credentials, and HTTP(S). Other MCP servers are not there: say which evidence that leaves out. |
 
 ## Subagent fields
 
@@ -48,22 +45,20 @@ cube. A field with no row: drop it and say so.
 | Cursor field | purpose | cube |
 | --- | --- | --- |
 | `subagent_type: poteto-agent` | the delegate reads cube-mode first | the brief says "read `~/.cube/skills/cube-mode/SKILL.md` in full first": [`../agents/poteto-agent.md`](../agents/poteto-agent.md) is the template |
-| `subagent_type: comment-sicko` | a reviewer that did not write the comments | a fresh thread briefed with [`../../no-comments/agents/comment-sicko.md`](../../no-comments/agents/comment-sicko.md) (**M3**) |
+| `subagent_type: comment-sicko` | a reviewer that did not write the comments | a fresh thread briefed with [`../../no-comments/agents/comment-sicko.md`](../../no-comments/agents/comment-sicko.md) (see Independent review) |
 | `subagent_type: generalPurpose` | a plain worker | a thread whose brief is the worker prompt |
 | `readonly: true` | the worker must not write | the brief says "read only: no edits, no branch, no pull request"; the thread checks `git status` before reporting |
 | `readonly: false` "for MCP access" | keep tools | every thread has the same tools; nothing to set |
 | `environment: "cloud"` | its own machine and checkout | every thread already is one: its own VM, a fresh checkout of one project |
 | `environment: "local"` | reach the user's computer | not available: a thread never reaches the user's computer. A `runner` named by the user is the only exception (an unsandboxed host runner), and only when the user asks for it |
 | `cloud_base_branch: <b>` | start from a pushed branch | the brief names the branch or commit to check out first |
-| `run_in_background: true` | don't hold the parent's turn | always so: OptChat's `spawn` returns at once and reports arrive later; OptChat never waits or polls (**M7**) |
+| `run_in_background: true` | don't hold the parent's turn | always so: OptChat's `spawn` returns at once and reports arrive later; OptChat never waits or polls (see Waiting) |
 | `file_attachments` | give the worker files | name repository paths, pull requests or artifact ids in the brief; a thread cannot read another thread's files |
-| `model` | the role's model | `model` on OptChat's `spawn` task, from the role lines (**M4**); a thread cannot choose its own |
+| `model` | the role's model | `model` on OptChat's `spawn` task, from the role lines (see Models); a thread cannot choose its own |
 
 ## Models
 
-**M4.** pstack picks a model per role from the `/setup-pstack` rule, with
-defaults such as `claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. In
-cube only OptChat chooses, once per thread, with `spawn`'s `model`
+Only OptChat chooses a model, once per thread, with `spawn`'s `model`
 (`provider/id`, as `projects` lists them).
 
 - The role lines live in the user's OptChat instructions
@@ -85,14 +80,15 @@ cube only OptChat chooses, once per thread, with `spawn`'s `model`
 
 ## Delegation
 
-<!-- cube-adapt M2 (revised on the user's rule). Intent: pstack hands work to other agents for context protection, parallel throughput and independence between author and judge. Cube: a thread cannot start agents, and the user ruled that a thread must not stand in for agents pstack requires: no sequential role-playing, no self-review in place of an independent agent, no recursive delegation. Kept: every agent pstack requires still exists, as a fresh thread, and the thread's own task (including its fixes, continuation and landing) stays with it. Now: wherever a skill needs another agent, the thread reports a handoff (the tasks, ready briefs, the evidence so far, and how its own work continues) and ends its turn; OptChat starts each task as a fresh thread and tells the thread when its own task can go on. Cost: a thread's step that needs a fan-out costs a round trip through OptChat and more machines. -->
-**M2. A thread never stands in for another agent.** A thread is the agent
+### Handoff
+
+A thread never stands in for another agent. A thread is the agent
 its brief makes it: the delegate pstack's lead hands a task to (the
 implementer of a bug fix, feature, refactor, perf change or hillclimb
 attempt; a verifier; an explorer; a reviewer). It does that task itself,
 start to end, including the lead's hands-on steps (reproduce, verify,
 check its own diff before pushing, an author check that never stands in
-for the independent review, which is a handoff: see M3) and the task's own continuation,
+for the independent review, which is a handoff: see Independent review) and the task's own continuation,
 fixes and landing.
 
 Wherever a skill, playbook or template requires *another* agent (spawn,
@@ -134,19 +130,20 @@ Not a handoff: a deterministic script or codemod the thread writes and runs
   every report pasted in full. Never pass a worker's words on as a verdict.
 - A worker that drops out: go on with N-1 and say so, as the skills say.
 
-**M3. Independent judgment comes from a fresh thread.** A review,
+### Independent review
+
+Independent judgment comes from a fresh thread. A review,
 verification, judging or cross-model pass is done by a thread that neither
 wrote the change nor reviewed something else, started by OptChat. Its
 brief names what to review, the head commit and the criteria, never the
 author's reasoning.
 
-<!-- cube-adapt M2 M3 (review handoff). Intent: the lead reviews and verifies what its delegate wrote, so writing and judging are two agents. Cube: the implementing thread is the delegate, so the lead's review would be the author reviewing itself; OptChat, the lead, has no machine and cannot open a diff or rerun a repro. Kept: two agents for every change: the author, and a reviewer that reruns the evidence. Now: after pushing, the author hands off one fresh review-and-verification thread and ends its turn; findings return by tell. Cost: one more round through OptChat, and one machine, per change. -->
-**The review handoff.** pstack's lead reviews and verifies every delegate's change itself. In cube the delegate is the thread that wrote the change, so that review goes to a fresh thread. When the change is pushed, the author reports a handoff (M2) with one ready brief for a review-and-verification thread: the PR and its exact head SHA, the repro, measurement or pin to rerun on the real surface, the criteria (the playbook's own bar: the repro passes, the number moves past noise, behavior is unchanged), what the reviewer may not do (no edits, no pushes) and the verdict it returns (`PASS`, `PASS+NOTES` or `FAIL` with evidence). Never the author's reasoning. Then the author ends its turn. OptChat starts the reviewer, reads its verdict, and tells findings back to the author, whose fixes are the same task; a new head gets a delta review by the same reviewer thread. The author's own checks before pushing (tests, its own rerun of the repro, a reread of the diff) stay: they are author checks, reported as such, never the review.
+**The review handoff.** The lead's review and verification of a delegate's change goes to a fresh thread, because the delegate is the thread that wrote it. When the change is pushed, the author reports a handoff with one ready brief for a review-and-verification thread: the PR and its exact head SHA, the repro, measurement or pin to rerun on the real surface, the criteria (the playbook's own bar: the repro passes, the number moves past noise, behavior is unchanged), what the reviewer may not do (no edits, no pushes) and the verdict it returns (`PASS`, `PASS+NOTES` or `FAIL` with evidence). Never the author's reasoning. Then the author ends its turn. OptChat starts the reviewer, reads its verdict, and tells findings back to the author, whose fixes are the same task; a new head gets a delta review by the same reviewer thread. The author's own checks before pushing (tests, its own rerun of the repro, a reread of the diff) stay: they are author checks, reported as such, never the review.
 
-**M8. Same task, same thread.** pstack gives a fix round, retry or follow-up
-to a fresh subagent with the consolidated scope, because chained resumes
-drop directives. Cube keeps a task's own steps in its author thread
-(its checkout and branch live there):
+### Same task, same thread
+
+A task's own steps stay in its author thread (its checkout and branch
+live there):
 
 - `tell` the author thread: fixes to its own work, review findings on its
   own pull request, the user's answer to its question, going on after it
@@ -155,19 +152,22 @@ drop directives. Cube keeps a task's own steps in its author thread
 - `spawn` a new thread: another pull request, question or review, a
   follow-up outside the task, work in the same area after the result was
   delivered. Never reuse a thread as a standing worker.
-- pstack's concern stays: each tell restates every directive still open
-  for that task, so nothing rides only on the thread's memory. A thread
+- Each tell restates every directive still open for that task, so nothing rides only on the thread's memory. A thread
   that has spent its tells (8 between two messages of the user) waits for
   the user; do not start another thread to continue the same task.
 
 ## Questions, waiting and reports
 
-**M6.** A question is OptChat's to ask. A thread that needs a decision it
+### Questions
+
+A question is OptChat's to ask. A thread that needs a decision it
 cannot settle by running something ends its turn with the question, the
 options, its recommendation and what each changes; OptChat answers from
 the user's words or asks the user, then tells the thread.
 
-**M7.** Nothing wakes an ended thread, and nothing polls for OptChat.
+### Waiting
+
+Nothing wakes an ended thread, and nothing polls for OptChat.
 
 - A thread waits for CI, a review or a long command in the foreground,
   with a bounded wait it repeats (a command runs at most 10 minutes:
@@ -180,6 +180,8 @@ the user's words or asks the user, then tells the thread.
   runs only as `cube service start NAME --port PORT -- COMMAND`, and only
   when the brief asks for it; the report names it.
 
+### Reports
+
 A thread's **report** is its final reply, for someone who decides the next
 step from it alone:
 
@@ -189,8 +191,7 @@ step from it alone:
    ([prove-it-works](../../prove-it-works/SKILL.md)); failures quoted.
 4. Facts, hypotheses and unknowns kept apart.
 5. Gaps and risks.
-<!-- cube-adapt M2. Intent: the report carries what the lead needs. Cube: a thread's needed agents go back to OptChat. Kept: the report format. Now: a Handoff item. Cost: none. -->
-6. Handoff, when a skill needs another agent (M2): tasks, evidence, continuation.
+6. Handoff, when a skill needs another agent: tasks, evidence, continuation.
 7. Decisions that need the user or OptChat, with a recommendation.
 
 Promise no later work: say what is left and what it waits for.
@@ -203,7 +204,7 @@ CI, "should work" and an approving bot are not verdicts.
 
 ## Authority
 
-**M9.** pstack's Autonomy section ("just do it" for reversible work,
+cube-mode's Autonomy section ("just do it" for reversible work,
 "always pause" for irreversible writes, session overrides such as
 "don't stop") holds in cube, with cube's scope rules on top:
 
@@ -232,7 +233,7 @@ CI, "should work" and an approving bot are not verdicts.
 
 ## Records and memory
 
-**M10.** pstack reads transcripts (`~/.cursor/projects/<slug>/agent-transcripts/`),
+pstack reads transcripts (`~/.cursor/projects/<slug>/agent-transcripts/`),
 keeps program state in a Project tracker, and stores trails in a root
 agent's store. Cube keeps these records:
 
@@ -252,7 +253,7 @@ outside what the task is about, as pstack's "do not glob across
 
 ## Environment
 
-**M11.** A thread is one VM with one checkout of one project at
+A thread is one VM with one checkout of one project at
 `/workspace`, reaching the internet over HTTP and HTTPS only (no SSH, no
 UDP: no Tailscale), with real secrets kept out of it.
 
@@ -269,9 +270,8 @@ UDP: no Tailscale), with real secrets kept out of it.
 
 ## Cursor-only features
 
-**M12.** When a step needs a Cursor feature cube lacks, write one line in
-your reply or report, `Skipped in cube: <step>. <reason>.`, then go on (the
-convention upstream uses for Claude Code). When a later step needs what
+When a step needs a Cursor feature cube lacks, write one line in
+your reply or report, `Skipped in cube: <step>. <reason>.`, then go on. When a later step needs what
 the skipped step made, leave a placeholder and name it.
 
 | Cursor | cube |
@@ -284,15 +284,15 @@ the skipped step made, leave a placeholder and name it.
 | `cursor-team-kit`: `control-ui`, `control-cli` | the project's own verification skill (`.agents/skills/verify-*`, see **create-verification-skill**); else Playwright's Chromium in the thread (`pnpm test:browser` style), or driving the CLI in the shell |
 | `create-skill` (Cursor's built-in) | the **Authoring a skill** playbook plus cube's rules in cubeyard/skills' README (frontmatter, surface, links) |
 | Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat re-reads cube-mode when a turn's request needs it |
-| `/loop` | see M7 |
+| `/loop` | see Waiting |
 | Plan Mode | the Multi-phase plan playbook, written as an artifact |
 | `/visualize`, the image-generation tool, canvases | Mermaid diagrams and tables in an artifact or a reply; no generated images |
-| the Project tracker (`notes.md`) and Project store | an artifact OptChat writes and revises for the program (M10) |
+| the Project tracker (`notes.md`) and Project store | an artifact OptChat writes and revises for the program (see Records and memory) |
 | the sidebar's pinned and active chats | OptChat's `threads` (not archived = in use) |
 
 ## Links
 
-**M13.** A link that leaves an installed skill's folder tree (to pstack's
+A link that leaves an installed skill's folder tree (to pstack's
 README or guide) does not resolve in cube. Those documents are linked by
 their public copy at the pinned upstream commit,
 `https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/<path>`.

@@ -3,7 +3,6 @@
 Swap in the real paths, skills, and done checks. Informal wording works.
 
 ## Understand
-<!-- cube-adapt M5 (rename). Intent: these prompts start pstack's router. Cube: the router is renamed cube-mode (the user's option B); /poteto-mode still reaches it. Kept: every prompt. Now: /cube-mode. Cost: none. -->
 
 - `/cube-mode read <thread>. restate the underlying issue in your own words, in plain english.`
 - `/in-your-own-words <long or messy ask>`
@@ -24,7 +23,6 @@ Swap in the real paths, skills, and done checks. Informal wording works.
 - Perf: `/cube-mode <operation> takes <time> on <fixture>. trace it, fix the measured cause, show me before and after.`
 
 ## Design and plan
-<!-- cube-adapt M5 (rename). Intent: these prompts start pstack's router. Cube: the router is renamed cube-mode (the user's option B); /poteto-mode still reaches it. Kept: every prompt. Now: /cube-mode. Cost: none. -->
 
 - `/cube-mode prototype a few options for <feature>. take screenshots or videos for me to compare.`
 - `/cube-mode we need <feature>. /architect it first, and answer open questions with prototypes. let me review before proceeding.`
@@ -34,7 +32,6 @@ Swap in the real paths, skills, and done checks. Informal wording works.
 - `/cube-mode plan the migration of <library> to <target>. small verifiable PRs. the result must match the original exactly, bugs included.`
 
 ## Review and ship
-<!-- cube-adapt M5 (rename). Intent: these prompts start pstack's router. Cube: the router is renamed cube-mode (the user's option B); /poteto-mode still reaches it. Kept: every prompt. Now: /cube-mode. Cost: none. -->
 
 - `/interrogate the whole branch, but skeptically. don't change anything yet. no nitpicks unless it's a real bug or regression.` Read the Dropped list too.
 - `/create-formal-verification-skill prove <property> holds in <module>, even when <steps> interleave or retry.` After merges or refactors in that code: `/maintain-formal-verification-skill`.
@@ -45,7 +42,6 @@ Swap in the real paths, skills, and done checks. Informal wording works.
 
 ## Away and back
 
-<!-- cube-adapt M7. Intent: the overnight recipe. Cube: no /loop; a thread keeps going inside its turn, and OptChat drives a run across tasks. Kept: everything else in the recipe. Now: "keep going until done". Cost: none. -->
 - `/cube-mode im going to bed. <goal> off <base>. done means <checks>. keep a decision log. don't ask me before committing. keep going until done. if you're truly stuck after a few hours, stop and write up why.`
 - `/show-me-your-work catch me up on what you did last night.` Read its Attention section first.
 - `/ketchup` catches you up on this chat since your last message and lists every call that waits on you.
