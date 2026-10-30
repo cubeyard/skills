@@ -350,13 +350,13 @@ thread start is refused before a machine is allocated.
 | option | what changes | with the old cursor/plugins source still configured | other costs |
 | --- | --- | --- | --- |
 | A. keep upstream ids (this PR) | nothing | its 51 originals override the ported skills of the same id (silently, unported Cursor text); 61 ids, so starts still work | the ids say "poteto", not cube; `--diff` and future upstream updates stay one to one |
-| B. rename only the entry router (`poteto-mode` to a cube name, e.g. `cube-mode`), keep the leaves | one folder renamed, its links and the mentions of `/poteto-mode` updated | 62 ids; the new router is kept, but the 51 leaves it links to are still overridden by the originals | the user-facing name changes; `/poteto-mode` still needs a mention so users who type it are routed |
+| B. rename only the entry router (`poteto-mode` to a cube name, e.g. `cube-mode`), keep the leaves | one folder renamed, its links and the mentions of `/poteto-mode` updated | 62 ids; the new router is kept, but the 50 other ported skills it links to are still overridden by the originals (measured) | the user-facing name changes; `/poteto-mode` still needs a mention so users who type it are routed |
 | C. rename every skill (a prefix, e.g. `pstack-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
 | D. keep ids, set display names | `name:` differs from the folder (cube shows it in Settings only) | as A | the model never sees display names; upstream itself renamed every skill to its folder name (#702) |
 
 Under B, with the old cursor/plugins source still configured, `cube-mode`
 itself is safe, but its old `poteto-mode` comes back beside it (hidden, Cursor
-text) and the 51 leaves it links to are the unported originals. So the old
+text) and the 50 other ported skills it links to are the unported originals (measured: 62 skills, 50 overridden). So the old
 source must still go (G1), before or in the same save as the new default
 commit.
 
