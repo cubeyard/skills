@@ -12,9 +12,13 @@ Adversaries try to break a change or a design. A finding survives only when a ru
 
 The scope is what the user names. Otherwise it is the branch diff from its merge base with the base branch, through the working tree. State the intent with the **in-your-own-words** skill, from the user's message, the commits, and the PR description. Ask the user when the intent is unclear.
 
+<!-- cube-adapt M1 M2 M3. Intent: adversaries on different models try to break the change independently. Cube: adversaries are threads only OptChat starts; a thread alone has one model. Kept: the brief, run-proven findings only, verification by rerun. Now: OptChat spawns one adversary thread per reviewer line; a thread asked to interrogate runs one adversary pass itself and labels it. Cost: a single-pass interrogation has no model diversity. -->
 ## Fan out
 
-Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with four changes. Read the `interrogate reviewers` line in place of `arena runners`. Copy the scope's uncommitted changes into each worktree. Spawn each adversary as `generalPurpose`. In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
+In cube, OptChat spawns the adversaries as threads, each read only on the PR's branch (repros in a scratch directory, never pushed), and verifies their findings with one more thread or with the PR's author thread. A thread asked to interrogate its own or another change runs one adversary pass itself, with the brief below, and labels the result `self-review, not independent`.
+
+Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with four changes. <!-- cube-adapt M4 M11. Intent: each adversary sees exactly the scope. Cube: adversary threads check out a pushed branch; uncommitted changes do not reach them. Kept: the reviewer line and the exact scope. Now: push the scope first (a branch or the PR head) and name its commit in each brief. Cost: none. -->
+Read the `interrogate reviewers` role line in place of `arena runners`. Push the scope's uncommitted changes first and name the exact commit in each adversary's brief. In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
 
 > Break this change. Prove each finding with a run against the real code, such as a failing test, a repro script, or command output that shows the wrong behavior. For a design or plan, run a prototype or probe the current tree. Keep repros in your own worktree. Report each finding with a title, the exact command, the output it printed, and the output the intent requires. Leave out anything you did not run. That covers style, naming, structure, and risks that need a future change to matter. No findings is a valid result.
 

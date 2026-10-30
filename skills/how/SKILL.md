@@ -8,24 +8,28 @@ disable-model-invocation: true
 
 Explore the codebase to answer "how does X work?" questions. Produce architectural explanations at the level of a senior engineer onboarding onto a subsystem, enough to build a working mental model, not so much that it reads like annotated source code.
 
-Every spawn is a Task subagent with `subagent_type: generalPurpose` and `readonly: true`. Explorers use the `how explorer` line in the `pstack-models.mdc` rule (default `grok-4.7-xhigh-fast`), and every explainer uses the `how explainer` line (default `claude-opus-5-5-xhigh`). Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.
+<!-- cube-adapt M2 M4. Intent: explorers cover slices in parallel on a fast model, and a separate explainer on a judgment model writes from their findings, so exploring and explaining stay apart. Cube: a thread cannot spawn; OptChat can, and picks each thread's model from the role lines. Kept: the explorer/explainer split, the angles, the templates and the output shape. Now: a thread runs the roles in order with files between them; OptChat runs them as read-only threads. Cost: in a thread, one model plays both roles and the angles run one after another. -->
+**In a thread** (no spawns), run the same roles yourself, in order: each explorer angle as its own pass that writes its findings, in the explorer template's shape, to a scratch file (`/tmp/how-<slug>/angle-<n>.md`); then the explainer pass, which reads those files, not your memory of the code. Leave out the templates' lines about other agents. **In OptChat**, each explorer and the explainer is a thread: spawn the explorers in one call, read only (no edits, no branch), each with the explorer template and its angle; when they report, spawn the explainer with every report pasted in full. Models come from the `how explorer` and `how explainer` role lines.
 
 ## 1. Assess complexity
 
 If the scope is ambiguous, state your interpretation and explore. The user can redirect.
 
-- **Simple** (a single module, a small utility, a narrow question such as "how does function X work"): no explorers. Spawn one explainer that explores and explains in one pass, built from `references/explainer-prompt.md` without the explorer-findings section. Go to step 4.
+<!-- cube-adapt M2. Intent: a simple question needs one pass. Cube: the pass is yours in a thread, a thread in OptChat. Kept: one pass. Now: the words. Cost: none. -->
+- **Simple** (a single module, a small utility, a narrow question such as "how does function X work"): no explorers. Run one explainer pass (a thread: yourself; OptChat: one thread) that explores and explains in one pass, built from `references/explainer-prompt.md` without the explorer-findings section. Go to step 4.
 - **Complex** (a subsystem spanning multiple files or services, a cross-cutting feature, a full architectural overview): go to step 2.
 
 When in doubt, take the simple path.
 
 ## 2. Explore (complex only)
 
-Decompose the question into 2 to 4 angles, each a distinct slice of the subsystem. Spawn all explorers in a single message, each with `references/explorer-prompt.md` and its angle filled in.
+<!-- cube-adapt M2. Intent: explorers start together. Cube: only OptChat spawns. Kept: 2 to 4 angles, one template each. Now: OptChat spawns them in one call; a thread runs them as passes. Cost: none. -->
+Decompose the question into 2 to 4 angles, each a distinct slice of the subsystem. Run one explorer per angle with `references/explorer-prompt.md` and its angle filled in: OptChat spawns them all in one call; a thread runs them one pass at a time.
 
 ## 3. Synthesize (complex only)
 
-Once all explorers have returned, spawn one explainer with `references/explainer-prompt.md` and every explorer's findings filled in.
+<!-- cube-adapt M2. Intent: the explainer sees every explorer's findings. Cube: files carry them in a thread; pasted reports in OptChat. Kept: all findings, one explainer. Now: as written. Cost: none. -->
+Once all explorers have finished, run one explainer with `references/explainer-prompt.md` and every explorer's findings filled in (a thread: from the angle files; OptChat: a thread with every report pasted).
 
 ## 4. Present
 

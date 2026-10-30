@@ -2,8 +2,9 @@
 
 **You own the skill's voice.**
 
-1. Use the **create-skill** skill (Cursor's built-in for authoring SKILL.md files).
-2. Validate the skill: frontmatter has `name` and `description`, referenced files exist, cross-skill links resolve.
+<!-- cube-adapt M5 M11 M12. Intent: author a skill to the host's standard and validate it. Cube: Cursor's create-skill is not installed; cube's reader adds rules (folder name is the id, description at most 1024 characters, metadata.cube.surface, no symlinks, links stay inside the installed skills); a skill reaches agents only from a skills source or the project's .agents/skills at a commit. Kept: author, validate, test. Now: cube's rules and placement. Cost: no create-skill draft/test loop. -->
+1. Follow cube's skill rules (cubeyard/skills' README): the folder name is the skill id, `name` matches it, `description` says when to use it in at most 1024 characters, `metadata.cube.surface` says who lists it (`thread`, `optchat` or `both`), and `disable-model-invocation: true` hides it from both lists. Place it in the project's `.agents/skills/<id>/` or in a skills source repository, never in `~/.cube/skills` (replaced at every thread start).
+2. Validate the skill: frontmatter has `name` and `description`, referenced files exist, cross-skill links resolve and stay inside the skills directory (`../<id>/...`).
 3. Test cases if structural. Skip if subjective.
 4. Run **Opening a PR**.
 

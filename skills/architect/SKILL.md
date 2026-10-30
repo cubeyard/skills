@@ -28,7 +28,8 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt.
 
-Take the runners from the `architect runners` line in the `pstack-models.mdc` rule, in place of the `arena runners` line. If the rule or that line is missing, use `claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. Alias and rejected entries follow the runner rules in the **arena** skill's Phase A.
+<!-- cube-adapt M2 M4. Intent: several runners on different models sketch independently. Cube: runners are threads OptChat starts on the `architect runners` line; a thread runs arena's in-thread form. Kept: at least two structurally distinct candidates, screened, then synthesized. Now: the arena skill's In cube section decides who runs it. Cost: in a thread, both sketches come from one model, labeled self-review. -->
+Take the runners from the `architect runners` role line in OptChat's instructions, in place of the `arena runners` line. If that line is missing, follow the **arena** skill's Phase A. Who runs the arena (OptChat with threads, or a thread in arena's in-thread form) follows arena's **In cube** section.
 
 Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. This is the **exhaust-the-design-space** principle skill made concrete. Whole-shape alternatives, not point fixes inside one shape.
 
@@ -42,7 +43,8 @@ Arena returns one synthesized design package. Its synthesis decision fills the r
 
 Default: proceed directly to implementation with the synthesized design. No human checkpoint.
 
-Opt in to a checkpoint when the invoker explicitly asks: "/architect with checkpoint," "stop and show me before implementing," or similar. Then surface the synthesized design and pause for sign-off.
+<!-- cube-adapt M6. Intent: the human signs off on the design when asked. Cube: a thread pauses only by ending its turn. Kept: the opt-in checkpoint. Now: report the synthesized design (an artifact for a large one) and end your turn; OptChat brings the sign-off back as a tell. Cost: one round trip. -->
+Opt in to a checkpoint when the invoker explicitly asks: "/architect with checkpoint," "stop and show me before implementing," or similar. Then report the synthesized design (as an artifact when it is large) and end your turn; the sign-off comes back as a tell.
 
 The synthesis can ship as its own commit either way, as the "scaffold first" mode of the **foundational-thinking** principle skill. Planned and scoped breakage during fill-in is fine, per the **outcome-oriented-execution** principle skill. For adversarial pressure on the design before implementing, run the **interrogate** skill on the synthesized sketch.
 

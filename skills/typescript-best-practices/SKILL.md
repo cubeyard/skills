@@ -1,8 +1,8 @@
 ---
 name: typescript-best-practices
 description: TypeScript best practices. Use when reading or editing any .ts or .tsx file.
+# cube-adapt M5. Intent: the rules attach on their own to any .ts or .tsx file (the paths glob), not by the model's choice. Cube: cube has no path-triggered skills, and a hidden skill is listed to nobody; the only automatic route is a listed description. Kept: the trigger (any .ts or .tsx work) and the paths field for provenance. Now: listed to threads, so the description is the trigger. Cost: the model decides from the description, so a thread may miss it on TypeScript it only reads.
 paths: ["**/*.ts", "**/*.tsx"]
-disable-model-invocation: true
 ---
 
 # TypeScript best practices

@@ -1,6 +1,7 @@
 ---
 name: maintain-verification-skill
-description: "Periodic pass that keeps a project's verification skill and feature map honest: parallel source readers per feature, one live session driving every feature, at most one PR of proven corrections. Use for /maintain-verification-skill or \"audit the verify skill\"."
+description: "Periodic pass that keeps a project's verification skill and feature map honest: a source reading per feature, one live session driving every feature, at most one PR of proven corrections. Use for /maintain-verification-skill or \"audit the verify skill\"."
+# cube-adapt M2. Intent: per-feature source readers run in parallel. Cube: a thread reads them in order; OptChat may start readers as threads. Kept: one reading per feature. Now: the description no longer promises parallel readers. Cost: none.
 disable-model-invocation: true
 ---
 
@@ -22,11 +23,13 @@ Only edit the verification skill's own directory (its SKILL.md, features/, and a
 
 ## Pass
 
-0. **Locate the target.** Find the verification skill to maintain: the project-local skill whose body has launch/drive sections and a feature map (usually `.cursor/skills/verify-*/`). Several candidates → ask which one; none → stop and point at `/create-verification-skill` instead of inventing a target.
+<!-- cube-adapt M6 M11. Intent: find the one target, ask when ambiguous. Cube: project skills are in `.agents/skills/`; a thread asks by reporting. Kept: the search and the stop. Now: `.agents/skills/verify-*/`; several candidates go in the report. Cost: none. -->
+0. **Locate the target.** Find the verification skill to maintain: the project-local skill whose body has launch/drive sections and a feature map (usually `.agents/skills/verify-*/`). Several candidates → report them and ask which one; none → stop and point at `/create-verification-skill` instead of inventing a target.
 
 1. **Index hygiene.** Read the feature map README and glob its sibling files. Fix missing, extra, duplicate, or dead entries. Lightweight; no generated inventory.
 
-2. **Source wave.** One read-only subagent per feature file, launched concurrently. Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Children never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
+<!-- cube-adapt M2. Intent: one read-only reader per feature, so each explanation is fresh and the coordinator's context holds only the returns. Cube: a thread cannot spawn. Kept: one reading per feature, read only, the return shape. Now: read each feature yourself, one at a time, writing its return to a scratch file in the shape below; read the files, not your memory, in step 3. OptChat may run the wave as read-only threads for a large map. Cost: slower, and one model reads every feature. -->
+2. **Source wave.** One read-only reading per feature file (in a thread, one after another, each writing its return to a scratch file; OptChat may run them as read-only threads for a large map). Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Readers never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
 
 3. **Reconcile.** Every feature file has a returned summary. Merge overlapping recipes into as few app states as practical. Spot-check cited drift; don't re-prove clean claims. Sweep recent churn for user-facing surfaces missing from the map — require a concrete source path before calling one missing.
 

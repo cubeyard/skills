@@ -38,8 +38,9 @@ A prompt states the intent and the check for done. The playbook supplies the ste
 ## Before stepping away
 
 - Say "im going to bed" or "im stepping away" so the agent stops asking.
-- Write done as checks every iteration can run, and give `/loop` that predicate.
-- Ask for a fresh worktree off a named base.
+<!-- cube-adapt M7 M11. Intent: an unattended run needs a checkable predicate and a clean base. Cube: no /loop; each thread is a fresh checkout. Kept: the predicate and the named base. Now: give the run that predicate; name the base branch. Cost: none. -->
+- Write done as checks every iteration can run, and give the run that predicate.
+- Name the base branch to start from.
 - Pre-answer what the agent would stop for, such as "don't ask me before committing".
 - Ask for a decision log to audit later.
 - Give an exit: "if you're truly stuck after a few hours, stop and write up why".

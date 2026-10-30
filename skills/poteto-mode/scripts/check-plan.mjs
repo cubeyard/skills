@@ -17,7 +17,8 @@ const SUB_BLOCKS = [
 	"Merge.",
 ];
 const PROGRAM_H3 = ["Arm the program", "Spawn owners", "PR mechanics", "Verdict and merge", "Boot recipe"];
-const PROGRAM_MARKERS = ["git show origin/main:", "/loop 1h", "status message"];
+// cube-adapt M5 M7. Intent: a plan must make the runner re-read the skills from their source, arm a fixed audit cadence, and send status messages. Cube: skills are read from ~/.cube/skills/ (pinned by cube), and OptChat audits at every report and message of the user instead of an hourly /loop. Kept: the check that all three are present. Now: markers for the cube skeleton in multi-phase-plan.md. Cost: plans written for Cursor fail this check.
+const PROGRAM_MARKERS = ["~/.cube/skills/", "every report", "status message"];
 const HOW_TO_READ_MARKERS = [
 	"One box is one unit of work",
 	"names the evidence",

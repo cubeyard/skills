@@ -8,9 +8,8 @@ disable-model-invocation: true
 
 Investigate the motivation and intent behind code. The companion `how` skill answers what the code does and how it works. `why` answers what forces led to its shape.
 
-Each spawn below names a role line in the `pstack-models.mdc` rule and a default. Set `model` to that line's value, or to the default if the rule or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the Task tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.
-
-Every spawn is `generalPurpose` with `readonly: false` (agent mode). **Do not use readonly/Ask mode.** It strips MCP access, which disables the MCP-backed investigators and the synthesizer's citation spot-checks. Investigators still shouldn't write anything.
+<!-- cube-adapt M2 M4 M11. Intent: one investigator per evidence source in parallel, each keeping its tools, then a separate synthesizer that follows the epistemics framework. Cube: a thread cannot spawn and has no MCP servers beyond cube's own (artifacts, OptChat's memory); OptChat can spawn but has no machine. Kept: one pass per source, null results as findings, the separate synthesis, the confidence language. Now: a thread runs each investigator as its own pass writing to a scratch file, then the synthesizer pass; OptChat spawns the investigators as threads (role line `why investigators`) and one synthesizer thread (`why synthesizer`) with the findings pasted. Cost: in a thread the synthesizer is the same model that investigated, so its spot-checks are weaker; say so. -->
+**In a thread** (no spawns), run each investigator below as its own pass that writes its findings to `/tmp/why-<slug>/<source>.md`, then the synthesizer as a last pass that reads only those files, the anchor and the epistemics framework. **In OptChat**, each investigator and the synthesizer is a thread, read only, on the `why investigators` and `why synthesizer` role lines. Investigators never write anything.
 
 ## Operating Posture
 
@@ -20,7 +19,8 @@ Operate as a **careful, cautious, and precise investigator**. Be honest about wh
 
 The **target** is usually a chunk of code, a pattern, a feature, or a named design decision. The **question** is usually a design rationale, a tradeoff, a motivating edge case, an external constraint, dead code, or a broad history sweep.
 
-If the target is vague ("why do we do it this way?" with no clear referent), make your best guess from conversation context (open files, recent edits, cursor location, what was just discussed). State your interpretation briefly so the user can redirect if you're off, then proceed.
+<!-- cube-adapt M10. Intent: read the referent from context. Cube: a thread has no editor cursor; its context is the brief and OptChat's chat. Kept: best guess, stated. Now: the brief and the chat. Cost: none. -->
+If the target is vague ("why do we do it this way?" with no clear referent), make your best guess from context (the brief, recent edits, what OptChat's chat was discussing). State your interpretation briefly so the user can redirect if you're off, then proceed.
 
 ## Step 2. Establish the Code Anchor
 
@@ -32,7 +32,8 @@ Before spawning investigators, build the seed context inline: file paths and lin
 
 ### Discovery
 
-Before spawning investigators, list the available MCPs from the Cursor environment. Use the available-tools map when present. Otherwise inspect the `mcps/` directory Cursor exposes for enabled MCP servers.
+<!-- cube-adapt M10 M11. Intent: find every evidence source the environment really has. Cube: a cube thread's tools are git, gh, HTTP(S) and cube's own: OptChat's chat with the user (read only, with the memory tools) and the project's artifacts; no other MCP servers unless the brief names one. Kept: discovery before spawning, and the seven categories. Now: the user's chat with OptChat counts as real-time team chat, artifacts as long-form documents, GitHub issues as the tracker; the rest are gaps unless a tool for them exists. Cost: most categories are gaps in cube; the coverage map says so. -->
+Before starting investigators, list the evidence sources this thread really has. In cube that is git and `gh` (source control, and GitHub Issues as a tracker), the user's chat with OptChat (read only, through your memory tools: it is the team's real-time deliberation), the project's artifacts (long-form documents, with `artifact_read`), and any further tool the brief names. Treat each as its MCP below.
 
 Map each available MCP to one evidence category:
 
@@ -46,10 +47,12 @@ Map each available MCP to one evidence category:
 
 Source control is always available through git and `gh`. For the other six, classify using the MCP name, server instructions, tool names, and resource descriptors. If an MCP could fit more than one category, choose the one matching its primary evidence. Record ambiguous cases in the coverage map.
 
-Spawn one investigator per category that has a matching MCP, all in a single message so they run concurrently, each owning exactly one tool or MCP. Don't ask one agent to cover multiple MCPs. `model`: the `why investigators` line, default `grok-4.7-xhigh-fast`.
+<!-- cube-adapt M2 M4. Intent: one investigator per source, concurrently, each owning one source. Cube: only OptChat spawns. Kept: one pass per source, never one pass over several. Now: a thread runs one pass per source; OptChat spawns one thread each on the `why investigators` line. Cost: none. -->
+Run one investigator per category that has a matching source, each owning exactly one source: OptChat spawns them in one call on the `why investigators` line; a thread runs one pass per source. Don't let one pass cover several sources.
 
 Each investigator's prompt is `references/investigator-prompt.md` filled in, plus:
-- the category playbook `references/sources/<source>.md` for the selected MCP, adapted from the examples in `references/source-playbook.md`
+<!-- cube-adapt M10. Intent: each source has a playbook. Cube: cube adds one for OptChat's chat. Kept: the rule. Now: name it. Cost: none. -->
+- the category playbook `references/sources/<source>.md` for the selected MCP, adapted from the examples in `references/source-playbook.md` (for the user's chat with OptChat: `references/sources/optchat-chat.md`)
 - `references/sources/incident-postmortem.md` **if the target code looks defensive** (null checks, retry logic, timeout handling, rate limiting, feature flags, egress guards, OOM handlers)
 - the code anchor and the user's original question
 
@@ -76,7 +79,8 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 
 ## Step 4. Synthesize
 
-Spawn one synthesizer. `model`: the `why synthesizer` line, default `claude-opus-5-5-xhigh`. It gets:
+<!-- cube-adapt M2 M4. Intent: a separate synthesizer on a judgment model. Cube: only OptChat spawns. Kept: a separate synthesis with these inputs. Now: OptChat spawns it on the `why synthesizer` line; a thread runs it as a last pass over the files. Cost: none. -->
+Run one synthesizer (OptChat: a thread on the `why synthesizer` line; a thread: a last pass). It gets:
 1. The investigator findings, including any null results and any categories skipped with justification
 2. The code anchor
 3. The user's original question

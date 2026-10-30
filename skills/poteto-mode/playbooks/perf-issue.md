@@ -2,7 +2,8 @@
 
 **You own the measurement story. Plan, review, verify the numbers.** Tie every fix to a measurement, don't read source instead of measuring.
 
-1. Capture a baseline trace via the matching control skill. Vet the baseline, and each later number, with the **benchmark-checklist** skill.
+<!-- cube-adapt M12. Intent: drive the real surface the user sees. Cube: cursor-team-kit's control skills are not installed. Kept: the real-surface rule. Now: the project's verify-* skill, else Playwright's Chromium for web UIs or the shell for CLIs, in the thread's machine. Cost: native desktop and mobile surfaces are out of a thread's reach; say so rather than pass on a proxy. -->
+1. Capture a baseline trace via the matching control surface. Vet the baseline, and each later number, with the **benchmark-checklist** skill.
 2. `how` to ground hypotheses. Don't claim a perf ceiling without running it first.
    Try the performance mantras in order, cheapest first:
    1. Don't do it. Stop work whose result nothing uses rather than cheapening it.
@@ -14,7 +15,9 @@
    7. Do it cheaper.
 
    When an earlier mantra meets the target, stop.
-3. Plan the fix from the trace. If it crosses a function boundary, `architect` first. Delegate implementation to a subagent using your configured perf-issue model (default `grok-4.7-xhigh-fast`). Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section. Review the diff. Capture a post-fix trace.
+3. Plan the fix from the trace. If it crosses a function boundary, `architect` first.
+   <!-- cube-adapt M1 M2 M4. Intent: the lead keeps judgment while a delegate on the role's model writes the code. Cube: a thread cannot start a delegate; OptChat chose this thread's model from the role line when it spawned it. Kept: the lead's planning, review and verification, and the role's model. Now: the thread writes the code itself, then reviews its own diff before verifying; independent review comes from a fresh thread OptChat starts. Cost: no second model inside the task. -->
+   Implement it yourself (OptChat picked this thread's model from the `perf-issue` role line). Review your own diff. Capture a post-fix trace.
    Apply the **sequence-verifiable-units** principle skill, verifying each attempt before trying the next.
 4. Parse and compare the artifacts (JSON to sqlite, diff). "Inconclusive" or wrong-surface is not a pass. Flag it.
 5. Cite the measurement in the PR.

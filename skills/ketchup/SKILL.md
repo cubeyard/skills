@@ -6,13 +6,15 @@ disable-model-invocation: true
 
 # Ketchup
 
-Catch the user up on what changed in this chat since the last message they wrote before `/ketchup`, and help them understand each change, not only where it stands. Then lay out every call waiting on them so they can make it from your reply alone. Notifications and subagent results are not their messages. Assume the user remembers their last message and nothing after it.
+<!-- cube-adapt M1 M10. Intent: catch the user up on this chat since their last message. Cube: the user's chat is OptChat's; thread reports arrive in it tagged work, never as the user's words. Kept: the window, the voice, every rule below. Now: OptChat runs this skill; the window starts at the user's last own message (not a report). Cost: a thread catching up is rare: its own turn is the window. -->
+Catch the user up on what changed in this chat since the last message they wrote before `/ketchup`, and help them understand each change, not only where it stands. In cube this is OptChat's skill: the chat is the user's chat with you. Then lay out every call waiting on them so they can make it from your reply alone. Notifications and thread reports (`work` lines) are not their messages. Assume the user remembers their last message and nothing after it.
 
 Use [`/bro`](../bro/SKILL.md)'s voice, not its task: plain words, short sentences, no jargon, like one person catching up another. Say what changed for the user, not how you did it. Say "the tests pass", not "CI is green". Leave out hashes, file paths, commands, build numbers, and test counts unless the user needs one to act. Call each PR, branch, or agent by a name the user would know, not by a label you invented. If a fact needs context to make sense, give the context or leave the fact out.
 
 ## Gather what changed
 
-Keep this turn read-only. Make visuals only from what you already have: do not change code, start an app or a job, or post anything. Collect your own work since that message, reports from subagents, and messages from anyone else in this chat. Check the current state of each PR, CI run, or agent this chat touched. Check each number you will show against the facts it comes from, and say so when you correct one.
+<!-- cube-adapt M10. Intent: a read-only turn that still checks the live state of what it reports. Cube: OptChat cannot run gh; it reads threads, history(id) and artifacts; starting a check thread is not read-only. Kept: read-only, and live state over memory. Now: check each thread's state with threads and history(id); give a PR's state with the thread and time that last read it, and mark it so. Cost: PR and CI state may be as old as the last report. -->
+Keep this turn read-only. Make visuals only from what you already have: do not change code, start a thread or a job, or post anything. Collect your own work since that message, reports from threads, and messages from anyone else in this chat. Check the current state of each thread this chat touched (`threads`, `history(id)`); for a PR or CI run, give its state as of the report that read it, with that report's time. Check each number you will show against the facts it comes from, and say so when you correct one.
 
 An action item is a call or step only the user can take, such as a product choice, an approval, an irreversible action, or access you lack. Include any still waiting on the user, even one raised before their last message. Work you can still do yourself is not an action item. Never make up a call to fill the reply. A step the user did not ask for and the work does not need is not an action item, unless it is irreversible and waiting on the user: give it one line and no visual.
 
@@ -34,10 +36,11 @@ For a call between options, give every option the work weighed, each with what i
 
 ## Visuals
 
-A visual is a picture: a screenshot, a video, a Mermaid diagram, a chart or diagram from `/visualize`, or a generated image. A Markdown table is not a visual, even with before and after columns.
+<!-- cube-adapt M12. Intent: pictures carry what sentences cannot. Cube: cube has no /visualize or image generation; artifacts render Mermaid, and images are links. Kept: the same kinds of picture where cube has them. Now: Mermaid (in the reply or an artifact) and screenshots threads captured, linked. Cost: no charts beyond Mermaid's. -->
+A visual is a picture: a screenshot, a video, or a Mermaid diagram (in your reply or an artifact). `/visualize` charts and generated images are not in cube. A Markdown table is not a visual, even with before and after columns.
 
 When something is easier to grasp as a picture than as sentences, draw it: how a design or system works, a PR stack or dependency chain with each PR's state, a before and after of a fix, or options side by side. Never draw a status list, a list of action items, or boxes with nothing connecting them. Never give a fact twice, in text or across visuals.
 
 Keep each visual small enough to read at a glance: at most six boxes, with at most eight words in each. Write labels as plain words a person would say, not tags like "Tests: pass". A fact that needs a sentence belongs in the text, or nowhere.
 
-Embed screenshots and videos inline when the change is visible, not only as links. If a visible change has none, mark its summary line "No screenshot yet," and say there what changed on screen. Draw diagrams and charts from facts you have: a Mermaid diagram for how things connect and a `/visualize` chart for numbers. Never invent a number, and never draw or generate a picture of a screen you did not capture. Link only artifacts that exist.
+Embed screenshots and videos inline when the change is visible, not only as links. If a visible change has none, mark its summary line "No screenshot yet," and say there what changed on screen. Draw diagrams and charts from facts you have: a Mermaid diagram for how things connect, and for numbers a Mermaid chart or a short table beside the sentence. Never invent a number, and never draw or generate a picture of a screen you did not capture. Link only artifacts that exist.

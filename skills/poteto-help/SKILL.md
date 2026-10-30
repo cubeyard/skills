@@ -1,16 +1,20 @@
 ---
 name: poteto-help
-description: Guides users through pstack setup, /poteto-mode, and picking the skill, playbook, or principle for a task. Type /poteto-help with a question.
-disable-model-invocation: true
+description: Guides users through pstack setup, /poteto-mode, and picking the skill, playbook, or principle for a task. Use only when the user types /poteto-help or asks for pstack help by name.
+# cube-adapt M5. Intent: help loads only when the user asks for it by name. Cube: a hidden skill is listed to nobody, so neither OptChat nor a thread could reach it. Kept: the narrow description. Now: listed to both. Cost: a loose match may load it.
+metadata:
+  cube:
+    surface: both
 ---
 
 # Poteto help
 
 Answer the user's question about pstack, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a pstack run spends real tokens, so let them send the prompt.
 
-A message that asks for work, such as "use pstack to fix this bug", is not a help question. Read [`poteto-mode`](../poteto-mode/SKILL.md), do the work under it, and mention once that a Custom Mode keeps it on.
+<!-- cube-adapt M5 M12 M13. Intent: route work to poteto-mode, and give the user links they can open. Cube: cube has no Custom Modes; installed skills are under ~/.cube/skills (or read with skill() in OptChat); the guide and README are not installed, and the adapted skills' public copy is cubeyard/skills. Kept: routing work to poteto-mode and public links. Now: skills link to cubeyard/skills; the guide and README to cursor/plugins at the pinned commit, with a note that they describe Cursor. Cost: the guide's Cursor wording stays; references/cube.md maps it. -->
+A message that asks for work, such as "use pstack to fix this bug", is not a help question. Read [`poteto-mode`](../poteto-mode/SKILL.md) and do the work under it.
 
-This file maps questions to the skills and guide pages that hold the answers. Those files own the details. Read the file you route to before you quote it, and trust it when it disagrees with this map. The links here point into the installed plugin, which the user may not be able to open, so give the user the file's public copy: `https://github.com/cursor/plugins/blob/main/pstack/` followed by its path.
+This file maps questions to the skills and guide pages that hold the answers. Those files own the details. Read the file you route to before you quote it, and trust it when it disagrees with this map. The user may not be able to open the installed copies, so give the user a public copy: a skill at `https://github.com/cubeyard/skills/blob/main/skills/` followed by its path, and pstack's README and guide at `https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/` followed by their path. The guide describes Cursor; map its names with [`../poteto-mode/references/cube.md`](../poteto-mode/references/cube.md).
 
 ## Find out what they need
 
@@ -24,8 +28,9 @@ Infer the need from the message and the conversation. A named situation, such as
 
 Check the state that changes the answer, and mention it only when it does:
 
-- No `~/.cursor/rules/pstack-models.mdc` means `/setup-pstack` hasn't run for this user, so every role uses its default model.
-- No `verify-*` skill or other app harness in the project means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
+<!-- cube-adapt M4 M11. Intent: the answer depends on whether models are configured and the project has a harness. Cube: the role lines live in OptChat's instructions; project skills live in `.agents/skills`. Kept: both checks. Now: those places. Cost: a thread cannot see OptChat's instructions; it says the check is OptChat's. -->
+- No `pstack models` block in OptChat's instructions means `/setup-pstack` hasn't run for this user, so every role runs on the host's preferred model. Only OptChat can see that block.
+- No `verify-*` skill in the project's `.agents/skills` or other app harness means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
 - No formal verification skill in the project means no property is checked past what tests reach. Mention `/create-formal-verification-skill` when the question is about a race, an invariant, or another case tests rarely hit. When one exists and the code it covers changed after the commit it records as last in sync, mention `/maintain-formal-verification-skill` if the question touches that code.
 
 When the model rule is missing and it matters, ask whether the user wants to pick a model for each role and a reasoning budget now. It matters when the user is new, the question is about setup or cost, or the answer depends on which models run. Ask at most once per chat. If the need is also unclear, ask both questions together. Offer two choices:
@@ -35,29 +40,30 @@ When the model rule is missing and it matters, ask whether the user wants to pic
 
 ## Get set up
 
-1. Install with `/add-plugin pstack` in chat, or from Customize in the sidebar.
-2. Run [`/setup-pstack`](../setup-pstack/SKILL.md). It asks for a reasoning budget, maps a model to each role, and writes a rule. The rule applies to new chats. Then it offers once each to generate a verification skill and a formal verification skill for the project, unless the project already has one.
+<!-- cube-adapt M5 M10 M13. Intent: install, configure models, start a task. Cube: cube installs skills from cubeyard/skills at a pinned commit (Settings, Skills, check for update); setup-pstack produces a block the user saves; four skills are listed, the rest load by link. Kept: the three steps and the note about what loads by itself. Now: cube's install and listing. Cost: none. -->
+1. In cube, pstack ships in cube's default skills (cubeyard/skills). New threads get the commit chosen in Settings, Skills (check for update, then use that commit); a running thread keeps the skills it started with.
+2. Run [`/setup-pstack`](../setup-pstack/SKILL.md) in OptChat. It asks for a budget, maps a model to each role, and hands you a block to save in OptChat's instructions file. It applies from OptChat's next request. Then it offers once each to generate a verification skill and a formal verification skill for the project, unless the project already has one.
 3. Start a real task with `/poteto-mode`, a goal, and a check that can pass or fail.
 
-Installing changes nothing until the user invokes a skill. Only `/setup-pstack` loads from the user's words. The [README](../../README.md) and [guide page 1](../../docs/guide/01-setup.md) have the details. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
+Only four skills are listed for the model to load from the user's words: `poteto-mode`, `poteto-help`, `setup-pstack` (OptChat) and `typescript-best-practices` (threads). The others are installed but load only when poteto-mode routes to them or the user names them. The [README](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/README.md) and [guide page 1](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/01-setup.md) have the Cursor details. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
-If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens on subagents and review panels. Rerun `/setup-pstack` and pick a smaller budget or cheaper models. A role set to `auto` or `inherit-parent` runs on the chat's model, which saves tokens when the chat runs on Auto or a cheaper model. A shorter panel list runs fewer subagents, one for each entry. Save `/poteto-mode` for work that needs rigor.
+<!-- cube-adapt M2 M4 M12. Intent: explain cost and where pstack runs. Cube: in cube the extra cost is extra threads (each a machine and a model context); OptChat's usage tool reports it; Cursor and Claude Code installs do not apply here. Kept: cost advice and the harness note. Now: threads and role lines; references/cube.md is cube's adapter. Cost: none. -->
+If cost is the worry, say where the tokens go and how to spend fewer. pstack spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Rerun `/setup-pstack` and pick a smaller budget or cheaper models. A role set to `auto` or `inherit-parent` runs on the host's preferred model. A shorter panel list starts fewer threads, one for each entry. Save `/poteto-mode` for work that needs rigor.
 
-pstack is built for Cursor, and it also installs in Claude Code with `/plugin marketplace add cursor/plugins`, then `/plugin install pstack@cursor-plugins`. There, each command takes a `pstack:` prefix, such as `/pstack:poteto-mode`. The [Claude Code adapter](../../docs/harness/claude-code.md) maps the Cursor names, and a step that needs a Cursor-only feature, such as Bugbot or Automations, is skipped with a one-line note.
-
-Other tools can read the skills, because they use the Agent Skills format. But most workflow skills, including `/poteto-mode`, `/how`, `/why`, and `/teach`, spawn Cursor subagents with per-role models, and Custom Modes and `/loop` are Cursor features, so those parts may not work there.
+pstack is built for Cursor. In cube, [`../poteto-mode/references/cube.md`](../poteto-mode/references/cube.md) maps every Cursor name: OptChat starts the threads that pstack's subagents were, and a step that needs a Cursor-only feature, such as Bugbot or Automations, is skipped with a one-line note. Upstream's [Claude Code adapter](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/harness/claude-code.md) is the model it follows.
 
 ## Start a task with `/poteto-mode`
 
-`/poteto-mode` matches the task to a playbook, copies the playbook's steps into the todo list, and runs the other skills as the steps need them. A step it skips stays in the list as `skip: <reason>`. A good prompt states the goal and how to tell it's done. It doesn't list skills, because a hand-written sequence tends to drop or reorder steps the playbook would keep. Read [`references/prompting.md`](references/prompting.md) before you help word one. [Guide page 2](../../docs/guide/02-poteto-mode.md) has examples.
+<!-- cube-adapt M1 M5 M13. Intent: how the mode starts and stays on. Cube: cube has no Custom Modes; OptChat reads the mode when a request asks for it, and passes it to threads by naming it in their briefs; a thread keeps it for its whole task. Kept: what the mode does and how to prompt it. Now: say "/poteto-mode" (or "use poteto-mode") in the message to OptChat or the thread; OptChat briefs its threads with the poteto-agent preamble. Cost: OptChat must be asked again on a later unrelated turn. -->
+`/poteto-mode` matches the task to a playbook, copies the playbook's steps into the todo list, and runs the other skills as the steps need them. A step it skips stays in the list as `skip: <reason>`. A good prompt states the goal and how to tell it's done. It doesn't list skills, because a hand-written sequence tends to drop or reorder steps the playbook would keep. Read [`references/prompting.md`](references/prompting.md) before you help word one. [Guide page 2](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/02-poteto-mode.md) has examples.
 
-Whether `/poteto-mode` stays on depends on how the user starts it:
+In cube, how `/poteto-mode` stays on:
 
-- Enter on `/poteto-mode` attaches the skill to one message. It fades as the chat moves on.
-- Option+Enter on Mac or Alt+Enter on Windows, or Use as Mode from the skill entry, makes it a Custom Mode. It stays in context every turn until the user exits the mode, and it stays out of casual turns.
-- Cursor's docs list Custom Modes in the Agents Window and the CLI. Elsewhere, start each new task with `/poteto-mode`.
+- In a message to OptChat, `/poteto-mode` (or "use poteto-mode") makes OptChat work in it for that request and name it in the brief of every thread it starts for it ([`../poteto-mode/agents/poteto-agent.md`](../poteto-mode/agents/poteto-agent.md)).
+- A thread whose brief names it keeps it for its whole task.
+- There are no Custom Modes: on a later, unrelated request, say it again.
 
-Link [Cursor's skills docs](https://cursor.com/docs/skills) when this comes up. Mid-chat, "new task" makes the mode match a fresh playbook. `/poteto-mode` already uses `poteto-agent` for the subagents its playbook steps spawn. To get the same style from a subagent of your own, spawn it with `subagent_type: "poteto-agent"`.
+Mid-chat, "new task" makes the mode match a fresh playbook.
 
 ## Pick a skill
 
@@ -77,7 +83,8 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | Know what a small diff could break outside itself | [`/blast-radius`](../blast-radius/SKILL.md) |
 | Settle types and module shape before code that crosses a function boundary | [`/architect`](../architect/SKILL.md) |
 | Get several attempts at one brief, merged into the best one | [`/arena`](../arena/SKILL.md) |
-| Run parallel checks over slices, or race workers, as cloud agents | [`/swarm`](../swarm/SKILL.md) |
+<!-- cube-adapt M2. Intent: the swarm row. Cube: workers are threads. Kept: the row. Now: the words. Cost: none. -->
+| Run parallel checks over slices, or race workers, as threads | [`/swarm`](../swarm/SKILL.md) |
 | Have different models review a diff and try to break it | [`/interrogate`](../interrogate/SKILL.md) |
 | Fix a bug test-first when a cheap local test exists | [`/tdd`](../tdd/SKILL.md) |
 | Apply TypeScript rules to `.ts` or `.tsx` work | [`/typescript-best-practices`](../typescript-best-practices/SKILL.md) |
@@ -97,7 +104,8 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | Turn their own working habits into a personal mode skill | [`/automate-me`](../automate-me/SKILL.md) |
 | Turn what a finished task taught into skill edits | [`/reflect`](../reflect/SKILL.md) |
 | Stop agents from repeating the same mistakes in this repo | [`/correct`](../correct/SKILL.md) |
-| Build a page whose buttons wake a Grok Bot over a webhook | [`/make-bot-ui`](../make-bot-ui/SKILL.md) |
+<!-- cube-adapt M12. Intent: the bot UI row. Cube: cube has no webhook that wakes an agent. Kept: the row and the skill. Now: say what the skill can still do in cube. Cost: none. -->
+| Build a page whose buttons wake an agent over a webhook (in cube: the page only; no webhook wakes a cube agent yet) | [`/make-bot-ui`](../make-bot-ui/SKILL.md) |
 | Find their way around pstack | `/poteto-help` |
 
 If a skill directory next to this one is missing from the table, read its frontmatter and route by its description. The `principle-*` directories are covered under principles below.
@@ -113,8 +121,9 @@ Close calls:
 
 Not in pstack:
 
-- `/deslop`, `control-cli`, and `control-ui` ship in the `cursor-team-kit` plugin.
-- `/loop` and `/create-skill` are Cursor built-ins.
+<!-- cube-adapt M12. Intent: say what pstack does not ship. Cube: none of these is in cube. Kept: the list. Now: add what stands in for each in cube. Cost: none. -->
+- `/deslop`, `control-cli`, and `control-ui` ship in the `cursor-team-kit` plugin, which cube does not have (see the Cursor-only table in `../poteto-mode/references/cube.md`).
+- `/loop` and `/create-skill` are Cursor built-ins, not in cube.
 - pstack has no `/orchestrate` skill. Orchestrate is a `/poteto-mode` playbook. If the slash menu shows `/orchestrate`, another plugin provides it.
 
 ## Playbooks and principles
@@ -128,35 +137,40 @@ Playbooks are step lists inside `/poteto-mode`, not skills, so they have no slas
 - "full autopilot on this queue" runs Autopilot-full. "autopilot, don't merge" runs Autopilot-stack.
 - "run the eval playbook" runs Eval.
 
-Without `/poteto-mode`, a phrase such as "babysit this pr" can start Cursor's own skill for the same job instead. The Playbooks section of [`poteto-mode`](../poteto-mode/SKILL.md) lists every playbook and when it applies. [Guide page 6](../../docs/guide/06-verify-and-ship.md) covers opening, babysitting, and landing a PR.
+<!-- cube-adapt M12 M13. Intent: playbooks are named through the mode; planning has a home. Cube: cube has no built-in babysit skill and no Plan Mode; the guide is not installed. Kept: the routing. Now: pinned guide links; plans are the Multi-phase plan playbook. Cost: none. -->
+The Playbooks section of [`poteto-mode`](../poteto-mode/SKILL.md) lists every playbook, when it applies, and whether OptChat or a thread runs it. [Guide page 6](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/06-verify-and-ship.md) covers opening, babysitting, and landing a PR.
 
-pstack has no planning skill. Cursor's Plan Mode works alongside it. For work that spans phases or stacked PRs, asking `/poteto-mode` for a plan runs the [Multi-phase plan playbook](../poteto-mode/playbooks/multi-phase-plan.md), which writes the plan and doesn't implement it. For a design question, the Prototype playbook or `/architect` settles it in code first.
+pstack has no planning skill, and cube has no Plan Mode. For work that spans phases or stacked PRs, asking `/poteto-mode` for a plan runs the [Multi-phase plan playbook](../poteto-mode/playbooks/multi-phase-plan.md), which writes the plan and doesn't implement it. For a design question, the Prototype playbook or `/architect` settles it in code first.
 
-Principles are one-rule skills that `/poteto-mode` reads and cites in its replies. The user rarely invokes one. They steer with the names instead, as in "apply prove it works. show me the real output." Typing `/principle-<name>` still loads one on demand. [Guide page 8](../../docs/guide/08-principles.md) lists them.
+<!-- cube-adapt M5 M13. Intent: principles load on demand by name. Cube: principle skills are hidden in cube; an agent reaches them by path. Kept: steering by name. Now: naming one makes the agent read `~/.cube/skills/principle-<name>/SKILL.md`. Cost: none. -->
+Principles are one-rule skills that `/poteto-mode` reads and cites in its replies. The user rarely invokes one. They steer with the names instead, as in "apply prove it works. show me the real output." Naming `/principle-<name>` makes the agent read `~/.cube/skills/principle-<name>/SKILL.md`. [Guide page 8](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/08-principles.md) lists them.
 
 ## Fix a run that went wrong
 
 | Symptom | Fix |
 |---|---|
-| The mode stopped applying after a few turns | It was started with Enter. Start it as a Custom Mode, or start each task with `/poteto-mode`. |
+<!-- cube-adapt M5 M7 M11. Intent: symptoms map to cube's causes. Cube: cube's modes, model choice, isolation and overnight runs work differently. Kept: every symptom row. Now: cube's cause and fix in each changed row. Cost: none. -->
+| The mode stopped applying after a few turns | OptChat reads it per request: say `/poteto-mode` again on a new request. A thread keeps it for its task when its brief names it. |
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
-| A new model choice had no effect | The rule from `/setup-pstack` applies to new chats. Start one. |
+| A new model choice had no effect | The block from `/setup-pstack` must be saved in OptChat's instructions file, and applies to threads started after that; running threads keep their model. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |
-| A skill didn't load on its own | Only `/setup-pstack` loads from the user's words. The others load when the user types them or when `/poteto-mode` runs them, and it doesn't run every skill. |
-| Parallel agents overwrote each other | Give each agent its own worktree, or run them as cloud agents, which each get their own machine. |
-| An overnight run moved but finished nothing | `/loop` needs a check that can pass or fail, not a duration. See [guide page 7](../../docs/guide/07-overnight.md). |
+| A skill didn't load on its own | Only the four listed skills load from the user's words (see Get set up). The others load when the user names them or when `/poteto-mode` runs them, and it doesn't run every skill. |
+| Parallel agents overwrote each other | Each thread has its own machine; give each its own branch, and never two writers on one branch. |
+| An overnight run moved but finished nothing | A run needs a check that can pass or fail, not a duration. See [guide page 7](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/07-overnight.md). |
 | The reply claims success from a green build | Ask for the real command, flow, stored value, or profile. That's the prove-it-works principle. |
 
-For a run that drifts, [`references/prompting.md`](references/prompting.md) has one-line steers. [Guide page 10](../../docs/guide/10-recipes-and-pitfalls.md) has more pitfalls and the recipes worth copying.
+<!-- cube-adapt M13. Intent: point at more steers. Cube: the guide is not installed. Kept: the pointer. Now: the pinned public copy. Cost: none. -->
+For a run that drifts, [`references/prompting.md`](references/prompting.md) has one-line steers. [Guide page 10](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/10-recipes-and-pitfalls.md) has more pitfalls and the recipes worth copying.
 
 ## Make pstack my own
 
 - [`/automate-me`](../automate-me/SKILL.md) drafts a personal mode skill from the user's own history, to use alongside `/poteto-mode`.
 - [`/reflect`](../reflect/SKILL.md) after a session turns its lessons into skill edits the user approves.
 - `/poteto-mode write a skill for <workflow>` runs the authoring playbook. The eval playbook tests a skill change blind.
-- Fix a misbehaving skill in its own PR, not inside the feature work where it went wrong.
+<!-- cube-adapt M11 M13. Intent: fix skills in their own PR. Cube: a skill's source is cubeyard/skills, the user's own skills source, or the project's .agents/skills. Kept: the rule. Now: name those places; pinned guide link. Cost: none. -->
+- Fix a misbehaving skill in its own PR, in its source (cubeyard/skills, your own skills source, or the project's `.agents/skills`), not inside the feature work where it went wrong.
 
-[Guide page 9](../../docs/guide/09-make-it-yours.md) covers each of these.
+[Guide page 9](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/09-make-it-yours.md) covers each of these.
 
 ## Reply
 
