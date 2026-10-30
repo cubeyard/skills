@@ -3,7 +3,7 @@
 **You own a clean stop. Leave a checkpoint a cold-start agent can resume from.** This is explicit only. On "keep going", "going to bed, keep going", or "don't stop", do not pause.
 
 <!-- cube-adapt M2. Intent: a clean stop leaves nothing running. Cube: a thread has no subagents; what can outlive it is a background process or a cube service. Kept: start nothing new, leave nothing running. Now: stop your own background processes; leave a cube service only if the brief asked for it, and name it. Cost: none. -->
-1. Stop at a safe boundary. Finish the current atomic step or back out of it. Start nothing new, and stop any background process you started (a `cube service` the brief asked for may stay; name it).
+1. Stop at a safe boundary. Finish the current atomic step or back out of it. Start nothing new (a thread starts no agents; work that needs one goes to OptChat as a handoff), and stop any background process you started (a `cube service` the brief asked for may stay; name it).
 2. Take no irreversible action to pause. No PR and no push unless you already had one out.
 3. Make the work durable. Commit uncommitted edits as one clear `wip:` commit on the current branch so nothing is lost. If the tree is broken, say so in the commit body in one line.
 4. Write the resume note off-context. Capture intent, what you were doing, progress and what's verified, current state, next steps, key files, and gotchas. 

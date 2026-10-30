@@ -54,7 +54,7 @@ pstack is built for Cursor. In cube, [`../cube-mode/references/cube.md`](../cube
 
 ## Start a task with `/cube-mode`
 
-<!-- cube-adapt M1 M5 M13. Intent: how the mode starts and stays on. Cube: cube has no Custom Modes; OptChat reads the mode when a request asks for it, and passes it to threads by naming it in their briefs; a thread keeps it for its whole task. Kept: what the mode does and how to prompt it. Now: say "/poteto-mode" (or "use poteto-mode") in the message to OptChat or the thread; OptChat briefs its threads with the poteto-agent preamble. Cost: OptChat must be asked again on a later unrelated turn. -->
+<!-- cube-adapt M1 M5 M13. Intent: how the mode starts and stays on. Cube: cube has no Custom Modes; OptChat reads the mode when a request asks for it, and passes it to threads by naming it in their briefs; a thread keeps it for its whole task. Kept: what the mode does and how to prompt it. Now: say "/cube-mode" (or "use cube-mode") in the message to OptChat or the thread; OptChat briefs its threads with the poteto-agent preamble. Cost: OptChat must be asked again on a later unrelated turn. -->
 `/cube-mode` matches the task to a playbook, copies the playbook's steps into the todo list, and runs the other skills as the steps need them. A step it skips stays in the list as `skip: <reason>`. A good prompt states the goal and how to tell it's done. It doesn't list skills, because a hand-written sequence tends to drop or reorder steps the playbook would keep. Read [`references/prompting.md`](references/prompting.md) before you help word one. [Guide page 2](https://github.com/cursor/plugins/blob/4dd1d05818d19792e7cd6e818f1667f95f7e1dbe/pstack/docs/guide/02-cube-mode.md) has examples.
 
 In cube, how `/cube-mode` stays on:

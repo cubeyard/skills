@@ -8,8 +8,8 @@ disable-model-invocation: true
 
 Investigate the motivation and intent behind code. The companion `how` skill answers what the code does and how it works. `why` answers what forces led to its shape.
 
-<!-- cube-adapt M2 M4 M11. Intent: one investigator per evidence source in parallel, each keeping its tools, then a separate synthesizer that follows the epistemics framework. Cube: a thread cannot spawn and has no MCP servers beyond cube's own (artifacts, OptChat's memory); OptChat can spawn but has no machine. Kept: one pass per source, null results as findings, the separate synthesis, the confidence language. Now: a thread runs each investigator as its own pass writing to a scratch file, then the synthesizer pass; OptChat spawns the investigators as threads (role line `why investigators`) and one synthesizer thread (`why synthesizer`) with the findings pasted. Cost: in a thread the synthesizer is the same model that investigated, so its spot-checks are weaker; say so. -->
-**In a thread** (no spawns), run each investigator below as its own pass that writes its findings to `/tmp/why-<slug>/<source>.md`, then the synthesizer as a last pass that reads only those files, the anchor and the epistemics framework. **In OptChat**, each investigator and the synthesizer is a thread, read only, on the `why investigators` and `why synthesizer` role lines. Investigators never write anything.
+<!-- cube-adapt M2 (handoff rule). Intent: investigators per source and a separate synthesizer. Cube: a thread cannot start agents and, by the user's rule, never stands in for one (no sequential role-play, no self-review substitute). Kept: the roles, the anchor, the epistemics. Now: a thread builds the code anchor (step 2, its own work) and reports a handoff with one investigator brief per source and the synthesizer brief. Cost: a round trip through OptChat. -->
+**In a thread**, build the code anchor (step 2) yourself, then report a handoff with one investigator brief per source and the synthesizer brief, the anchor attached (`../cube-mode/references/cube.md` M2), and end your turn. **In OptChat**, each investigator and the synthesizer is a thread, read only, on the `why investigators` and `why synthesizer` role lines. Investigators never write anything.
 
 ## Operating Posture
 
@@ -26,8 +26,8 @@ If the target is vague ("why do we do it this way?" with no clear referent), mak
 
 Before spawning investigators, build the seed context inline: file paths and line ranges, key symbols (functions, classes, constants), the last few commits touching the target, PR numbers from merge commits (pattern `(#1234)` in the subject line), and any linked ticket IDs. Run `git blame -L <start>,<end> <file>` for last-touch commits, `git log --follow -p -- <file>` for full history with patches through renames, `git log --oneline -20 -- <file>` for recent commits with PR numbers visible, and `git log -1 --format=%B <commit>` to extract PR numbers. Then pull the PR bodies and discussion for any substantive commit: `gh pr view <number> --json title,body,author,createdAt,mergedAt,labels,closingIssuesReferences,comments,reviews`. This anchor goes to every investigator and to the synthesizer.
 
-<!-- cube-adapt M2. Intent: investigators run side by side. Cube: a thread runs them as passes. Kept: one per source. Now: the heading names both forms. Cost: none. -->
-## Step 3. Run the Investigators (threads in OptChat, passes in a thread)
+<!-- cube-adapt M2. Intent: investigators run side by side. Cube: only OptChat starts them; a thread hands them off. Kept: one per source. Now: the heading says threads OptChat starts. Cost: none. -->
+## Step 3. Run the Investigators (threads OptChat starts)
 
 **Default to the full parallel investigation.** The goal is a complete coverage map, not a minimal one. Document the null, don't skip the search.
 
@@ -48,8 +48,8 @@ Map each available MCP to one evidence category:
 
 Source control is always available through git and `gh`. For the other six, classify using the MCP name, server instructions, tool names, and resource descriptors. If an MCP could fit more than one category, choose the one matching its primary evidence. Record ambiguous cases in the coverage map.
 
-<!-- cube-adapt M2 M4. Intent: one investigator per source, concurrently, each owning one source. Cube: only OptChat spawns. Kept: one pass per source, never one pass over several. Now: a thread runs one pass per source; OptChat spawns one thread each on the `why investigators` line. Cost: none. -->
-Run one investigator per category that has a matching source, each owning exactly one source: OptChat spawns them in one call on the `why investigators` line; a thread runs one pass per source. Don't let one pass cover several sources.
+<!-- cube-adapt M2 M4. Intent: one investigator per source, concurrently, each owning one source. Cube: only OptChat spawns. Kept: one pass per source, never one pass over several. Now: OptChat spawns one thread each on the `why investigators` line; a thread hands them off. Cost: none. -->
+Run one investigator per category that has a matching source, each owning exactly one source: OptChat spawns them in one call on the `why investigators` line. Don't let one investigator cover several sources.
 
 Each investigator's prompt is `references/investigator-prompt.md` filled in, plus:
 <!-- cube-adapt M10. Intent: each source has a playbook. Cube: cube adds one for OptChat's chat. Kept: the rule. Now: name it. Cost: none. -->
@@ -80,8 +80,8 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 
 ## Step 4. Synthesize
 
-<!-- cube-adapt M2 M4. Intent: a separate synthesizer on a judgment model. Cube: only OptChat spawns. Kept: a separate synthesis with these inputs. Now: OptChat spawns it on the `why synthesizer` line; a thread runs it as a last pass over the files. Cost: none. -->
-Run one synthesizer (OptChat: a thread on the `why synthesizer` line; a thread: a last pass). It gets:
+<!-- cube-adapt M2 M4. Intent: a separate synthesizer on a judgment model. Cube: only OptChat spawns. Kept: a separate synthesis with these inputs. Now: OptChat spawns it on the `why synthesizer` line. Cost: none. -->
+Run one synthesizer (a thread OptChat starts on the `why synthesizer` line). It gets:
 1. The investigator findings, including any null results and any categories skipped with justification
 2. The code anchor
 3. The user's original question

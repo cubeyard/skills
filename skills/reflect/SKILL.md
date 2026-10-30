@@ -1,6 +1,6 @@
 ---
 name: reflect
-description: Run three review lenses over the session (threads OptChat starts, or passes in a thread), surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect.
+description: Run three review lenses over the session (threads OptChat starts), surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect.
 # cube-adapt M2. Intent: three independent reviewers over the transcript. Cube: only OptChat starts threads. Kept: three lenses, routed edits. Now: the description names both forms. Cost: none.
 disable-model-invocation: true
 ---
@@ -17,10 +17,12 @@ Invoke when the user says "reflect" or "/reflect". Skip when the conversation is
 In cube: a thread writes a tight digest of its own session from its context (the transcript file is out of its reach) to `/tmp/reflect/digest.md`, with the opening request quoted. OptChat reflecting on a thread reads `history(id)`, and on its own chat uses `zoom`. Read nothing outside this conversation. Never glob across other projects' or threads' records.
 
 <!-- cube-adapt M2 M10. Intent: find the transcript file among Cursor's layouts and run three reviewers in parallel. Cube: cube has no transcript files a thread can read, and only OptChat starts reviewers. Kept: the digest fallback and three lenses. Now: the Cursor layout commands are left in upstream/ only; the heading names both forms. Cost: none. -->
-## 2. Run three reviewers (threads in OptChat, passes in a thread)
+## 2. Run three reviewers (threads OptChat starts)
 
-<!-- cube-adapt M2 M3 M4. Intent: three lenses read the session independently, each on its role's model, with tools to check what the transcript cites. Cube: only OptChat starts reviewers (threads, model from the role lines); a thread runs the lenses itself. Kept: three lenses, verbatim templates, the role lines. Now: OptChat spawns three threads with the templates and the digest; a thread runs the three lenses as passes, each writing to its own file before the next starts. Cost: a thread's lenses share one model and one memory of the session; label them self-review. -->
-OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the role lines below (omit `model` where a line is missing or says `auto` or `inherit-parent`). A thread: run the three lenses yourself, one pass each, each writing its findings to `/tmp/reflect/<lens>.md` before the next begins, and label them `self-review, not independent`.
+<!-- cube-adapt M2 M3 M4. Intent: three lenses read the session independently, each on its role's model, with tools to check what the transcript cites. Cube: only OptChat starts reviewers (threads, model from the role lines); a thread hands them off. Kept: three lenses, verbatim templates, the role lines. Now: OptChat spawns three threads with the templates and the digest; a thread writes the digest and hands off (M2 handoff rule). Cost: a thread's digest is its own view of the session. -->
+OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the role lines below (omit `model` where a line is missing or says `auto` or `inherit-parent`). 
+<!-- cube-adapt M2 (handoff rule). Intent: three reviewers read the session independently. Cube: a thread cannot start agents and, by the user's rule, never stands in for one (no sequential role-play, no self-review substitute). Kept: three lenses, verbatim templates. Now: a thread writes its digest and reports a handoff with the three reviewer briefs and the synthesizer brief. Cost: a round trip through OptChat. -->
+A thread: write the digest, push or attach it, and report a handoff with the three reviewer briefs and the synthesizer brief (`../cube-mode/references/cube.md` M2); end your turn.
 
 <!-- cube-adapt M4. Intent: each lens has a role line and a default model. Cube: Cursor slugs are not cube model ids; a role with no line runs on the host's preferred model. Kept: the lenses, role lines and templates. Now: the default column says so. Cost: none. -->
 | Lens | Role line | Default `model` | Prompt template |
@@ -34,8 +36,8 @@ Pass each template verbatim, substituting the transcript path or digest where ma
 
 ## 3. Synthesize
 
-<!-- cube-adapt M2 M4. Intent: a separate synthesizer on the judgment model verifies citations and sorts findings. Cube: only OptChat spawns. Kept: the template and its three lists. Now: OptChat spawns a synthesizer thread with every reviewer report pasted; a thread runs the synthesis as a last pass over the lens files. Cost: none. -->
-OptChat: one synthesizer thread, `model` from the `reflect judgment, divergent, synthesizer` line, with every reviewer's report inlined. A thread: a last pass over the lens files. Pass `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. It returns an Accepted / Rejected / Backlog list.
+<!-- cube-adapt M2 M4. Intent: a separate synthesizer on the judgment model verifies citations and sorts findings. Cube: only OptChat spawns. Kept: the template and its three lists. Now: OptChat spawns a synthesizer thread with every reviewer report pasted; a thread hands it off with the reviewers. Cost: none. -->
+OptChat: one synthesizer thread, `model` from the `reflect judgment, divergent, synthesizer` line, with every reviewer's report inlined. Pass `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. It returns an Accepted / Rejected / Backlog list.
 
 ## 4. Structural enforcement check
 

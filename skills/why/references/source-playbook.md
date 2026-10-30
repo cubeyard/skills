@@ -1,7 +1,7 @@
 # Source playbooks
 
 <!-- cube-adapt M2. Intent: one investigator per category. Cube: an investigator is a thread OptChat starts or a pass in a thread. Kept: one per category. Now: the words. Cost: none. -->
-The why skill runs one investigator (a thread, or a pass) per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common MCPs. Adapt them for a different MCP in the same category.
+The why skill runs one investigator (a thread OptChat starts) per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common MCPs. Adapt them for a different MCP in the same category.
 
 | Category | Playbook | Example MCP it documents |
 |---|---|---|

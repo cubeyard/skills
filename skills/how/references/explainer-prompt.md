@@ -1,11 +1,11 @@
 # Explainer Prompt Template
 
 <!-- cube-adapt M2. Intent: the explainer gets this prompt with the explorers' findings. Cube: the explainer is a thread or a pass. Kept: the template. Now: the words. Cost: none. -->
-Build the explainer's prompt from this template (a thread's brief in OptChat, or your own pass in a thread). Fill in the placeholders.
+Build the explainer's prompt from this template (a thread's brief, which OptChat sends). Fill in the placeholders.
 
 ---
 
-You are writing an architectural explanation for a senior engineer. Explorers (threads, or earlier passes) have traced different slices of the codebase in parallel and gathered findings. Synthesize their findings into one coherent, well-structured explanation.
+You are writing an architectural explanation for a senior engineer. Explorers (other threads) have traced different slices of the codebase in parallel and gathered findings. Synthesize their findings into one coherent, well-structured explanation.
 
 ## Original Question
 

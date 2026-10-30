@@ -10,7 +10,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/architect/references/design-red-flags.md | architect/references/design-red-flags.md | unchanged |
 | skills/architect/references/rationale-template.md | architect/references/rationale-template.md | unchanged |
 | skills/architect/references/runner-prompt.md | architect/references/runner-prompt.md | adapted (1 hunks, 1 notes) |
-| skills/arena/SKILL.md | arena/SKILL.md | adapted (5 hunks, 6 notes) |
+| skills/arena/SKILL.md | arena/SKILL.md | adapted (5 hunks, 7 notes) |
 | skills/automate-me/SKILL.md | automate-me/SKILL.md | adapted (15 hunks, 11 notes) |
 | skills/benchmark-checklist/SKILL.md | benchmark-checklist/SKILL.md | unchanged |
 | skills/blast-radius/SKILL.md | blast-radius/SKILL.md | unchanged |
@@ -22,21 +22,21 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/create-verification-skill/references/feature-map-example/create-note.md | create-verification-skill/references/feature-map-example/create-note.md | unchanged |
 | skills/create-verification-skill/references/feature-map-example/search.md | create-verification-skill/references/feature-map-example/search.md | unchanged |
 | skills/figure-it-out/SKILL.md | figure-it-out/SKILL.md | adapted (3 hunks, 3 notes) |
-| skills/how/SKILL.md | how/SKILL.md | adapted (4 hunks, 4 notes) |
+| skills/how/SKILL.md | how/SKILL.md | adapted (4 hunks, 5 notes) |
 | skills/how/references/explainer-prompt.md | how/references/explainer-prompt.md | adapted (2 hunks, 1 notes) |
 | skills/how/references/explorer-prompt.md | how/references/explorer-prompt.md | adapted (2 hunks, 1 notes) |
 | skills/in-your-own-words/SKILL.md | in-your-own-words/SKILL.md | unchanged |
-| skills/interrogate/SKILL.md | interrogate/SKILL.md | adapted (2 hunks, 2 notes) |
+| skills/interrogate/SKILL.md | interrogate/SKILL.md | adapted (2 hunks, 3 notes) |
 | skills/ketchup-video/SKILL.md | ketchup-video/SKILL.md | adapted (1 hunks, 1 notes) |
 | skills/ketchup/SKILL.md | ketchup/SKILL.md | adapted (4 hunks, 3 notes) |
 | skills/maintain-formal-verification-skill/SKILL.md | maintain-formal-verification-skill/SKILL.md | unchanged |
 | skills/maintain-verification-skill/SKILL.md | maintain-verification-skill/SKILL.md | adapted (3 hunks, 3 notes) |
 | skills/make-bot-ui/SKILL.md | make-bot-ui/SKILL.md | adapted (2 hunks, 2 notes) |
-| skills/no-comments/SKILL.md | no-comments/SKILL.md | adapted (4 hunks, 3 notes) |
+| skills/no-comments/SKILL.md | no-comments/SKILL.md | adapted (4 hunks, 4 notes) |
 | skills/poteto-help/SKILL.md | poteto-help/SKILL.md | adapted (30 hunks, 15 notes) |
 | skills/poteto-help/references/prompting.md | poteto-help/references/prompting.md | adapted (1 hunks, 1 notes) |
 | skills/poteto-help/references/recipes.md | poteto-help/references/recipes.md | adapted (12 hunks, 4 notes) |
-| skills/poteto-mode/SKILL.md | cube-mode/SKILL.md | adapted (25 hunks, 20 notes) |
+| skills/poteto-mode/SKILL.md | cube-mode/SKILL.md | adapted (25 hunks, 21 notes) |
 | skills/poteto-mode/playbooks/authoring-a-skill.md | cube-mode/playbooks/authoring-a-skill.md | adapted (1 hunks, 1 notes) |
 | skills/poteto-mode/playbooks/autonomous-run.md | cube-mode/playbooks/autonomous-run.md | adapted (2 hunks, 2 notes) |
 | skills/poteto-mode/playbooks/autopilot-full.md | cube-mode/playbooks/autopilot-full.md | adapted (6 hunks, 7 notes) |
@@ -47,7 +47,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/poteto-mode/playbooks/feature.md | cube-mode/playbooks/feature.md | adapted (3 hunks, 4 notes) |
 | skills/poteto-mode/playbooks/hillclimb.md | cube-mode/playbooks/hillclimb.md | adapted (3 hunks, 3 notes) |
 | skills/poteto-mode/playbooks/investigation.md | cube-mode/playbooks/investigation.md | adapted (1 hunks, 1 notes) |
-| skills/poteto-mode/playbooks/multi-phase-plan.md | cube-mode/playbooks/multi-phase-plan.md | adapted (12 hunks, 7 notes) |
+| skills/poteto-mode/playbooks/multi-phase-plan.md | cube-mode/playbooks/multi-phase-plan.md | adapted (12 hunks, 8 notes) |
 | skills/poteto-mode/playbooks/opening-a-pr.md | cube-mode/playbooks/opening-a-pr.md | adapted (4 hunks, 3 notes) |
 | skills/poteto-mode/playbooks/orchestrate.md | cube-mode/playbooks/orchestrate.md | adapted (5 hunks, 9 notes) |
 | skills/poteto-mode/playbooks/pause-safely.md | cube-mode/playbooks/pause-safely.md | adapted (2 hunks, 2 notes) |
@@ -104,7 +104,7 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/principle-test-behavior-not-implementation/SKILL.md | principle-test-behavior-not-implementation/SKILL.md | unchanged |
 | skills/principle-type-system-discipline/SKILL.md | principle-type-system-discipline/SKILL.md | unchanged |
 | skills/recall/SKILL.md | recall/SKILL.md | adapted (3 hunks, 4 notes) |
-| skills/reflect/SKILL.md | reflect/SKILL.md | adapted (13 hunks, 9 notes) |
+| skills/reflect/SKILL.md | reflect/SKILL.md | adapted (13 hunks, 10 notes) |
 | skills/reflect/references/divergent-reviewer.md | reflect/references/divergent-reviewer.md | adapted (1 hunks, 1 notes) |
 | skills/reflect/references/judgment-reviewer.md | reflect/references/judgment-reviewer.md | adapted (1 hunks, 1 notes) |
 | skills/reflect/references/synthesizer.md | reflect/references/synthesizer.md | unchanged |
@@ -521,16 +521,16 @@ Every file of upstream `pstack/` (cursor/plugins@4dd1d058) and where it is in `s
 | skills/statechart/scripts/test/tlc.ts | statechart/scripts/test/tlc.ts | unchanged |
 | skills/statechart/scripts/tsconfig.json | statechart/scripts/tsconfig.json | unchanged |
 | skills/statechart/scripts/worker.ts | statechart/scripts/worker.ts | unchanged |
-| skills/swarm/SKILL.md | swarm/SKILL.md | adapted (5 hunks, 4 notes) |
+| skills/swarm/SKILL.md | swarm/SKILL.md | adapted (5 hunks, 5 notes) |
 | skills/tdd/SKILL.md | tdd/SKILL.md | unchanged |
-| skills/teach/SKILL.md | teach/SKILL.md | adapted (2 hunks, 2 notes) |
+| skills/teach/SKILL.md | teach/SKILL.md | adapted (2 hunks, 3 notes) |
 | skills/technical-writing/SKILL.md | technical-writing/SKILL.md | unchanged |
 | skills/typescript-best-practices/SKILL.md | typescript-best-practices/SKILL.md | adapted (2 hunks, 1 notes) |
 | skills/typescript-best-practices/references/patterns.md | typescript-best-practices/references/patterns.md | unchanged |
 | skills/unslop/SKILL.md | unslop/SKILL.md | unchanged |
 | skills/why/SKILL.md | why/SKILL.md | adapted (8 hunks, 7 notes) |
 | skills/why/references/epistemics.md | why/references/epistemics.md | unchanged |
-| skills/why/references/investigator-prompt.md | why/references/investigator-prompt.md | unchanged |
+| skills/why/references/investigator-prompt.md | why/references/investigator-prompt.md | adapted (1 hunks, 1 notes) |
 | skills/why/references/source-playbook.md | why/references/source-playbook.md | adapted (1 hunks, 1 notes) |
 | skills/why/references/sources/code-archaeology.md | why/references/sources/code-archaeology.md | unchanged |
 | skills/why/references/sources/databricks.md | why/references/sources/databricks.md | unchanged |

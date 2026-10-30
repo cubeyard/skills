@@ -220,6 +220,22 @@ for (const id of listed.optchat) {
 if (ids.length > LIMITS.skills) fail(`${ids.length} skills; a thread installs at most ${LIMITS.skills}`);
 if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${bytes} bytes; a thread installs at most ${LIMITS.files} and ${LIMITS.bytes}`);
 
+// 6. The handoff rule (references/cube.md, M2): a thread never stands in
+// for an agent pstack requires. Installed text may not offer an in-thread
+// substitute, and every installed file whose upstream text hands work to
+// another agent must say where that work goes (a handoff, or OptChat).
+const SUBSTITUTES = [/self-review, not independent/i, /in-thread form/i, /single-agent (form|version)/i, /passes in a thread/i, /as its own pass/i, /one pass at a time/i, /run the (same roles|three lenses) yourself/i, /runs the pass itself/i];
+const DELEGATES = /subagent|\bspawn|fan (them )?out|comment-sicko|in parallel|\b(Task) (call|tool|prompt)|`Task`/i;
+for (const { from, to } of pairs) {
+  if (!to.endsWith(".md")) continue;
+  const full = path.join(skillsDir, to);
+  if (!fs.existsSync(full)) continue;
+  const prose = fs.readFileSync(full, "utf8").split("\n").filter((l) => !l.includes("cube-adapt")).join("\n");
+  for (const re of SUBSTITUTES) if (re.test(prose)) fail(`skills/${to}: offers an in-thread substitute for another agent (${re}); report a handoff instead (M2)`);
+  const upstream = fs.readFileSync(path.join(baseline, from), "utf8");
+  if (DELEGATES.test(upstream) && !/handoff|OptChat/i.test(prose)) fail(`skills/${to}: upstream hands work to another agent here, but the port never says where it goes (handoff or OptChat, M2)`);
+}
+
 // 5. Links: a relative link must reach a file cube installs (inside skills/).
 const LINK = /\]\(([^)\s]+)\)/g;
 let links = 0;

@@ -3,7 +3,7 @@
 Invoked at the end of every other playbook.
 
 <!-- cube-adapt M2 M11. Intent: start from a clean tree off main, and keep concurrent writers apart. Cube: a thread is one fresh checkout of the project at /workspace; no subagents share it; two threads never share a branch. Kept: clean base, separate writers, the recovery recipes. Now: branch from the default branch in /workspace; a second writer is another thread on another branch. Cost: none. -->
-**Worktree.** Work in the thread's checkout (`/workspace`) on a branch off main. Only you write it; another writer is another thread on its own branch. Dirty branch with unrelated work: patch out, fresh branch or worktree, apply. Snarled worktree: reset from main, redo minimally. The cube mechanics of a PR (identity, attribution lines, body length) are in [`../../opening-a-pull-request/SKILL.md`](../../opening-a-pull-request/SKILL.md); where it is stricter, follow it.
+**Worktree.** Work in the thread's checkout (`/workspace`) on a branch off main. Only you write it; another writer is another thread, which OptChat starts on its own branch. Dirty branch with unrelated work: patch out, fresh branch or worktree, apply. Snarled worktree: reset from main, redo minimally. The cube mechanics of a PR (identity, attribution lines, body length) are in [`../../opening-a-pull-request/SKILL.md`](../../opening-a-pull-request/SKILL.md); where it is stricter, follow it.
 
 **Commits.** Commit liberally. Rebase into small, ordered commits before opening PRs. Each commit is a future PR: landable, ordered to tell the story. Amend when the fix belongs in a just-made commit. New commit when separable. Commit bodies don't restate the subject.
 

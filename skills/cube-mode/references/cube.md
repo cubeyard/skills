@@ -18,7 +18,7 @@ says it is OptChat.
 | --- | --- | --- |
 | the parent chat that owns a playbook, the todo list and every spawn | yes: it routes, briefs, reads reports, decides the next step | no |
 | a subagent, delegate, worker, owner, verifier, judge | no: it never writes code, runs commands or touches files | yes: one task, in its own machine |
-| "spawn N in one message" | `spawn` with N tasks in one call | not possible: do the roles yourself, or report the fan-out (below) |
+| "spawn N in one message" | `spawn` with N tasks in one call | not possible: report a handoff (M2) |
 | the human, the operator | the user, in the chat | the user only through OptChat |
 
 **M1.** A playbook step that plans, routes, judges or lands across
@@ -85,23 +85,36 @@ cube only OptChat chooses, once per thread, with `spawn`'s `model`
 
 ## Delegation
 
-**M2. A thread cannot start agents.** Where a skill tells a thread to
-spawn, fan out, or delegate:
+<!-- cube-adapt M2 (revised on the user's rule). Intent: pstack hands work to other agents for context protection, parallel throughput and independence between author and judge. Cube: a thread cannot start agents, and the user ruled that a thread must not stand in for agents pstack requires: no sequential role-playing, no self-review in place of an independent agent, no recursive delegation. Kept: every agent pstack requires still exists, as a fresh thread, and the thread's own task (including its fixes, continuation and landing) stays with it. Now: wherever a skill needs another agent, the thread reports a handoff (the tasks, ready briefs, the evidence so far, and how its own work continues) and ends its turn; OptChat starts each task as a fresh thread and tells the thread when its own task can go on. Cost: a thread's step that needs a fan-out costs a round trip through OptChat and more machines. -->
+**M2. A thread never stands in for another agent.** A thread is the agent
+its brief makes it: the delegate pstack's lead hands a task to (the
+implementer of a bug fix, feature, refactor, perf change or hillclimb
+attempt; a verifier; an explorer; a reviewer). It does that task itself,
+start to end, including the lead's hands-on steps (reproduce, verify,
+review its own diff before reporting) and the task's own continuation,
+fixes and landing.
 
-1. **The work is the thread's own task:** do it yourself, in order, one
-   role at a time. Give each role the prompt the skill gives it, and keep
-   its output in a file in the work directory, so the next role reads the
-   file, not your memory of it (guard the context window).
-2. **The point is independence or diversity** (a verifier who did not
-   write the code, a judge from another model family, N parallel
-   candidates, adversaries on different models): you cannot supply it.
-   Do the single-agent version if the skill has one and label it
-   `self-review, not independent` in your report. Or, if the step needs
-   the real thing, end your turn with a report that proposes the fan-out:
-   the briefs, ready to send, the models, and what each returns. OptChat
-   decides; you start nothing.
-3. Never simulate parallel agents by pretending to be several reviewers in
-   one context and calling the result independent.
+Wherever a skill, playbook or template requires *another* agent (spawn,
+fan out, delegate, a subagent, a worker, a judge, a verifier, a reviewer
+that did not write the work, a second model), the thread does not play
+that agent, in parallel or in sequence, and does not label its own pass as
+a substitute. It reports a **handoff** and ends its turn:
+
+1. **Tasks**: each agent the skill requires, as a ready brief: the skill
+   and template path to read (`~/.cube/skills/<id>/...`), the exact
+   branch, PR or commit, what it may write, what it returns, the role
+   line for its model.
+2. **Evidence**: what this thread established so far, pushed or attached
+   (a branch, an artifact), so the new threads start from it.
+3. **Continuation**: what this thread does when the results come back as a
+   tell (the same task), or that its task ends here.
+
+OptChat starts each task as a fresh thread (never the reporting thread,
+which keeps only its own task), and tells the reporting thread the results
+when its task continues. A thread never starts a thread itself.
+
+Not a handoff: a deterministic script or codemod the thread writes and runs
+(a lever, not an agent), and reading code the task itself needs.
 
 **In OptChat**, a pstack fan-out is a `spawn` with one task per worker:
 
@@ -171,8 +184,10 @@ step from it alone:
 3. Evidence: each check marked ran, mocked or not run
    ([prove-it-works](../../prove-it-works/SKILL.md)); failures quoted.
 4. Facts, hypotheses and unknowns kept apart.
-5. Gaps and risks; anything labeled `self-review, not independent`.
-6. Decisions that need the user or OptChat, with a recommendation.
+5. Gaps and risks.
+<!-- cube-adapt M2. Intent: the report carries what the lead needs. Cube: a thread's needed agents go back to OptChat. Kept: the report format. Now: a Handoff item. Cost: none. -->
+6. Handoff, when a skill needs another agent (M2): tasks, evidence, continuation.
+7. Decisions that need the user or OptChat, with a recommendation.
 
 Promise no later work: say what is left and what it waits for.
 

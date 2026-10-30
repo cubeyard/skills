@@ -9,8 +9,9 @@ disable-model-invocation: true
 
 ## Start
 
-<!-- cube-adapt M1 M2. Intent: N parallel workers across slices or races, drained into one report. Cube: only OptChat starts workers (threads); a thread cannot. Kept: the phases, the shapes, the selection rules, the result schema. Now: OptChat runs the swarm; a thread asked to swarm runs slices itself in order and proposes the rest. Cost: a thread's race is not a race; say so. -->
-**In cube, OptChat runs a swarm**: each worker is a thread. A thread asked to swarm runs coverage slices itself, one after another, each against the same done predicate, and reports any race or model comparison as a proposal for OptChat (a race run by one agent in sequence is not a race).
+<!-- cube-adapt M1 M2. Intent: N parallel workers across slices or races, drained into one report. Cube: only OptChat starts workers (threads); a thread cannot. Kept: the phases, the shapes, the selection rules, the result schema. Now: OptChat runs the swarm; a thread asked to swarm frames it and hands off (M2 handoff rule). Cost: none beyond the round trip. -->
+**In cube, OptChat runs a swarm**: each worker is a thread. A thread asked to swarm frames it (Phase A) and reports a handoff with one brief per worker (`../cube-mode/references/cube.md` M2), then ends its turn; it does not run the slices itself.
+<!-- cube-adapt M2 (handoff rule). Intent: N workers in parallel. Cube: a thread cannot start agents and, by the user's rule, never stands in for one (no sequential role-play, no self-review substitute). Kept: the phases and selection rules. Now: a thread frames and hands off; it no longer runs slices in sequence. Cost: a round trip through OptChat. -->
 
 Open a todolist with one entry per phase before launching anything.
 
