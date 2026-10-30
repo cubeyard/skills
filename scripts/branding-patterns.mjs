@@ -1,12 +1,14 @@
 // Retired names (PORTING.md, Naming): no path or file in this repository
-// names the two retired brands or the original stack, in any casing or
-// spelling. The words are spelled backwards here so that this file passes
-// its own check.
+// names the two retired brands, the original stack, or the original host's
+// review bot (its support is removed, so no field, step or rubric may name
+// it), in any casing or spelling. The words are spelled backwards here so
+// that this file passes its own check.
 const reverse = (s) => [...s].reverse().join("");
 export const BRANDS = ["otetop", "rosruc"].map(reverse);
 // The stack's name also ends a common word for stacked pull requests
 // ("u" + name), so it matches only where no letter or digit precedes it.
 export const STACK = reverse("kcatsp");
+export const REVIEW_BOT = reverse("tobgub");
 const [, editorBrand] = BRANDS;
 
 // Look-alike letters that NFKC leaves alone (Cyrillic, Greek), folded to
@@ -22,7 +24,7 @@ const fold = (text) => [...text.normalize("NFKC").toLowerCase()].map((ch) => CON
 // or" is not a match.
 const SEP = String.raw`(?:[-_.·'’­​-‏‐-―⁠−﻿]|-[ \t]*\r?\n[ \t]*)?`;
 const wordPattern = (word) => [...word].join(SEP);
-export const BRANDING = new RegExp([...BRANDS.map(wordPattern), `(?<![a-z0-9])${wordPattern(STACK)}`].join("|"), "g");
+export const BRANDING = new RegExp([...BRANDS.map(wordPattern), wordPattern(REVIEW_BOT), `(?<![a-z0-9])${wordPattern(STACK)}`].join("|"), "g");
 
 // The one kind of match a file may keep: a protocol identifier an outside
 // system defines, which cannot be renamed without breaking it. Each entry

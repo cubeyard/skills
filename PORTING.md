@@ -268,7 +268,7 @@ prerequisites map onto that. Measured: `bun` (for `watch-pr`) and `mise`
 (for `statechart`) install in a thread machine; Tailscale (UDP) and a webhook
 sender key (a secret) cannot be there.
 
-**M12. Features cube lacks.** The original host's products: Bugbot,
+**M12. Features cube lacks.** The original host's products: its review bot,
 Automations, `SendToUser`, a separate team plugin (`deslop`, `control-ui`,
 `control-cli`), `create-skill`,
 Plan Mode, `/visualize`, image generation, canvases. Where cube has an
@@ -293,7 +293,7 @@ changed a few more.
 
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
-| cube-mode (renamed from upstream's router) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/cube-mode-agent.md` |
+| cube-mode (renamed from upstream's router) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); its review-bot rubric later removed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/cube-mode-agent.md` |
 | cube-help (renamed from upstream's help) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed ported skills), models said in the chat, a request for model setup answered as needing none, modes, troubleshooting rows, links to installed playbooks in place of the guide |
 | model setup skill | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
 | typescript-best-practices | 2 | 1 | threads | M5 | listed, since its original path glob was automatic |
@@ -444,14 +444,14 @@ its own check). Behavior that depended on the names keeps working:
 | skill text naming the stack | the stack's name as a product ("its skills", "use it", "make it my own") | "cube-mode", "cube's skills", "the original stack" where the text is about the source; cube.md's tables say "skill term" |
 | the model setup skill | named as retired in cube-help and cube.md, with a `RETIRED` check | not named; cube-help answers a request for model setup; the branding check keeps the name out, folder included |
 | statechart recorded TLC logs | absolute paths of the author's checkout | the same paths under this repository's name; the parsers ignore them (same 264 pass before and after) |
-| `watch-pr` Bugbot recognition | a login containing "bugbot", or the original host's app login with its comment markers; pass keys from `RUN_ID` or the host's automation id | a login containing "bugbot"; pass keys from `RUN_ID`. The host's app is no longer recognised: its threads are ordinary review threads, without pass counts |
+| the original host's review bot | `watch-pr` recognised its threads (a per-thread flag, and a review-pass count from run ids) and rendered both; a triage rubric (`references/` in cube-mode) and Babysit, Multi-phase plan and cube-mode steps named it | removed entirely, as the user approved: review threads carry only `id` and `firstComment`, the watcher's pending review-automation check keeps its generic tokens, and every review comment, from a person or a bot, is triaged by Babysit step 8 (verify, fix with a red-first proof, dismiss with a concrete reason, or ask; escalate security, auth, billing, data and migrations). The guard keeps the bot's name, and so its old fields and rubric, out of the repository |
 
 `EXTERNAL_IDENTIFIERS` lists by file the only matches the check allows:
 GitHub GraphQL's `PageInfo` page field, in `watch-pr/github.ts` and its
 recorded test responses, which a query must name to page through review
 threads and checks. It is a protocol field, not branding, and renaming it
-would break paging. The user chose to drop the Bugbot recognition that
-needed the original host's identifiers rather than exempt them.
+would break paging. The user chose to remove the original host's review
+bot support entirely rather than exempt its identifiers.
 
 What the resolver does (cubeyard/cube `packages/server/src/skills.ts`):
 sources are read default first, then the user's in order; for each id **the

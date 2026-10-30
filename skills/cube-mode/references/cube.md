@@ -302,7 +302,7 @@ the skipped step made, leave a placeholder and name it.
 
 | skill term | cube |
 | --- | --- |
-| Bugbot, the agentic security review | GitHub review comments from any bot are review threads: triage them with [`bugbot-triage.md`](bugbot-triage.md) the same way. Skip steps that start or configure Bugbot itself |
+| a review bot, an automated security review | its comments are ordinary GitHub review threads: triage them per the Babysit playbook's step 8. Skip steps that start or configure the bot itself |
 | Automations, routines, `update_state`, webhook wakes, `SendToUser` secret requests | none: cube has no event that starts or wakes an agent besides the user's message and thread reports. Skip with the line |
 | a built-in PR tool | `gh` (see opening-a-pr); no line needed |
 | Origin (`origin pr ...`) | use it only if `command -v origin` succeeds in the thread; otherwise `gh` |

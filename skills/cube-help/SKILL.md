@@ -42,7 +42,7 @@ Only three of these skills are listed for the model to load from the user's word
 
 If cost is the worry, say where the tokens go and how to spend fewer. cube-mode spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Tell OptChat in the chat to use cheaper models, for every role or one, or fewer panel seats; it applies to threads started after that. Save `/cube-mode` for work that needs rigor.
 
-Most of these skills were ported from a stack built for another agent host. [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps its terms: OptChat starts the threads that its subagents were, and a step that needs a feature cube lacks, such as Bugbot or Automations, is skipped with a one-line note.
+Most of these skills were ported from a stack built for another agent host. [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps its terms: OptChat starts the threads that its subagents were, and a step that needs a feature cube lacks, such as Automations, is skipped with a one-line note.
 
 ## Start a task with `/cube-mode`
 

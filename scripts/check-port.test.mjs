@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { substitutesIn } from "./handoff-patterns.mjs";
 import { retiredConfigIn } from "./model-patterns.mjs";
-import { BRANDS, STACK, brandingIn } from "./branding-patterns.mjs";
+import { BRANDS, REVIEW_BOT, STACK, brandingIn } from "./branding-patterns.mjs";
 
 // Wordings earlier revisions or reviews found; each must be caught.
 const BAD = [
@@ -72,6 +72,7 @@ test("the port's own model wordings are not caught", () => {
 // the name list so that this file passes the check itself.
 const [P, C] = BRANDS;
 const S = STACK;
+const B = REVIEW_BOT;
 const cap = (w) => w[0].toUpperCase() + w.slice(1);
 const spread = (w, sep) => [...w].join(sep);
 const BRAND_BAD = [
@@ -92,6 +93,11 @@ const BRAND_BAD = [
   `${S.toUpperCase()}_HOME`,
   `# ${cap(S)} in cube`,
   spread(S, "."),
+  `readonly is${cap(B)}: boolean;`,
+  `\`${B}ReviewPasses=\${thread.${B}ReviewPasses}\``,
+  `per \`../references/${B}-triage.md\`.`,
+  `8. **${cap(B)} is triaged skeptically, always.**`,
+  `address the ${B.toUpperCase()} comments`,
   spread(P, "."),
   spread(C, "-"),
   spread(P, "\u2011"),
@@ -164,6 +170,17 @@ test("installed text that falls back to the host's model fails the checker", () 
   const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-mode/references/cube.md"), "\nIf no preference covers it, omit `model`.\n"));
   assert.equal(run.status, 1);
   assert.match(run.stderr, /cube-mode\/references\/cube\.md: points at the retired model setup or the host default/);
+});
+test("a removed review-bot contract that comes back fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/scripts/watch-pr/types.ts");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("  readonly firstComment: ReviewComment | null;\n}", `  readonly firstComment: ReviewComment | null;\n  readonly is${cap(B)}: boolean;\n}`)));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /watch-pr\/types\.ts:\d+: retired name/);
+});
+test("the removed review-bot rubric that comes back fails the checker", () => {
+  const run = scratch((dir) => fs.writeFileSync(path.join(dir, `skills/cube-mode/references/${B}-triage.md`), "# Triage\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /references\/[^:]+-triage\.md: the path carries a retired name/);
 });
 test("a ported skill without its LICENSE fails the checker", () => {
   const run = scratch((dir) => fs.rmSync(path.join(dir, "skills/how/LICENSE")));
