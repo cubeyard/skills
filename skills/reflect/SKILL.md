@@ -14,15 +14,10 @@ Invoke when the user says "reflect" or "/reflect". Skip when the conversation is
 <!-- cube-adapt M10. Intent: reviewers read the real transcript of this conversation, never other projects' chats. Cube: a thread cannot read its own transcript file (its agent runs outside the machine); OptChat reads a thread's conversation with history(id); upstream already allows a tight digest when the transcript cannot be found. Kept: this conversation only, and the digest fallback. Now: in a thread, write the digest from your context to a file; in OptChat, read the thread's history(id) (or your own chat with zoom) and pass a digest or the pasted pages. Cost: a digest is the author's view of its own session; say so in the findings. -->
 ## 1. Locate the active transcript
 
-In cube: a thread writes a tight digest of its own session from its context (the transcript file is out of its reach) to `/tmp/reflect/digest.md`, with the opening request quoted. OptChat reflecting on a thread reads `history(id)`, and on its own chat uses `zoom`. Read nothing outside this conversation. The rest of this step is Cursor's layout, kept for reference: do not glob across `~/.cursor/projects/*/`.
+In cube: a thread writes a tight digest of its own session from its context (the transcript file is out of its reach) to `/tmp/reflect/digest.md`, with the opening request quoted. OptChat reflecting on a thread reads `history(id)`, and on its own chat uses `zoom`. Read nothing outside this conversation. Never glob across other projects' or threads' records.
 
-```bash
-ls -t <agent-transcripts>/*.jsonl <agent-transcripts>/*/*.jsonl <agent-transcripts>/*/subagents/*.jsonl 2>/dev/null | head -10
-```
-
-That covers the legacy flat (`<id>.jsonl`), current nested (`<id>/<id>.jsonl`), and subagent (`<parent>/subagents/<child>.jsonl`) layouts. For each candidate, read the first JSONL line. Take the file whose `message.content[0].text` contains the conversation's opening user prompt. If none matches, pass a tight digest of the session instead.
-
-## 2. Spawn three reviewers in parallel
+<!-- cube-adapt M2 M10. Intent: find the transcript file among Cursor's layouts and run three reviewers in parallel. Cube: cube has no transcript files a thread can read, and only OptChat starts reviewers. Kept: the digest fallback and three lenses. Now: the Cursor layout commands are left in upstream/ only; the heading names both forms. Cost: none. -->
+## 2. Run three reviewers (threads in OptChat, passes in a thread)
 
 <!-- cube-adapt M2 M3 M4. Intent: three lenses read the session independently, each on its role's model, with tools to check what the transcript cites. Cube: only OptChat starts reviewers (threads, model from the role lines); a thread runs the lenses itself. Kept: three lenses, verbatim templates, the role lines. Now: OptChat spawns three threads with the templates and the digest; a thread runs the three lenses as passes, each writing to its own file before the next starts. Cost: a thread's lenses share one model and one memory of the session; label them self-review. -->
 OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the role lines below (omit `model` where a line is missing or says `auto` or `inherit-parent`). A thread: run the three lenses yourself, one pass each, each writing its findings to `/tmp/reflect/<lens>.md` before the next begins, and label them `self-review, not independent`.

@@ -1,12 +1,13 @@
 ---
 name: no-comments
-description: "Spawn Comment Sicko, fix accepted findings, and offer encodings for claimed constraints."
+# cube-adapt M2 M3. Intent: a fresh Comment Sicko judges the comments. Cube: it is a thread OptChat starts, or a labeled self pass. Kept: the fresh reviewer. Now: the description names both. Cost: none.
+description: "Get a Comment Sicko pass (a fresh thread, or a labeled self pass), fix accepted findings, and offer encodings for claimed constraints."
 disable-model-invocation: true
 ---
 
 # No comments
 
-Spawn Comment Sicko. Act on accepted findings.
+Get a Comment Sicko pass. Act on accepted findings.
 
 Defer to Comment Sicko's fresh perspective.
 

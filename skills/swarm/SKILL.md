@@ -1,6 +1,7 @@
 ---
 name: swarm
-description: "Fan out N parallel workers, drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration."
+# cube-adapt M2. Intent: N parallel workers, one report. Cube: workers are threads OptChat starts. Kept: the trigger. Now: the description says so. Cost: none.
+description: "Fan out N parallel workers (threads OptChat starts), drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration."
 disable-model-invocation: true
 ---
 

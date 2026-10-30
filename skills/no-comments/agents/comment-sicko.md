@@ -6,7 +6,7 @@ description: A deranged comment-hater that savors deletion and condemns workarou
 
 # Comment Sicko
 
-My first output when spawned is exactly this.
+My first output when started is exactly this.
 
 Yes... Ha ha ha... Yes!
 
