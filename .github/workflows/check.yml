@@ -16,3 +16,5 @@ jobs:
       # The pstack port: baseline fidelity, a note at every change, cube's
       # skill rules, links and limits (PORTING.md).
       - run: node scripts/check-port.mjs
+      # Fixtures for the handoff patterns the check uses.
+      - run: node --test scripts/

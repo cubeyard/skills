@@ -11,6 +11,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { DELEGATES, prose, substitutesIn } from "./handoff-patterns.mjs";
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const baseline = path.join(root, "upstream/pstack");
@@ -48,7 +49,7 @@ function walk(dir, base = dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isSymbolicLink()) out.push({ rel: path.relative(base, full), symlink: true });
-    else if (entry.isDirectory()) out.push(...walk(full, base));
+    else if (entry.isDirectory()) { if (entry.name !== "node_modules") out.push(...walk(full, base)); } // a script's local install is not part of the skill
     else out.push({ rel: path.relative(base, full) });
   }
   return out.sort((a, b) => (a.rel < b.rel ? -1 : 1));
@@ -220,20 +221,21 @@ for (const id of listed.optchat) {
 if (ids.length > LIMITS.skills) fail(`${ids.length} skills; a thread installs at most ${LIMITS.skills}`);
 if (files > LIMITS.files || bytes > LIMITS.bytes) fail(`${files} files and ${bytes} bytes; a thread installs at most ${LIMITS.files} and ${LIMITS.bytes}`);
 
-// 6. The handoff rule (references/cube.md, M2): a thread never stands in
-// for an agent pstack requires. Installed text may not offer an in-thread
-// substitute, and every installed file whose upstream text hands work to
-// another agent must say where that work goes (a handoff, or OptChat).
-const SUBSTITUTES = [/self-review, not independent/i, /in-thread form/i, /single-agent (form|version)/i, /passes in a thread/i, /as its own pass/i, /one pass at a time/i, /run the (same roles|three lenses) yourself/i, /runs the pass itself/i];
-const DELEGATES = /subagent|\bspawn|fan (them )?out|comment-sicko|in parallel|\b(Task) (call|tool|prompt)|`Task`/i;
+// 6. The handoff rule (references/cube.md, M2 and M3): a thread never
+// stands in for an agent pstack requires, and OptChat never reads a diff.
+// Every installed Markdown file is scanned for known substitute wordings
+// (scripts/handoff-patterns.mjs, with fixtures in check-port.test.mjs), and
+// every one whose upstream hands work to another agent must say where it
+// goes. Keyword checks cannot prove the rule; they keep known regressions out.
+for (const f of skillFiles) {
+  if (!f.rel.endsWith(".md") || CUBE_OWN.has(f.rel.split("/")[0])) continue;
+  for (const re of substitutesIn(fs.readFileSync(path.join(skillsDir, f.rel), "utf8"))) fail(`skills/${f.rel}: offers a substitute for another agent or a diff OptChat cannot read (${re}); hand off instead (M2, M3)`);
+}
 for (const { from, to } of pairs) {
   if (!to.endsWith(".md")) continue;
   const full = path.join(skillsDir, to);
   if (!fs.existsSync(full)) continue;
-  const prose = fs.readFileSync(full, "utf8").split("\n").filter((l) => !l.includes("cube-adapt")).join("\n");
-  for (const re of SUBSTITUTES) if (re.test(prose)) fail(`skills/${to}: offers an in-thread substitute for another agent (${re}); report a handoff instead (M2)`);
-  const upstream = fs.readFileSync(path.join(baseline, from), "utf8");
-  if (DELEGATES.test(upstream) && !/handoff|OptChat/i.test(prose)) fail(`skills/${to}: upstream hands work to another agent here, but the port never says where it goes (handoff or OptChat, M2)`);
+  if (DELEGATES.test(fs.readFileSync(path.join(baseline, from), "utf8")) && !/handoff|OptChat/i.test(prose(fs.readFileSync(full, "utf8")))) fail(`skills/${to}: upstream hands work to another agent here, but the port never says where it goes (handoff or OptChat, M2)`);
 }
 
 // 5. Links: a relative link must reach a file cube installs (inside skills/).
