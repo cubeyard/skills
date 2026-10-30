@@ -1,6 +1,6 @@
 ### Hillclimb
 
-<!-- cube-adapt M1 M2. Intent: the supervisor guards the metric while delegates make attempts. Cube: a thread makes its own attempts; parallel attempts are threads OptChat starts. Kept: the integrity rules, one change per measurement. Now: the thread runs the loop itself. Cost: one context carries both roles; the decision log is the guard. -->
+<!-- cube-adapt M1 M2. Intent: the supervisor guards the metric while delegates make attempts. Cube: a thread makes its own attempts; parallel attempts are threads OptChat starts. Kept: the integrity rules, one change per measurement. Now: the thread runs the loop and checks each attempt itself (author checks); its kept commits get an independent review from a fresh thread OptChat starts (the review handoff, step 9). Cost: attempts are reviewed only once kept; until then the decision log is the guard. -->
 **You own the metric and the experiment's integrity. Make the attempts; an independent thread reviews what you keep.** For sustained, iterative improvement of one measurable thing against a target. A one-off fix is Bug fix or Perf issue. This is the loop.
 
 Core discipline: one change, one measurement, keep or revert. Never stack untested changes, and never claim a win from code inspection (the **prove-it-works** principle skill).
