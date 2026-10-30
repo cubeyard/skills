@@ -377,11 +377,11 @@ export function parseReviewThreadPage(value: unknown): T.ReviewThreadPage {
   const page = record(reviewThreads.pageInfo, "reviewThreads.pageInfo");
   if (typeof page.hasNextPage !== "boolean")
     missing("reviewThreads.pageInfo.hasNextPage", page.hasNextPage);
-  const cursor = optionalString(
+  const next = optionalString(
     page.endCursor,
     "reviewThreads.pageInfo.endCursor"
   );
-  return { threads, endCursor: page.hasNextPage && cursor ? cursor : null };
+  return { threads, nextAfter: page.hasNextPage && next ? next : null };
 }
 export function buildReviewThreads(
   threads: readonly T.RawReviewThread[]
@@ -553,13 +553,13 @@ export class GhGitHubReader implements T.GitHubReader {
       at(value, ["data", "repository", "pullRequest", "commits", "nodes"]),
       "commits.nodes"
     );
-    if (commits.length === 0) return { checks: [], endCursor: null };
+    if (commits.length === 0) return { checks: [], nextAfter: null };
     const commit = record(
       at(commits[commits.length - 1], ["commit"]),
       "commit"
     );
     if (commit.statusCheckRollup === null)
-      return { checks: [], endCursor: null };
+      return { checks: [], nextAfter: null };
     const contexts = record(
       at(commit, ["statusCheckRollup", "contexts"]),
       "contexts"
@@ -570,11 +570,11 @@ export class GhGitHubReader implements T.GitHubReader {
     const page = record(contexts.pageInfo, "contexts.pageInfo");
     if (typeof page.hasNextPage !== "boolean")
       missing("contexts.pageInfo.hasNextPage", page.hasNextPage);
-    const cursor = optionalString(
+    const next = optionalString(
       page.endCursor,
       "contexts.pageInfo.endCursor"
     );
-    return { checks, endCursor: page.hasNextPage && cursor ? cursor : null };
+    return { checks, nextAfter: page.hasNextPage && next ? next : null };
   }
   async reviewThreadPage(
     context: T.PrContext,
@@ -622,7 +622,7 @@ export async function resolveChecks(
   do {
     const page = await reader.checkRollupPage(context, after);
     checks.push(...page.checks);
-    after = page.endCursor;
+    after = page.nextAfter;
   } while (after !== null);
   const fallback = nonEmpty(checks);
   if (fallback !== null) return { source: "graphql-rollup", checks: fallback };
@@ -641,7 +641,7 @@ export async function resolveReviewThreads(
   do {
     const page = await reader.reviewThreadPage(context, after);
     threads.push(...page.threads);
-    after = page.endCursor;
+    after = page.nextAfter;
   } while (after !== null);
   return buildReviewThreads(threads);
 }

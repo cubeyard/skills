@@ -5,11 +5,12 @@ as noted here.
 
 ## pstack
 
-`upstream/pstack/` is a copy of the `pstack/` directory of
-https://github.com/cursor/plugins at commit
-`4dd1d05818d19792e7cd6e818f1667f95f7e1dbe`. The skills under `skills/` that
-came from it (every folder with its own `LICENSE` file) are adaptations of
-it. pstack is licensed under the MIT License:
+The skills under `skills/` that have their own `LICENSE` file are
+adaptations of pstack, by Lauren Tan, at its upstream commit
+`4dd1d05818d19792e7cd6e818f1667f95f7e1dbe`. The unmodified copy the port
+started from is in this repository's history (`upstream/pstack/` at commit
+`b052d0d2f088e81c0c0237b2fe33acb1e33b4bba`). pstack is licensed under the
+MIT License:
 
 ```
 MIT License
@@ -35,4 +36,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-The MIT notice is also in `upstream/pstack/LICENSE` and in each ported skill folder, so it travels with every installed copy. The changes made in the port are marked by `cube-adapt` notes and described in `PORTING.md`.
+The MIT notice is also in each ported skill folder, so it travels with every installed copy. The changes made in the port are described in `PORTING.md`.

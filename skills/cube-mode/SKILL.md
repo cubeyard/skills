@@ -1,6 +1,6 @@
 ---
 name: cube-mode
-description: poteto's agent style for concise, detailed responses, deliberate delegation to threads, unslopped prose, simple code, and verified work. Use for cube-mode, /cube-mode, poteto, pstack, or requests to work in this style; when the user names a pstack skill or playbook (how, why, teach, recall, ketchup, sharpen, arena, swarm, interrogate, architect, blast-radius, no-comments, reflect, correct, automate-me, figure-it-out, babysit, shipping, orchestrate, autopilot) or a principle; and in a thread whose brief says to use cube-mode.
+description: An agent style for concise, detailed responses, deliberate delegation to threads, unslopped prose, simple code, and verified work. Use for cube-mode, /cube-mode, pstack, or requests to work in this style; when the user names a pstack skill or playbook (how, why, teach, recall, ketchup, sharpen, arena, swarm, interrogate, architect, blast-radius, no-comments, reflect, correct, automate-me, figure-it-out, babysit, shipping, orchestrate, autopilot) or a principle; and in a thread whose brief says to use cube-mode.
 icon: crown
 color: yellow
 metadata:
@@ -10,7 +10,7 @@ metadata:
 
 # Cube mode
 
-Bundled skills live at `../<name>/SKILL.md` from this file: in a thread, `~/.cube/skills/<name>/SKILL.md`; in OptChat, `skill("cube-mode", "../<name>/SKILL.md")`. Put `~/.cube/skills/cube-mode/SKILL.md` in every brief for a thread that works in this style ([`agents/poteto-agent.md`](agents/poteto-agent.md)). Before anything else, read [`references/cube.md`](references/cube.md): it says which parts below are OptChat's and which a thread's, and maps every Cursor name.
+Bundled skills live at `../<name>/SKILL.md` from this file: in a thread, `~/.cube/skills/<name>/SKILL.md`; in OptChat, `skill("cube-mode", "../<name>/SKILL.md")`. Put `~/.cube/skills/cube-mode/SKILL.md` in every brief for a thread that works in this style ([`agents/cube-mode-agent.md`](agents/cube-mode-agent.md)). Before anything else, read [`references/cube.md`](references/cube.md): it says which parts below are OptChat's and which a thread's, and maps pstack's names to cube's.
 
 ## Non-negotiables
 
@@ -26,9 +26,9 @@ Remaining triggers:
 - Parallel fan-out → the **swarm** skill for coverage matrices, races, gauntlets, and exploration partitions. Use **arena** for design or code bakeoffs with base selection and grafting.
 - Contested design → the **interrogate** skill (multi-model adversarial) before shipping.
 - Nontrivial multi-step → write the throughput checkpoint (Feature step 3).
-- Any prose surface, your reply to the user included → the **unslop** skill. Write the reply per **Writing the reply**. Agent-facing prose also follows the **Authoring a skill** playbook (`playbooks/authoring-a-skill.md`); Cursor's built-in **create-skill** is not in cube.
+- Any prose surface, your reply to the user included → the **unslop** skill. Write the reply per **Writing the reply**. Agent-facing prose also follows the **Authoring a skill** playbook (`playbooks/authoring-a-skill.md`); a built-in **create-skill** is not in cube.
 - Docs, RFCs, readmes, PR descriptions, or commit messages → the **technical-writing** skill (`/technical-writing`).
-- Before commit → `cursor-team-kit`'s `deslop` is not in cube: run **unslop** over the prose you wrote and reread the diff for slop, and say `Skipped in cube: /deslop` once.
+- Before commit → `deslop` is not in cube: run **unslop** over the prose you wrote and reread the diff for slop, and say `Skipped in cube: /deslop` once.
 - Before review → the **no-comments** skill (`/no-comments`).
 - Shipping UI / IDE / CLI → the matching control surface: the project's own verification skill (`.agents/skills/verify-*`, made by **create-verification-skill**), else a real browser (Playwright's Chromium in the thread) for web UIs and the shell for CLIs and TUIs. For bug fixes, reproduce first on the same surface yourself. Hand to the user only under the narrow Bug fix step 1 exception.
 - Running a benchmark, measuring perf yourself, or reporting a speedup or regression you measured → the **benchmark-checklist** skill before you report or act on the number.
@@ -95,9 +95,9 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 In cube, OptChat runs the playbook's lead role and threads do its execution (`references/cube.md`, Who you are).
 
-**OptChat: every thread you start inside a playbook step works in this style.** Brief it from [`agents/poteto-agent.md`](agents/poteto-agent.md): it reads `~/.cube/skills/cube-mode/SKILL.md` in full first. Never start a thread to run the whole playbook in your place when the playbook is yours (Orchestrate, Autopilot, Shipping, Eval). Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own worker prompts for diverse-model review. Respect what the skill prescribes, don't override it with the poteto-agent brief.
+**OptChat: every thread you start inside a playbook step works in this style.** Brief it from [`agents/cube-mode-agent.md`](agents/cube-mode-agent.md): it reads `~/.cube/skills/cube-mode/SKILL.md` in full first. Never start a thread to run the whole playbook in your place when the playbook is yours (Orchestrate, Autopilot, Shipping, Eval). Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own worker prompts for diverse-model review. Respect what the skill prescribes, don't override it with the cube-mode-agent brief.
 
-**OptChat: defaults for every `spawn`.** One task per thread, a complete brief (`../briefing-a-thread/SKILL.md`): the goal restated, the repository pointers rather than pasted context, what it may write, the evidence it returns, when it stops, and the grants it may use. The model per role comes from the user's own words in the chat, found and matched per the Models section of `references/cube.md`: there is no setup step. Code roles (`feature, refactoring`, `bug-fix`, `perf-issue`, or `hillclimb`), the hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms, `hardest tasks`), and prose and judgment (`judgment and prose`) each take the newest preference that covers them. Those preferences override the model choices in the routed skills (`how`, `why`, `arena`, `swarm`, `architect`, `interrogate`, `reflect`). When none covers a spawn, ask (Models); never omit `model` in its place. A Cursor slug such as `claude-opus-5-5-xhigh` is never a cube model id: never pass one.
+**OptChat: defaults for every `spawn`.** One task per thread, a complete brief (`../briefing-a-thread/SKILL.md`): the goal restated, the repository pointers rather than pasted context, what it may write, the evidence it returns, when it stops, and the grants it may use. The model per role comes from the user's own words in the chat, found and matched per the Models section of `references/cube.md`: there is no setup step. Code roles (`feature, refactoring`, `bug-fix`, `perf-issue`, or `hillclimb`), the hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms, `hardest tasks`), and prose and judgment (`judgment and prose`) each take the newest preference that covers them. Those preferences override the model choices in the routed skills (`how`, `why`, `arena`, `swarm`, `architect`, `interrogate`, `reflect`). When none covers a spawn, ask (Models); never omit `model` in its place. A pstack model slug such as `claude-opus-5-5-xhigh` is never a cube model id: never pass one.
 
 **Match the model to the job.** Before each spawn, start from the role's preference and pick the model the job needs among those the user's words cover and `projects` offers, matched by provider and id. Raise to the strongest covered model for the hardest or subtlest work; lower for routine work. Keep the family and provider the role names, so a diverse panel stays diverse. A thread keeps its model for its whole task, so choose before you spawn. If `spawn` or the thread's start refuses a model, ask the user, and say which model failed.
 

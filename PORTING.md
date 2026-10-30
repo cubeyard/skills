@@ -1,51 +1,58 @@
 # Porting pstack to cube
 
-pstack (poteto's agent stack, [cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack))
-is a set of 58 skills and 2 agent definitions written for Cursor: one chat
-that plans, spawns subagents on chosen models and reviews their work. This
-repository ports all of it to cube, where that one chat becomes two agents:
-OptChat, which directs and has no machine, and threads, which each do one
-bounded task in their own machine and report. Nothing is dropped silently.
-57 skills are here, with their references, scripts and assets; one,
-`setup-pstack`, is retired on purpose (Retired, below), and its original
-stays in the baseline. Every change from the original is justified here.
+pstack (Lauren Tan's agent workflow stack, MIT) is a set of 58 skills and 2
+agent definitions written for another agent host: one chat that plans,
+spawns subagents on chosen models and reviews their work. This repository
+ports all of it to cube, where that one chat becomes two agents: OptChat,
+which directs and has no machine, and threads, which each do one bounded
+task in their own machine and report. Nothing is dropped silently. 57 skills
+are here, with their references, scripts and assets; one, `setup-pstack`, is
+retired on purpose (Retired, below), and its original stays in the
+baseline. Every change from the original is justified here.
 
 ## Layout
 
 ```text
-upstream/pstack/        pstack as published, byte for byte (git tree 4719e1c4); never installed
-upstream/pstack.sha256  sha256 of each of its 573 files
-upstream/README.md      provenance: repository, commit, why this commit, how to update
 skills/<id>/            what cube installs: 57 ported skills + cube's own 3
 skills/cube-mode/references/cube.md   the cube adapter every ported skill relies on (the rules M1-M13, by section name)
-scripts/check-port.mjs  the checks below; --matrix prints COVERAGE.md, --diff <id> shows a port
-COVERAGE.md             every upstream file and where it went (generated)
+scripts/check-port.mjs  the checks below
+scripts/branding-patterns.mjs  the retired brand names, spelled so the file passes its own check
 THIRD_PARTY_NOTICES.md  pstack's MIT license, beside this repository's Apache-2.0
 ```
 
-cube installs only `skills/` (the default source's `path`), so the originals
-under `upstream/` can never reach a thread or OptChat, and the two copies can
-be diffed at any time:
+## Baseline
+
+The port started from an unmodified copy of pstack at its upstream commit
+`4dd1d05818d19792e7cd6e818f1667f95f7e1dbe` (plugin version 0.15.36, 573
+files). The copy, its sha256 manifest, its provenance (`upstream/README.md`)
+and the per-file coverage table (`COVERAGE.md`) were in this repository's
+tree until the user asked that neither retired brand name appear in it
+(Naming). They are removed from the tree, not from history: commit
+`b052d0d2f088e81c0c0237b2fe33acb1e33b4bba` holds them, and git still proves
+the copy is byte for byte upstream's:
 
 ```sh
-node scripts/check-port.mjs --diff how      # upstream/pstack/skills/how against skills/how
+git rev-parse b052d0d2:upstream/pstack     # 4719e1c4b4c43bac85d4206a8b41dd2899769c1c, upstream's tree
+git diff b052d0d2:upstream/pstack/skills/how HEAD:skills/how   # one port against its original
 ```
+
+cube installs only `skills/`, so the original never reached a thread or
+OptChat, and removing it changes nothing a thread installs. A depth-1 fetch
+of this repository no longer carries it (G10).
 
 ## Method
 
-1. **Copy as is.** Commit 1 adds `upstream/pstack/` from
-   `cursor/plugins@4dd1d058` (`git archive`), with a sha256 manifest. Its git
-   tree equals upstream's `pstack/` tree, so fidelity is checkable with one
-   command (`upstream/README.md`).
-2. **Copy into place.** Every `upstream/pstack/skills/<id>/` is copied to
+1. **Copy as is.** Commit 1 added the unmodified copy with a sha256 manifest.
+   Its git tree equals upstream's `pstack/` tree (Baseline).
+2. **Copy into place.** Every upstream skill folder is copied to
    `skills/<id>/` unchanged; the two agent definitions go into the skill that
-   starts them (`cube-mode/agents/poteto-agent.md`,
+   starts them (`cube-mode/agents/cube-mode-agent.md`,
    `no-comments/agents/comment-sicko.md`), since cube has no agent definitions.
    pstack's `LICENSE` is copied into every ported folder, because cube
    installs each folder on its own.
 3. **Adapt in place.** Each change is an edit at the spot it concerns. A
    file that needs no change stays byte-identical (33 of the 57 ported skills
-   are unchanged, and 529 of 593 mapped files).
+   were unchanged, and 529 of 593 mapped files, before the branding removal).
 4. **Check it mechanically** (`node scripts/check-port.mjs`, below), so that
    "no silent omission" is a test, not a promise.
 
@@ -70,28 +77,30 @@ cube.md names its rules by section instead:
 | M9 | Authority |
 | M10 | Records and memory |
 | M11 | Environment |
-| M12 | Cursor-only features |
+| M12 | Features cube lacks |
 | M13 | Links |
 
 The reason for each change is the mapping rules below and the commit that
 made it (the port's notes are in git history before the removal);
-`node scripts/check-port.mjs --diff <id>` shows the change itself.
+`git diff` against the baseline (above) shows the change itself.
 
 ### What the checker enforces
 
 | check | how |
 | --- | --- |
-| the baseline is upstream | every file's sha256 against the manifest; the git tree of `upstream/pstack` equals `4719e1c4` |
-| nothing is dropped silently | each of the 536 upstream skill and agent files outside a retired skill, and the license in each of 57 folders, has its file under `skills/`; a retired skill (`RETIRED`) needs a reason and an upstream folder, and fails if its folder comes back |
+| a retired skill stays retired | a skill in `RETIRED` needs a reason, and fails if its folder comes back |
 | the model rule (M4) | every installed Markdown file is scanned for wordings that point at the retired setup (`pstack models`, `inherit-parent`, role lines in OptChat's instructions, `setup-pstack` outside a sentence that says it is retired) or fall back to the host's default model (`omit model`, "runs on the host's preferred model"), from `scripts/model-patterns.mjs`, with fixtures in `check-port.test.mjs`; the fixtures also run the whole checker on a scratch copy with the retired folder restored, with setup wording added, and with a `cube-adapt` note added, and each fails. Same limit as the handoff rule: keyword checks |
 | no port commentary | no installed file contains `cube-adapt`, and no installed Markdown file an M1-M13 label |
+| no retired branding | every path and every file in the repository, not only `skills/`, is checked for the two retired brand names in any casing, after NFKC folding and Cyrillic and Greek look-alike folding, with one punctuation or invisible character, or a hyphenated line break, allowed between letters (`scripts/branding-patterns.mjs`, fixtures in `check-port.test.mjs`). The only exemptions are outside identifiers listed by file in `EXTERNAL_IDENTIFIERS` (Naming). **Limit:** a substring check: a brand split by plain whitespace, encoded, or named by description passes, and an unrelated word that contains a brand fails |
 | cube can read it | folder id, `name` = id, description 1-1024 characters, surface `thread`/`optchat`/`both`, no symlinks |
 | cube can install it | at most 64 skills, 2000 files, 8 MiB |
 | links resolve where installed | every relative Markdown link stays inside `skills/` and exists |
 | OptChat reads it in one call | each SKILL.md listed to OptChat is at most 30,000 characters (`SKILL_PAGE`) |
-| non-skill upstream files are accounted for | every run fails on an upstream file that is neither mapped nor given a reason (so CI catches a new one) |
-| the handoff rule (M2, M3) | every installed Markdown file is scanned for known substitute wordings (sequential roles, a self-review label, a labeled self pass, "review your own diff", OptChat reading a diff), from `scripts/handoff-patterns.mjs`; regression fixtures (`node --test scripts/check-port.test.mjs`, also in CI) prove each known bad wording is caught and the port's own wordings are not; an installed file whose upstream hands work to another agent must name a handoff or OptChat. **Limit:** these are keyword checks. They keep known regressions out but cannot prove the rule; a substitute worded another way passes, so the rule still needs a semantic review |
+| the handoff rule (M2, M3) | every installed Markdown file is scanned for known substitute wordings (sequential roles, a self-review label, a labeled self pass, "review your own diff", OptChat reading a diff), from `scripts/handoff-patterns.mjs`; regression fixtures (`node --test scripts/check-port.test.mjs`, also in CI) prove each known bad wording is caught and the port's own wordings are not; each of the 43 installed files whose original hands work to another agent (`HANDS_OFF`, computed from the baseline with `DELEGATES`) must name a handoff or OptChat. **Limit:** these are keyword checks. They keep known regressions out but cannot prove the rule; a substitute worded another way passes, so the rule still needs a semantic review |
 | surface is read as YAML nests it | `metadata.cube.surface` by key path; comment lines are ignored |
+
+The checks that compared the tree with the baseline (the manifest, every
+upstream file mapped, `COVERAGE.md` current) went with the baseline.
 
 ## How cube finds these skills (M5, verified)
 
@@ -192,20 +201,20 @@ thread's handoff names the role and may quote the user's model words;
 only OptChat picks the `provider/id`. Omitting `model` is no longer a
 fallback: it picks the host default (Pi's default model, else the catalog's
 first), which can be a provider the user ruled out, such as the Anthropic
-API when they chose Opus through Claude Code. Cursor slugs are never passed.
+API when they chose Opus through Claude Code. The original host's model slugs are never passed.
 A panel is diverse only with families the user accepted, and a skill says so
 when it is not. Lost: per-call effort and mid-task model changes; a fresh
 chat asks once before its first spawn. This rule holds where OptChat reads
 cube-mode; a spawn outside it still follows cube's own default.
 
-**M5. Discovery is explicit.** pstack relies on Cursor's slash menu,
+**M5. Discovery is explicit.** pstack relies on its host's slash menu,
 `disable-model-invocation`, custom modes, `alwaysApply` rules and path
 globs. Cube has one automatic route (a listed description) and one explicit
 route (a link from a skill that was read). The port keeps upstream's
 two-tier design (few entry points, many hidden leaves) and moves each
 trigger onto the route cube has: the user's words name a skill; cube-mode
 and cube-help list every one; `typescript-best-practices` becomes listed
-because its Cursor trigger (a path glob) was automatic. `setup-pstack`, the
+because its original trigger (a path glob) was automatic. `setup-pstack`, the
 other always-applied skill, is retired (M4). A skill is loaded only when an agent decides to read it; nothing
 guarantees it.
 
@@ -259,8 +268,9 @@ prerequisites map onto that. Measured: `bun` (for `watch-pr`) and `mise`
 (for `statechart`) install in a thread machine; Tailscale (UDP) and a webhook
 sender key (a secret) cannot be there.
 
-**M12. Cursor-only products.** Bugbot, Automations, `SendToUser`,
-`cursor-team-kit` (`deslop`, `control-ui`, `control-cli`), `create-skill`,
+***M12. Features cube lacks.** The original host's products: Bugbot,
+Automations, `SendToUser`, a separate team plugin (`deslop`, `control-ui`,
+`control-cli`), `create-skill`,
 Plan Mode, `/visualize`, image generation, canvases. Where cube has an
 equivalent the step uses it (GitHub review threads, the project's
 `verify-*` skill or a real browser, Mermaid in artifacts, the Authoring a
@@ -269,21 +279,24 @@ cube: <step>. <reason>.`, the convention upstream itself uses for Claude
 Code.
 
 **M13. Links.** A link out of an installed skill folder does not resolve
-in cube. Links to pstack's README and guide point at the pinned public copy
-(`cursor/plugins@4dd1d058`); the guide stays in the baseline (it is Cursor
-user documentation, and cube.md maps its names).
+in cube. pstack's README and guide are user documentation for the original
+host: they stay in the baseline, and installed skills no longer link them.
+cube-help points at the installed skills and playbooks that hold the same
+answers, and cube.md maps pstack's names.
 
 ## Coverage by skill
 
 Files: upstream files in the skill / changed in the port. Every unchanged
-file is byte-identical. `COVERAGE.md` lists every file.
+file was byte-identical when the port was made; `COVERAGE.md` in the
+baseline commit lists every file. The branding removal (Naming) later
+changed a few more.
 
 | skill | files | changed | listed | rules | in cube |
 | --- | --- | --- | --- | --- | --- |
-| cube-mode (upstream `poteto-mode`) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/poteto-agent.md` |
-| cube-help (upstream `poteto-help`) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed pstack skills), models said in the chat, `/setup-pstack` answered as retired, modes, troubleshooting rows, pinned guide links |
+| cube-mode (renamed from upstream's router) | 43 | 30 (+3 new) | both | M1-M13 | renamed (Naming); the router: Threads section (OptChat half, thread half), a home for each playbook, cube's pause list; playbooks mapped step by step; `check-plan.mjs` markers follow the adapted skeleton; adds `references/cube.md` and `agents/cube-mode-agent.md` |
+| cube-help (renamed from upstream's help) | 3 | 3 | both | M1 M2 M4 M5 M7 M10-M13 | renamed (Naming); cube setup (default source, Settings pin, the three listed pstack skills), models said in the chat, `/setup-pstack` answered as retired, modes, troubleshooting rows, links to installed playbooks in place of the guide |
 | setup-pstack | 1 | retired | | M4 | not installed (Retired); its original stays in the baseline |
-| typescript-best-practices | 2 | 1 | threads | M5 | listed, since its Cursor path glob was automatic |
+| typescript-best-practices | 2 | 1 | threads | M5 | listed, since its original path glob was automatic |
 | how | 3 | 1 | | M2 M4 | explorers and explainer are threads OptChat starts; a thread hands `how` off |
 | why | 13 | 1 (+1 new) | | M2 M4 M10 M11 | investigators and synthesizer are threads; a thread builds the anchor and hands off; evidence sources cube has; adds the OptChat-chat source playbook |
 | teach | 1 | 1 | | M2 M12 | how and why by handoff; no image generation |
@@ -305,14 +318,15 @@ file is byte-identical. `COVERAGE.md` lists every file.
 | statechart | 407 | 1 | | M11 | install mise first; measured working |
 | principle-build-the-lever | 1 | 1 | | M2 M5 | the lever is a committed file named in every brief |
 | principle-guard-the-context-window | 1 | 1 | | M2 | bulk to threads (OptChat) or to scripts (a thread) |
-| benchmark-checklist, blast-radius, bro, correct, create-formal-verification-skill, in-your-own-words, maintain-formal-verification-skill, sharpen, tdd, technical-writing, unslop, and the 22 other `principle-*` | 1 each | 0 | | | unchanged: nothing in them depends on Cursor; hidden, as upstream |
+| benchmark-checklist, blast-radius, bro, correct, create-formal-verification-skill, in-your-own-words, maintain-formal-verification-skill, sharpen, tdd, technical-writing, unslop, and the 22 other `principle-*` | 1 each | 0 | | | unchanged: nothing in them depends on the original host; hidden, as upstream |
 
 Upstream's files outside `skills/` and `agents/` stay in the baseline only:
-the README and the ten-page guide (Cursor user documentation, linked at the
-pinned commit), the Claude Code adapter (cube.md is cube's), `automations/benny`
-(two Cursor Automations triggered from Slack: cube has nothing that starts an
+the README and the ten-page guide (user documentation for the original
+host), the Claude Code adapter (cube.md is cube's), `automations/benny`
+(two Automations triggered from Slack: cube has nothing that starts an
 agent on an event, gap G3), and the plugin manifests and logo (cube installs
-git folders, not plugins). `COVERAGE.md` gives each file's reason.
+git folders, not plugins). `COVERAGE.md` in the baseline commit gives each
+file's reason.
 
 ## The earlier port
 
@@ -335,13 +349,14 @@ are removed; cube-mode replaces them, and their reviewed rules moved here:
 
 ## Verification
 
-Run in a cube thread machine (Linux, node 26) against the branch's commit.
-No model was called: none of this shows how a model behaves with these
+The port as first merged, run in a cube thread machine (Linux, node 26)
+against that branch's commit; the branding removal's own checks are in its
+pull request. No model was called: none of this shows how a model behaves with these
 skills.
 
 | what | how | result |
 | --- | --- | --- |
-| baseline fidelity | `git rev-parse HEAD:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
+| baseline fidelity | `git rev-parse b052d0d2:upstream/pstack`, sha256 manifest | tree `4719e1c4` = upstream; 573/573 hashes match |
 | completeness, no port commentary, cube rules, links, limits, handoff rule, model rule | `node scripts/check-port.mjs` | ok: 593 mapped files (64 adapted, 529 unchanged), 2 added, 1 retired skill, 60 skills, 87 links |
 | cube resolves it | cube's `resolveSkills` (packages/server/src/skills.ts at `6c6ff59c`) on this repository at the commit | 60 skills, 0 skipped; YAML comments in frontmatter parse |
 | cube lists it | `skillsPrompt`, `optchatSkillsPrompt` | as the table above |
@@ -354,7 +369,7 @@ skills.
 | statechart | mise install, then `scripts/statechart` on the Counter corpus spec | Java and TLC installed by mise; chart equals the corpus chart |
 | worktree-audit | on a scratch clone with one worktree | classified; transcript scan skipped |
 | show-me-your-work log.sh | one row with a formula-like cell | written, cell quoted |
-| with the old source still configured | `resolveSkills` with cursor/plugins@df581122 after the default | 63 skills; 48 ported skills overridden by the originals, and the old `poteto-mode`, `poteto-help` and `setup-pstack` back beside `cube-mode` and `cube-help` (gap G1) |
+| with the old source still configured | `resolveSkills` with the original pstack source (`df581122`) after the default | 63 skills; 48 ported skills overridden by the originals, and the original router, help and `setup-pstack` back beside `cube-mode` and `cube-help` (gap G1) |
 
 ## Gaps and product changes
 
@@ -362,7 +377,7 @@ None of these is in this PR. Each needs a decision or a cube change.
 
 | | gap | effect | what would close it |
 | --- | --- | --- | --- |
-| G1 | a cube that added cursor/plugins (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 48 of the ported skills (all but `cube-mode` and `cube-help`) would be replaced by the unported originals, and the originals `poteto-mode`, `poteto-help` and `setup-pstack` come back beside them: 63 ids (measured with cube's resolver after the retirement) | the user removes that source in Settings, Skills, when activating |
+| G1 | a cube that added the original pstack repository (`df581122`, `pstack/skills`) as a skills source keeps it after the default updates; the last source wins | 48 of the ported skills (all but `cube-mode` and `cube-help`) would be replaced by the unported originals, and the original router, help and `setup-pstack` come back beside them, under their old names: 63 ids (measured with cube's resolver after the retirement) | the user removes that source in Settings, Skills, when activating |
 | G2 | closed: no model setup is needed | `setup-pstack` is retired; OptChat reads model preferences from the chat (M4) | nothing |
 | G3 | nothing starts or wakes an agent on an event (webhook, schedule, Slack) | `automations/benny` is not ported; `make-bot-ui` stops; audits run at reports, not on the hour | an authenticated wake endpoint whose credential stays in cube's gateway, or scheduled ticks |
 | G4 | OptChat cannot read PR, CI or diff state, nor stop a working thread | Orchestrate and ketchup state PR status as last reported; a looping thread can only be told to stop | read-only forge status for OptChat; a stop tool |
@@ -371,7 +386,7 @@ None of these is in this PR. Each needs a decision or a cube change.
 | G7 | chat and artifacts cannot play video, and show images as links | ketchup-video and review gates link media | inline media in artifacts |
 | G8 | 60 of the 64 skills a thread can install are used | a user's own sources can add at most 4 new ids (or must disable some) | a higher limit, or hidden skills not counted |
 | G9 | no live model run | how well OptChat and threads follow these skills, and how reliably threads hand off instead of doing a fan-out themselves, is unmeasured | real runs after activation |
-| G10 | each thread now installs 601 files, 3.6 MB, from a repository whose depth-1 fetch also carries the baseline | one run each in a thread machine: the depth-1 fetch took 975 ms and 3.4 MB at this head, against 568 ms and 140 KB at the current pin (`d5041ce9`); not repeated, so the spread is unknown | if it matters, move the baseline to its own branch or repository |
+| G10 | closed: the baseline left the tree (Baseline) | a depth-1 fetch no longer carries the 573 baseline files; it carried them from the first port until the branding removal | nothing |
 
 ## Retired
 
@@ -393,44 +408,66 @@ setup did, and where it went:
 | write the rule | nothing to write; the chat is the record |
 | offer a verification and a formal verification skill | unchanged skills (`create-verification-skill`, `create-formal-verification-skill`, their `maintain-*`), offered by cube-mode's UI/CLI gate and cube-help's state checks when the question calls for them |
 
-`scripts/check-port.mjs` lists it in `RETIRED`: its upstream file is shown
-in COVERAGE.md as retired, its folder must not come back, and installed
+`scripts/check-port.mjs` lists it in `RETIRED`: its folder must not come back, and installed
 text must not send anyone to it (the model rule). A user who types
 `/setup-pstack` reaches `cube-help`, which says it is retired and how to
 state a preference.
 
-## Naming: option B, chosen by the user
+## Naming
 
-The user first asked to adapt *and rename* poteto-mode for cube, then asked
-for every pstack skill copied as is and converted. The options below were put
-to the user, who chose **B**: the router `poteto-mode` is `cube-mode` in cube,
-and every other skill keeps its upstream id. The user later retired the old
-name: cube-mode is the only name, and no installed file mentions the old
-mode name, not even as a trigger or as the tool package's internal name
-(`@cursor-skill/cube-mode-tools`); `scripts/legacy-patterns.mjs` keeps it
-out. The upstream copy keeps `poteto-mode`; `scripts/check-port.mjs` maps it
-by its `RENAMED` table, so the coverage and diff checks treat
-`upstream/pstack/skills/poteto-mode/*` and `skills/cube-mode/*` as one file
-each. Later the user asked for the help skill to match:
-`poteto-help` is `cube-help`, mapped the same way, and `/poteto-help` still
-triggers it. What the
-resolver does (cubeyard/cube `packages/server/src/skills.ts`): sources are read
-default first, then the user's in order; for each id **the last source wins**;
-the union of ids after `skills.disabled` may hold at most **64**, or every
-thread start is refused before a machine is allocated.
+The user first asked to adapt *and rename* pstack's router for cube, then
+asked for every pstack skill copied as is and converted. The options below
+were put to the user, who chose **B**: the router is `cube-mode` in cube, and
+every other skill keeps its upstream id. Later the user asked for the help
+skill to match, and it is `cube-help`.
 
-| option | what changes | with the old cursor/plugins source still configured | other costs |
+Then the user ruled that the two retired brand names (the author's handle
+and the original host's name) are mentioned nowhere: not as a trigger or
+alias, not in a file or path name, not in docs, manifests, tests or the
+reference copy. So the old slash commands no longer trigger anything (a user
+types `/cube-mode` or `/cube-help`), the router's agent brief is
+`agents/cube-mode-agent.md`, the script packages are `@cube-skill/*`, the
+baseline left the tree (Baseline), and `scripts/check-port.mjs` refuses
+either name in any path or file of the repository
+(`scripts/branding-patterns.mjs`, which spells them backwards so it passes
+its own check). Behavior that depended on the names keeps working:
+
+| where | before | now |
+| --- | --- | --- |
+| cube-mode, cube-help descriptions | listed the old names as triggers | list only the cube names |
+| cube-help | linked the original guide pages | links the installed playbooks, recipes and Principles that hold the same answers; the guide stays in the baseline |
+| `worktree-audit.sh` | scanned the original host's transcript directory, which never exists in a thread machine | scans `WORKTREE_AUDIT_TRANSCRIPTS` when it is set; unset, the scan is skipped as before |
+| `watch-pr` | internal page fields named after GraphQL's page field | `nextAfter`; the GraphQL query still reads GitHub's own field |
+| `check-plan.mjs` | a loop index named for its job | `from` |
+
+`EXTERNAL_IDENTIFIERS` lists by file the only matches the check allows,
+identifiers an outside system defines, all in `watch-pr/github.ts` and its
+recorded test responses: GitHub GraphQL's `PageInfo` page field, which a
+query must name to page through review threads and checks, and the GitHub
+login and comment marker of the Bugbot review app, which `watch-pr` uses to
+recognise Bugbot threads and count their review passes. Renaming them would
+break paging or Bugbot triage; dropping Bugbot recognition would make its
+threads ordinary review threads without pass counts. That is the user's
+call, not a rename.
+
+What the resolver does (cubeyard/cube `packages/server/src/skills.ts`):
+sources are read default first, then the user's in order; for each id **the
+last source wins**; the union of ids after `skills.disabled` may hold at most
+**64**, or every thread start is refused before a machine is allocated.
+
+| option | what changes | with the original pstack source still configured | other costs |
 | --- | --- | --- | --- |
-| A. keep upstream ids (the port before the user chose) | nothing | its 51 originals override the ported skills of the same id (silently, unported Cursor text); 61 ids, so starts still work | the ids say "poteto", not cube; `--diff` and future upstream updates stay one to one |
-| B. rename only the entry router (chosen, this PR) (`poteto-mode` to a cube name, e.g. `cube-mode`), keep the leaves | one folder renamed, its links and the mentions of `/poteto-mode` updated | 62 ids; the new router is kept, but the 50 other ported skills it links to are still overridden by the originals (measured) | the user-facing name changes; `/poteto-mode` still needs a mention so users who type it are routed |
+| A. keep upstream ids (the port before the user chose) | nothing | its 51 originals override the ported skills of the same id (silently, unported text); 61 ids, so starts still work | the ids carry the author's handle, not cube; diffs and future upstream updates stay one to one |
+| B. rename only the entry router (chosen) to a cube name, `cube-mode`, keep the leaves | one folder renamed, its links and the mentions of the old command updated | 62 ids; the new router is kept, but the 50 other ported skills it links to are still overridden by the originals (measured) | the user-facing name changes |
 | C. rename every skill (a prefix, e.g. `pstack-how`) | 58 folders, every cross-link | no override, but the union is 61 + 51 = 112 ids, over 64: **every thread start fails** until the old source is removed or its skills disabled | the largest diff; ids get longer (install command grows, still under 8 KiB); upstream updates map by a rename table |
 | D. keep ids, set display names | `name:` differs from the folder (cube shows it in Settings only) | as A | the model never sees display names; upstream itself renamed every skill to its folder name (#702) |
 
-Under B, with the old cursor/plugins source still configured, `cube-mode`
-itself is safe, but its old `poteto-mode` comes back beside it (hidden, Cursor
-text) and the 50 other ported skills it links to are the unported originals (measured when B was chosen: 62 skills, 50 overridden; after cube-help and the retirement, 63 and 48, G1). So the old
-source must still go (G1), before or in the same save as the new default
-commit.
+Under B, with the original pstack source still configured, `cube-mode`
+itself is safe, but the original router comes back beside it (hidden,
+unported text) and the 50 other ported skills it links to are the unported
+originals (measured when B was chosen: 62 skills, 50 overridden; after
+cube-help and the retirement, 63 and 48, G1). So the old source must still
+go (G1), before or in the same save as the new default commit.
 
 ## Activating (not done here)
 
@@ -438,7 +475,7 @@ Merging changes nothing a cube runs until the user chooses the new commit in
 Settings, Skills (check for update, then use that commit). In order:
 
 1. Squash-merge, so the as-is copy commit never sits on main to be pinned.
-2. Remove (or disable) the cursor/plugins `df581122` source before, or in the
+2. Remove (or disable) the original pstack source (`df581122`) before, or in the
    same save as, the new default commit (G1; see Naming for why the order matters).
 3. Keep the user's own sources to at most 4 new ids (G8), or every thread start fails.
 4. Smoke-test with a real model: one OptChat turn and one thread with cube-mode (G9). New threads and OptChat's next turn then get it;

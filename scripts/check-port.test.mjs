@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { substitutesIn } from "./handoff-patterns.mjs";
 import { retiredConfigIn } from "./model-patterns.mjs";
-import { legacyModeIn } from "./legacy-patterns.mjs";
+import { BRANDS, brandingIn } from "./branding-patterns.mjs";
 
 // Wordings earlier revisions or reviews found; each must be caught.
 const BAD = [
@@ -69,33 +69,68 @@ test("the port's own model wordings are not caught", () => {
   for (const line of RETIRED_GOOD) assert.deepEqual(retiredConfigIn(line), [], `caught: ${line}`);
 });
 
-// The retired mode name, in any casing or spelling.
-const LEGACY_BAD = [
-  "A user who asks for `/poteto-mode` means this skill.",
-  "Use for /Poteto-Mode (its pstack name).",
-  "work in poteto mode",
-  "POTETO_MODE",
-  "\"name\": \"@cursor-skill/poteto-mode-tools\"",
+// The retired branding, in any casing or spelling. Fixtures are built from
+// the brand list so that this file passes the check itself.
+const [P, C] = BRANDS;
+const cap = (w) => w[0].toUpperCase() + w.slice(1);
+const spread = (w, sep) => [...w].join(sep);
+const BRAND_BAD = [
+  `A user who asks for \`/${P}-mode\` means this skill.`,
+  `Use for /${cap(P)}-Mode (its pstack name).`,
+  `work in ${P} mode`,
+  `${P.toUpperCase()}_MODE`,
+  `"name": "@${C}-skill/cube-mode-tools"`,
+  `Use for cube-mode, /cube-mode, ${P}, pstack.`,
+  `${P}'s agent style`,
+  `Brief it from agents/${P}-agent.md.`,
+  `ported from ${cap(C)} to cube`,
+  `~/.${C}/projects/<slug>/agent-transcripts`,
+  `https://github.com/${C}/plugins/tree/main/pstack`,
+  spread(P, "."),
+  spread(C, "-"),
+  spread(P, "\u2011"),
+  spread(C, "\u00ad"),
+  spread(P, "\u200b"),
+  P.replace("o", "\u043e"),
+  C.replace("c", "\u0441"),
+  [...C.toUpperCase()].map((ch) => String.fromCharCode(ch.charCodeAt(0) + 0xfee0)).join(""),
+  `${P.slice(0, 3)}-\n${P.slice(3)}`,
+  `pre${C}`,
 ];
-const LEGACY_GOOD = [
-  "Use for cube-mode, /cube-mode, poteto, pstack.",
-  "poteto's agent style",
-  "Brief it from agents/poteto-agent.md.",
+const BRAND_GOOD = [
+  "cube-mode, pstack, Comment Sicko",
+  "a cube-mode thread brief",
+  `${C.slice(0, 4)} ${C.slice(4)}`,
+  `${P.slice(0, 3)} ${P.slice(3)}`,
+  "after = page.nextAfter;",
 ];
+const github = "skills/cube-mode/scripts/watch-pr/github.ts";
 
-test("every spelling of the retired mode name is caught", () => {
-  for (const line of LEGACY_BAD) assert.ok(legacyModeIn(line), `not caught: ${line}`);
+test("every spelling of the retired branding is caught", () => {
+  for (const line of BRAND_BAD) assert.ok(brandingIn(line).length > 0, `not caught: ${JSON.stringify(line)}`);
 });
-test("cube-mode and pstack's other names are not caught", () => {
-  for (const line of LEGACY_GOOD) assert.equal(legacyModeIn(line), false, `caught: ${line}`);
+test("text without the branding is not caught", () => {
+  for (const line of BRAND_GOOD) assert.deepEqual(brandingIn(line), [], `caught: ${line}`);
+});
+test("an outside identifier is allowed only in its own file, and nothing else there", () => {
+  const field = `pageInfo { hasNextPage end${cap(C)} }`;
+  assert.deepEqual(brandingIn(field, github), []);
+  assert.equal(brandingIn(field, "skills/cube-mode/SKILL.md").length, 1);
+  assert.deepEqual(brandingIn(`author === "${C}"`, github), []);
+  assert.equal(brandingIn(`${cap(C)} built this`, github).length, 1);
+  assert.equal(brandingIn(`author === "${P}"`, github).length, 1);
+});
+test("matches report their line", () => {
+  assert.deepEqual(brandingIn(`one\ntwo ${P}\nthree`).map((m) => m.line), [2]);
 });
 
-// The whole checker on a scratch copy: a retired skill that comes back, or
-// installed text that sends the user to it, fails the check.
+// The whole checker on a scratch copy: a retired skill that comes back,
+// installed text that sends the user to it, or retired branding anywhere in
+// the repository fails the check.
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 function scratch(change) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "check-port-"));
-  for (const name of ["scripts", "skills", "upstream", "COVERAGE.md"]) fs.cpSync(path.join(root, name), path.join(dir, name), { recursive: true });
+  for (const name of ["scripts", "skills", "README.md"]) fs.cpSync(path.join(root, name), path.join(dir, name), { recursive: true });
   change(dir);
   const run = spawnSync(process.execPath, [path.join(dir, "scripts/check-port.mjs")], { encoding: "utf8" });
   fs.rmSync(dir, { recursive: true, force: true });
@@ -107,7 +142,7 @@ test("the unchanged port passes the checker", () => {
   assert.equal(run.status, 0, run.stderr);
 });
 test("a retired skill folder that comes back fails the checker", () => {
-  const run = scratch((dir) => fs.cpSync(path.join(dir, "upstream/pstack/skills/setup-pstack"), path.join(dir, "skills/setup-pstack"), { recursive: true }));
+  const run = scratch((dir) => { fs.mkdirSync(path.join(dir, "skills/setup-pstack")); fs.writeFileSync(path.join(dir, "skills/setup-pstack/SKILL.md"), "---\nname: setup-pstack\ndescription: x\n---\n"); });
   assert.equal(run.status, 1);
   assert.match(run.stderr, /RETIRED setup-pstack/);
 });
@@ -121,14 +156,30 @@ test("port commentary in an installed file fails the checker", () => {
   assert.equal(run.status, 1);
   assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: port commentary/);
 });
-test("the retired mode name in an installed file fails the checker", () => {
-  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), "\nA user who asks for `/poteto-mode` means cube-mode.\n"));
+test("retired branding in an installed file fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-help/SKILL.md"), `\nA user who asks for \`/${P}-help\` means cube-help.\n`));
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /cube-help\/SKILL\.md:\d+: mentions the retired mode name/);
+  assert.match(run.stderr, /skills\/cube-help\/SKILL\.md:\d+: retired branding/);
 });
-test("the retired mode name in an installed script fails the checker", () => {
+test("retired branding in an installed script fails the checker", () => {
   const file = (dir) => path.join(dir, "skills/cube-mode/scripts/bootstrap.ts");
-  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("cube-mode-tools", "poteto-mode-tools")));
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("cube-mode-tools", `${C}-tools`)));
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /cube-mode\/scripts\/bootstrap\.ts:\d+: mentions the retired mode name/);
+  assert.match(run.stderr, /skills\/cube-mode\/scripts\/bootstrap\.ts:\d+: retired branding/);
+});
+test("retired branding outside skills/ fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "README.md"), `\nPorted from ${cap(C)}.\n`));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /README\.md:\d+: retired branding/);
+});
+test("a path with retired branding fails the checker", () => {
+  const run = scratch((dir) => fs.renameSync(path.join(dir, "skills/cube-mode/agents/cube-mode-agent.md"), path.join(dir, `skills/cube-mode/agents/${P}-agent.md`)));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /agents\/[^:]+-agent\.md: the path carries retired branding/);
+});
+test("retired branding beside an allowed identifier fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/scripts/watch-pr/github.ts");
+  const run = scratch((dir) => fs.appendFileSync(file(dir), `\n// ${cap(C)} review app\n`));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /watch-pr\/github\.ts:\d+: retired branding/);
 });

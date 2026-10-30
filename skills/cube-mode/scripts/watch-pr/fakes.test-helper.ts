@@ -112,13 +112,13 @@ export function fakeReader(
     },
     async checkRollupPage(_requested, after) {
       calls.push(`checkRollupPage:${after ?? "null"}`);
-      return options.rollupPages?.[page++] ?? { checks: [], endCursor: null };
+      return options.rollupPages?.[page++] ?? { checks: [], nextAfter: null };
     },
     async reviewThreadPage(_requested, after) {
       calls.push(`reviewThreadPage:${after ?? "null"}`);
       return options.threadPages?.[threadPage++] ?? {
         threads: (options.threads ?? []).map(toRawThread),
-        endCursor: null,
+        nextAfter: null,
       };
     },
     async commitRollups() {

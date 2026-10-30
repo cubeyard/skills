@@ -45,8 +45,8 @@ describe("checks fallback chain", () => {
     const reader = fakeReader({
       fastPath: { kind: "unusable", exitCode: 8, stderr: "" },
       rollupPages: [
-        { checks: [passingCheck("first")], endCursor: "next" },
-        { checks: [failedCheck("second")], endCursor: null },
+        { checks: [passingCheck("first")], nextAfter: "next" },
+        { checks: [failedCheck("second")], nextAfter: null },
       ],
     });
     const read = await resolveChecks(reader, context);
@@ -62,7 +62,7 @@ describe("checks fallback chain", () => {
   it("falls back when valid fast-path JSON represented an empty list", async () => {
     const reader = fakeReader({
       fastPath: { kind: "checks", checks: [] },
-      rollupPages: [{ checks: [pendingCheck("fallback")], endCursor: null }],
+      rollupPages: [{ checks: [pendingCheck("fallback")], nextAfter: null }],
     });
     expect((await resolveChecks(reader, context)).checks[0].name).toBe(
       "fallback"
@@ -308,12 +308,12 @@ describe("review thread pagination", () => {
     resolved,
   });
 
-  it("keeps walking pages until the cursor is exhausted", async () => {
+  it("keeps walking pages until the last page", async () => {
     const reader = fakeReader({
       threadPages: [
-        { threads: [thread("one")], endCursor: "next" },
-        { threads: [thread("two")], endCursor: "last" },
-        { threads: [thread("three")], endCursor: null },
+        { threads: [thread("one")], nextAfter: "next" },
+        { threads: [thread("two")], nextAfter: "last" },
+        { threads: [thread("three")], nextAfter: null },
       ],
     });
     const threads = await resolveReviewThreads(reader, context);
@@ -328,17 +328,17 @@ describe("review thread pagination", () => {
   it("sees an unresolved thread that sits past the first page", async () => {
     const reader = fakeReader({
       threadPages: [
-        { threads: [thread("early", true)], endCursor: "next" },
-        { threads: [thread("late")], endCursor: null },
+        { threads: [thread("early", true)], nextAfter: "next" },
+        { threads: [thread("late")], nextAfter: null },
       ],
     });
     const threads = await resolveReviewThreads(reader, context);
     expect(threads.map((item) => item.id)).toEqual(["late"]);
   });
 
-  it("stops after a single page when the cursor is exhausted", async () => {
+  it("stops after a single page when it is the last", async () => {
     const reader = fakeReader({
-      threadPages: [{ threads: [thread("only")], endCursor: null }],
+      threadPages: [{ threads: [thread("only")], nextAfter: null }],
     });
     expect((await resolveReviewThreads(reader, context)).length).toBe(1);
     expect(reader.calls).toEqual(["reviewThreadPage:null"]);
@@ -358,8 +358,8 @@ describe("review thread pagination", () => {
     });
     const reader = fakeReader({
       threadPages: [
-        { threads: [bugbot("one", "run-1")], endCursor: "next" },
-        { threads: [bugbot("two", "run-2")], endCursor: null },
+        { threads: [bugbot("one", "run-1")], nextAfter: "next" },
+        { threads: [bugbot("two", "run-2")], nextAfter: null },
       ],
     });
     const threads = await resolveReviewThreads(reader, context);
@@ -369,8 +369,8 @@ describe("review thread pagination", () => {
   it("drops resolved threads from later pages too", async () => {
     const reader = fakeReader({
       threadPages: [
-        { threads: [thread("one")], endCursor: "next" },
-        { threads: [thread("two", true)], endCursor: null },
+        { threads: [thread("one")], nextAfter: "next" },
+        { threads: [thread("two", true)], nextAfter: null },
       ],
     });
     expect(

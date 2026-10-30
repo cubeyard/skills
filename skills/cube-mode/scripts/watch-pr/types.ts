@@ -378,7 +378,7 @@ export type ChecksFastPath =
     };
 export interface RollupPage {
   readonly checks: readonly Check[];
-  readonly endCursor: string | null;
+  readonly nextAfter: string | null;
 }
 export interface RawReviewThread {
   readonly id: string;
@@ -387,7 +387,7 @@ export interface RawReviewThread {
 }
 export interface ReviewThreadPage {
   readonly threads: readonly RawReviewThread[];
-  readonly endCursor: string | null;
+  readonly nextAfter: string | null;
 }
 export interface GitHubReader {
   originRepo(): Promise<Repository | null>;
