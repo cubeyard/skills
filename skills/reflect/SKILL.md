@@ -16,7 +16,7 @@ In cube: a thread writes a tight digest of its own session from its context (the
 
 ## 2. Run three reviewers (threads OptChat starts)
 
-OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the user's preferences for the roles below, matched per the Models section of `../cube-mode/references/cube.md` (ask when none covers a role). 
+OptChat: one `spawn` call with three threads, each with its template and the digest or the pasted history, models from the user's preferences for the roles below, matched per the Models section of `../briefing-a-thread/SKILL.md` (ask when none covers a role). 
 A thread: write the digest, push or attach it, and report a handoff with the three reviewer briefs and the synthesizer brief (`../cube-mode/references/cube.md`, Handoff); end your turn.
 
 | Lens | Role | `model` | Prompt template |

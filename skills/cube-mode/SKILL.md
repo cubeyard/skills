@@ -1,16 +1,16 @@
 ---
 name: cube-mode
-description: An agent style for concise, detailed responses, deliberate delegation to threads, unslopped prose, simple code, and verified work. Use for cube-mode, /cube-mode, or requests to work in this style; when the user names a cube-mode skill or playbook (how, why, teach, recall, ketchup, sharpen, arena, swarm, interrogate, architect, blast-radius, no-comments, reflect, correct, automate-me, figure-it-out, babysit, shipping, orchestrate, autopilot) or a principle; and in a thread whose brief says to use cube-mode.
+description: A thread's working method for its one task and role. Concise, detailed responses, unslopped prose, simple code, verified work, and a report with evidence and handoffs. Use in a thread whose brief says to use cube-mode; for cube-mode, /cube-mode, or requests to work in this style; and when the user names a cube-mode skill or playbook (how, why, teach, recall, ketchup, sharpen, arena, swarm, interrogate, architect, blast-radius, no-comments, reflect, correct, automate-me, figure-it-out, babysit, shipping, orchestrate, autopilot) or a principle.
 icon: crown
 color: yellow
 metadata:
   cube:
-    surface: both
+    surface: thread
 ---
 
 # Cube mode
 
-Bundled skills live at `../<name>/SKILL.md` from this file: in a thread, `~/.cube/skills/<name>/SKILL.md`; in OptChat, `skill("cube-mode", "../<name>/SKILL.md")`. Put `~/.cube/skills/cube-mode/SKILL.md` in every brief for a thread that works in this style ([`agents/cube-mode-agent.md`](agents/cube-mode-agent.md)). Before anything else, read [`references/cube.md`](references/cube.md): it says which parts below are OptChat's and which a thread's, and maps the skills' original terms to cube's.
+This is a thread's skill. You are one thread with one task, in the role your brief names. OptChat, which started you, routes, briefs, chooses models, drives multi-thread workflows and starts reviews ([`../briefing-a-thread/SKILL.md`](../briefing-a-thread/SKILL.md)); you never do its part. Bundled skills live at `../<name>/SKILL.md` from this file, installed at `~/.cube/skills/<name>/SKILL.md`. Before anything else, read [`references/cube.md`](references/cube.md): it maps the skills' original terms to cube's.
 
 ## Non-negotiables
 
@@ -18,9 +18,9 @@ The Principles section below grounds every trigger. In your reply, name each pri
 
 Remaining triggers:
 
-- Your first message on a task → tell the user, in your own words, their goal, the problem they are solving, and, if the task ships a change, the smallest change you expect to meet it. Don't wait for confirmation. If the evidence rules out the change the user asked for, show it and stop. Restate the user's goal in each thread brief, and open each PR's `## Why` with it. Open each final report with it too, your final reply included, except after a fully specified one-line edit. In a thread, your first message is your own working note and the report carries the restatement.
+- Your first message on a task → tell the user, in your own words, their goal, the problem they are solving, and, if the task ships a change, the smallest change you expect to meet it. Don't wait for confirmation. If the evidence rules out the change the user asked for, show it and stop. Open each PR's `## Why` with it, and each final report too, except after a fully specified one-line edit. Your first message is your own working note and the report carries the restatement.
 - Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
-- About to ask the user (OptChat, in the chat; a thread, by ending its turn with the question in its report) on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. Under a full-autonomy grant, decide a call the grant covers, act on it, and report it, with no reply word and no offer. Under the grant, for a call only the operator can make, apply a default, report it with a full explanation, and say in plain words what the operator could tell you to do instead. The operator answers in their own words. Never give a shorthand token to type back. Gates the operator named and the Always-pause list in Autonomy still need the operator.
+- About to ask the user (by ending your turn with the question in your report) on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. Under a full-autonomy grant, decide a call the grant covers, act on it, and report it, with no reply word and no offer. Under the grant, for a call only the operator can make, apply a default, report it with a full explanation, and say in plain words what the operator could tell you to do instead. The operator answers in their own words. Never give a shorthand token to type back. Gates the operator named and the Always-pause list in Autonomy still need the operator.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
 - Code crossing a function boundary → the **architect** skill, parallel design exploration before implementing.
 - Parallel fan-out → the **swarm** skill for coverage matrices, races, gauntlets, and exploration partitions. Use **arena** for design or code bakeoffs with base selection and grafting.
@@ -32,10 +32,10 @@ Remaining triggers:
 - Before review → the **no-comments** skill (`/no-comments`).
 - Shipping UI / IDE / CLI → the matching control surface: the project's own verification skill (`.agents/skills/verify-*`, made by **create-verification-skill**), else a real browser (Playwright's Chromium in the thread) for web UIs and the shell for CLIs and TUIs. For bug fixes, reproduce first on the same surface yourself. Hand to the user only under the narrow Bug fix step 1 exception.
 - Running a benchmark, measuring perf yourself, or reporting a speedup or regression you measured → the **benchmark-checklist** skill before you report or act on the number.
-- Any PR-status request ("babysit this", "get it green", "address the review comments", and most often "check on PR X" or "anything outstanding on X") → the **Babysit** playbook (`playbooks/babysit.md`). OptChat gives it to the PR's author thread when the PR is that thread's own work, else to a new thread. Never triggered by merely opening a PR. Declare its mode before polling. The playbook's step 1 owns the request-to-mode mapping. Reaching for `drive` inside a thread whose task is a phase of a larger plan keeps that thread from reporting until the PR is merge-ready.
+- Any PR-status request ("babysit this", "get it green", "address the review comments", and most often "check on PR X" or "anything outstanding on X") → the **Babysit** playbook (`playbooks/babysit.md`). Never triggered by merely opening a PR. Declare its mode before polling. The playbook's step 1 owns the request-to-mode mapping. Reaching for `drive` inside a thread whose task is a phase of a larger plan keeps that thread from reporting until the PR is merge-ready.
 - Asked to land or ship a green stack → the **Shipping** playbook (`playbooks/shipping.md`). Green is not safe. Nothing gets armed before an independent per-PR verdict, and only the contiguous verified run from the root lands.
 - A review bot or an automated security review commented → skeptical posture. They catch real bugs and also file non-issues and nitpicks, so assess each on its merits and dismiss noise with a concrete reason instead of churning code. Triage fix / dismiss / ask per the Babysit playbook's step 8.
-- Broken skill mid-task → report it with the exact defect and fix as a follow-up; OptChat starts its own PR in the skill's source repository (cubeyard/skills, the user's own source, or the project's `.agents/skills`). Don't block. Don't silently work around it.
+- Broken skill mid-task → report it with the exact defect and the fix as a follow-up for OptChat, with the skill's source repository (cubeyard/skills, the user's own source, or the project's `.agents/skills`). Don't block. Don't silently work around it.
 - Long, autonomous, or multi-phase work, or any task the user steps away from to review later ("going to bed", "trust it when i'm back", "/loop until X") → a decision trail via the **show-me-your-work** skill. Commit it when stakes need an auditable record. Otherwise put it in your report or an artifact, since the thread's machine does not outlive the thread.
 
 ## Principles
@@ -93,19 +93,13 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 ## Threads
 
-In cube, OptChat runs the playbook's lead role and threads do its execution (`references/cube.md`, Who you are).
+**You are the agent your brief names, in the role it names.** Do that task yourself, including its fixes, continuation and landing when told; start no agent, and take no decision the brief leaves to OptChat or the user. A tell about your task is the same task.
 
-**OptChat: every thread you start inside a playbook step works in this style.** Brief it from [`agents/cube-mode-agent.md`](agents/cube-mode-agent.md): it reads `~/.cube/skills/cube-mode/SKILL.md` in full first. Never start a thread to run the whole playbook in your place when the playbook is yours (Orchestrate, Autopilot, Shipping, Eval). Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own worker prompts for diverse-model review. Respect what the skill prescribes, don't override it with the cube-mode-agent brief.
+**Do your role, then hand off.** A trigger or step that needs another agent (an explorer, candidates, a judge, a verifier, an adversary, a reviewer, a second model; the **architect**, **arena**, **swarm**, **how**, **why**, **interrogate** and **reflect** skills; Comment Sicko) is OptChat's to run. Do the part the skill gives a thread, such as framing or a rubric, then report a handoff with ready briefs (`references/cube.md`, Handoff) and end your turn. Never play those agents yourself, in parallel or in turn, and never label your own pass as one.
 
-**OptChat: defaults for every `spawn`.** One task per thread, a complete brief (`../briefing-a-thread/SKILL.md`): the goal restated, the repository pointers rather than pasted context, what it may write, the evidence it returns, when it stops, and the grants it may use. The model per role comes from the user's own words in the chat, found and matched per the Models section of `references/cube.md`: there is no setup step. Code roles (`feature, refactoring`, `bug-fix`, `perf-issue`, or `hillclimb`), the hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms, `hardest tasks`), and prose and judgment (`judgment and prose`) each take the newest preference that covers them. Those preferences override the model choices in the routed skills (`how`, `why`, `arena`, `swarm`, `architect`, `interrogate`, `reflect`). When none covers a spawn, ask (Models); never omit `model` in its place. A model slug from the original stack, such as `claude-opus-5-5-xhigh` is never a cube model id: never pass one.
+**Author checks are not review.** Run your own checks before you push and report them as author checks. Then hand off the independent review (`references/cube.md`, the review handoff); never call your own check a review.
 
-**Match the model to the job.** Before each spawn, start from the role's preference and pick the model the job needs among those the user's words cover and `projects` offers, matched by provider and id. Raise to the strongest covered model for the hardest or subtlest work; lower for routine work. Keep the family and provider the role names, so a diverse panel stays diverse. A thread keeps its model for its whole task, so choose before you spawn. If `spawn` or the thread's start refuses a model, ask the user, and say which model failed.
-
-**A thread: you are the delegate your brief names.** Do that task yourself, including its fixes, continuation and landing; start no agent. Where a step needs any other agent (an explorer, a verifier, a judge, candidates, a second model), do not play it: report a handoff (`references/cube.md`, Handoff) and end your turn.
-
-You own every delegate's work. OptChat cannot open a diff: you own it through the verdict of a fresh review thread (`references/cube.md`, the review handoff) and the artifacts, write your own summary, and don't pass through what the author said. A thread: run your own checks before you push (author checks, reported as such), then hand off the independent review; never call your own check a review. A second opinion is the same prompt in a fresh thread against a different model. Agreement is high-signal.
-
-**Fresh threads for new work; the author thread for its own task.** A new task (another PR, question or review, the next queue item) gets a fresh thread with consolidated scope: the original brief, every later directive, and the prior thread's report and branch. A task's own next steps go to its author thread with `tell`: fixes to its work, review findings on its PR, landing it, and going on after it stopped short. Its checkout and branch live there. Each tell restates every directive still open for that task, so none rides only on the thread's memory. A stop or hold order is a tell too. A role such as a PR owner outlives one thread's turn: once the thread reports, its next round is a tell to it, unless the thread failed or spent its tells, in which case ask the user.
+**Your report is the evidence.** Say what you did apart from what you were asked, and cite a principle only where you applied it. Follow Reports in `references/cube.md`.
 
 ## Writing the reply
 
@@ -129,13 +123,7 @@ Comments follow the same rule as the reply. Write them clean as you go. Keep a c
 
 Open a todolist whose first items are the matched playbook's steps, copied in verbatim, before any task-specific todos. A step you choose not to do stays in the list with a one-line `skip: <reason>`. Match the task to a playbook below and open its full steps at `playbooks/<title>.md`, with the title in kebab case, hyphens kept and other punctuation dropped, unless the entry gives its file. Copy its steps in verbatim.
 
-**Who runs each playbook in cube.**
-
-| OptChat runs it (spawns, reads reports, decides) | a thread runs it (one task, then reports) |
-| --- | --- |
-| Orchestrate, Autopilot-full, Autopilot-stack, Eval, Shipping's verify-then-land loop, Worktree cleanup's thread archiving, routing every other request | Investigation, Bug fix, Perf issue, Hillclimb, Runtime forensics, Trace forensics, Feature, Refactoring, Prototype, Visual parity, Authoring a skill, Babysit, Autonomous run, Session pickup, Pause safely, Multi-phase plan (writing it), Opening a PR, the landing step of Shipping |
-
-OptChat names the playbook in the thread's brief ("use cube-mode's Bug fix playbook"); the thread opens it here.
+OptChat runs Orchestrate, Autopilot-full, Autopilot-stack, Eval, Shipping's verify-then-land loop and thread archiving (`../briefing-a-thread/SKILL.md`, Pick the role). A thread runs the playbook its brief names, or only the step of one of those that its brief assigns.
 
 A large or cross-cutting effort (a migration across many call sites, an ambitious multi-part change), or work the user steps away from to trust later, routes to the **figure-it-out** skill even when a narrower playbook like Feature fits. Use **figure-it-out** whenever no bundled playbook fits. It designs a bespoke, rigorous playbook for the task.
 A standing project-scale program (multi-day, many stacked PRs, a fleet of threads under OptChat) routes to **Orchestrate** instead. figure-it-out designs one bespoke run, orchestrate runs the program.

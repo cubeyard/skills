@@ -24,6 +24,9 @@ const BAD = [
   "A thread: you own your diff; review it yourself before reporting.",
   "A thread asked to interrogate plays the adversaries itself.",
   "OptChat: read the thread's report and its diff or artifact.",
+  "A thread plays all three arena candidates in turn.",
+  "Give one thread the whole arena: it writes the candidates, judges them and grafts the winner.",
+  "The implementer acts as the judge too.",
 ];
 // Wordings the port uses on purpose; none may be caught.
 const GOOD = [
@@ -36,6 +39,10 @@ const GOOD = [
   "Report a handoff with one brief per worker and end your turn.",
   "Migrate one component at a time.",
   "A thread frames it and reports a handoff; it does not run the slices itself.",
+  "Never give one thread a whole multi-thread workflow, and never let one thread play several of its roles in turn.",
+  "Spawn all N candidate threads in one `spawn` call.",
+  "Never play those agents yourself, in parallel or in turn, and never label your own pass as one.",
+  "Do the part the skill gives a thread, such as framing or a rubric, then report a handoff with ready briefs.",
 ];
 
 test("every known substitute wording is caught", () => {
@@ -233,4 +240,46 @@ test("a retired name beside an allowed identifier fails the checker", () => {
   const run = scratch((dir) => fs.appendFileSync(file(dir), `\n// ${cap(C)} review app\n`));
   assert.equal(run.status, 1);
   assert.match(run.stderr, /watch-pr\/github\.ts:\d+: retired name/);
+});
+
+// The role split: briefing-a-thread owns orchestration, cube-mode is the
+// thread's, and a section that moves takes its references along.
+test("a reference to a section the target does not have fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/arena/SKILL.md"), "\nPick runners per the Models section of `../cube-mode/references/cube.md`.\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /skills\/arena\/SKILL\.md: refers to section "Models" of cube-mode\/references\/cube\.md/);
+});
+test("an OptChat section copied back into cube-mode fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/cube-mode/references/cube.md"), "\n## Models\n\nOnly OptChat chooses a model.\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /section "Models" must be a heading in briefing-a-thread\/SKILL\.md only/);
+});
+test("cube-mode listed to OptChat fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/SKILL.md");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("surface: thread", "surface: both")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /skills\/cube-mode: surface must be thread/);
+});
+test("a multi-thread workflow briefing-a-thread does not list fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/briefing-a-thread/SKILL.md");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace(/^\| arena \|.*\n/m, "")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /the multi-thread workflow arena is not listed/);
+});
+test("a multi-thread workflow that lets one thread play its roles fails the checker", () => {
+  const run = scratch((dir) => fs.appendFileSync(path.join(dir, "skills/arena/SKILL.md"), "\nIn a thread, write all the candidates on one branch and pick the best.\n"));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /skills\/arena\/SKILL\.md: offers a substitute for another agent/);
+});
+test("a thread preamble that drops the role-only clause fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/cube-mode/agents/cube-mode-agent.md");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replace("start no other agent and ", "")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /cube-mode-agent\.md: lost a clause the role split needs/);
+});
+test("a brief guide that copies history instead of pointing into the chat view fails the checker", () => {
+  const file = (dir) => path.join(dir, "skills/briefing-a-thread/SKILL.md");
+  const run = scratch((dir) => fs.writeFileSync(file(dir), fs.readFileSync(file(dir), "utf8").replaceAll("memory_zoom", "the chat")));
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /briefing-a-thread\/SKILL\.md: lost a clause the role split needs \(\/memory_zoom\/\)/);
 });

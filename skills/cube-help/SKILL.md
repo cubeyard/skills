@@ -10,7 +10,7 @@ metadata:
 
 Answer the user's question about cube-mode and its skills, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a cube-mode run spends real tokens, so let them send the prompt.
 
-A message that asks for work, such as "use cube-mode to fix this bug", is not a help question. Read [`cube-mode`](../cube-mode/SKILL.md) and do the work under it.
+A message that asks for work, such as "use cube-mode to fix this bug", is not a help question. In OptChat, read [`briefing-a-thread`](../briefing-a-thread/SKILL.md) and start the work with it. In a thread, read [`cube-mode`](../cube-mode/SKILL.md) and do the work under it.
 
 This file maps questions to the skills that hold the answers. Those files own the details. Read the file you route to before you quote it, and trust it when it disagrees with this map. The user may not be able to open the installed copies, so give the user a public copy: a skill at `https://github.com/cubeyard/skills/blob/main/skills/` followed by its path. The original stack's README and guide are not part of cube; [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md) maps the skills' original terms to cube's.
 
@@ -26,7 +26,7 @@ Infer the need from the message and the conversation. A named situation, such as
 
 Check the state that changes the answer, and mention it only when it does:
 
-- No model preference in the chat with OptChat means OptChat asks which models to use before its first spawn (the Models section of [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md)). Only OptChat applies that check.
+- No model preference in the chat with OptChat means OptChat asks which models to use before its first spawn (the Models section of [`../briefing-a-thread/SKILL.md`](../briefing-a-thread/SKILL.md)). Only OptChat applies that check.
 - No `verify-*` skill in the project's `.agents/skills` or other app harness means agents have no scripted way to drive the app. Mention `/create-verification-skill` when the question is about proving a change works.
 - No formal verification skill in the project means no property is checked past what tests reach. Mention `/create-formal-verification-skill` when the question is about a race, an invariant, or another case tests rarely hit. When one exists and the code it covers changed after the commit it records as last in sync, mention `/maintain-formal-verification-skill` if the question touches that code.
 
@@ -35,10 +35,10 @@ When no preference is stated and it matters (the user is new, the question is ab
 ## Get set up
 
 1. cube-mode and its skills ship in cube's default skills (cubeyard/skills). New threads get the commit chosen in Settings, Skills (check for update, then use that commit); a running thread keeps the skills it started with.
-2. Say which models to use in the chat with OptChat, naming the provider and model (for example "Opus through Claude Code, not the API"), for every role or for one. Nothing is saved elsewhere: OptChat follows the newest statement and asks when none covers a spawn (the Models section of [`../cube-mode/references/cube.md`](../cube-mode/references/cube.md)). It applies to threads started after that.
+2. Say which models to use in the chat with OptChat, naming the provider and model (for example "Opus through Claude Code, not the API"), for every role or for one. Nothing is saved elsewhere: OptChat follows the newest statement and asks when none covers a spawn (the Models section of [`../briefing-a-thread/SKILL.md`](../briefing-a-thread/SKILL.md)). It applies to threads started after that.
 3. Start a real task with `/cube-mode`, a goal, and a check that can pass or fail.
 
-Only three of these skills are listed for the model to load from the user's words: `cube-mode` and `cube-help` (OptChat and threads) and `typescript-best-practices` (threads). The others are installed but load only when cube-mode routes to them or the user names them. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
+Only three of these skills are listed for the model to load from the user's words: `cube-help` (OptChat and threads), and `cube-mode` and `typescript-best-practices` (threads). OptChat's own entry point is cube's `briefing-a-thread`. The others are installed but load only when cube-mode or briefing-a-thread routes to them or the user names them. Offer to word their first prompt with them, per [`references/prompting.md`](references/prompting.md).
 
 If cost is the worry, say where the tokens go and how to spend fewer. cube-mode spends extra tokens, and machines, on extra threads and review panels; OptChat's `usage` shows the cost so far. Tell OptChat in the chat to use cheaper models, for every role or one, or fewer panel seats; it applies to threads started after that. Save `/cube-mode` for work that needs rigor.
 
@@ -50,7 +50,7 @@ Most of these skills were ported from a stack built for another agent host. [`..
 
 In cube, how `/cube-mode` stays on:
 
-- In a message to OptChat, `/cube-mode` (or "use cube-mode") makes OptChat work in it for that request and name it in the brief of every thread it starts for it ([`../cube-mode/agents/cube-mode-agent.md`](../cube-mode/agents/cube-mode-agent.md)).
+- In a message to OptChat, `/cube-mode` (or "use cube-mode") makes OptChat route the request with [`briefing-a-thread`](../briefing-a-thread/SKILL.md): it drives any multi-thread workflow itself and tells each thread it starts to read cube-mode for its role ([`../cube-mode/agents/cube-mode-agent.md`](../cube-mode/agents/cube-mode-agent.md)).
 - A thread whose brief names it keeps it for its whole task.
 - There are no Custom Modes: on a later, unrelated request, say it again.
 

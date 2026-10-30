@@ -15,13 +15,15 @@ Most skills here are ported from an agent workflow stack by Lauren Tan
 (MIT, THIRD_PARTY_NOTICES.md): 57 of its 58 skills with their references
 and scripts. Its model setup skill is retired, since cube needs no model
 setup: OptChat follows the model preference the user states in the chat
-(`skills/cube-mode/references/cube.md`, M4). Start from `cube-mode` or
-`cube-help`, the stack's router and help renamed for cube and listed to
-OptChat and threads; the other ported skills are installed but hidden, and
-cube-mode routes to them. OptChat takes the stack's lead role (routing,
-briefing, judging, landing order) and threads do its execution;
+(`skills/briefing-a-thread/SKILL.md`, Models). OptChat takes the stack's
+lead role (routing, briefing, multi-thread workflows, review, landing
+order) through cube's `briefing-a-thread`; a thread does one task in one
+role through `cube-mode`, the stack's router renamed for cube and listed to
+threads only. `cube-help` is listed to both. The other ported skills are
+installed but hidden, and those two route to them.
 `skills/cube-mode/references/cube.md` maps the skills' original terms to
-cube's, and no skill asks a thread to start another agent.
+cube's, and no skill asks a thread to start another agent (PORTING.md, Role
+split).
 
 The unmodified original the port started from is kept in this repository's
 history, not its tree (PORTING.md, Baseline).
@@ -33,7 +35,7 @@ in PORTING.md and git history, not in `skills/`. Check the port with:
 node scripts/check-port.mjs
 ```
 
-cube's own skills are `briefing-a-thread` (OptChat), `opening-a-pull-request`
+cube's own skills are `briefing-a-thread` (OptChat's whole part), `opening-a-pull-request`
 and `prove-it-works` (threads).
 
 ## Surface

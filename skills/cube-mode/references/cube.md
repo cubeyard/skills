@@ -26,15 +26,19 @@ playbook's lead "delegates implementation to a subagent", in cube the
 lead's judgment is OptChat's brief and the delegate is the thread you are
 in, or the thread OptChat starts.
 
+OptChat's whole part, including every multi-thread workflow, is
+[briefing-a-thread](../../briefing-a-thread/SKILL.md). A thread's is
+[cube-mode](../SKILL.md): one role, then a report.
+
 ## Tools
 
 | skill term | cube |
 | --- | --- |
 | `Task` (spawn a subagent) | OptChat: `spawn({tasks: [{project, task, model?}]})`, one thread per task; its report comes back as `[id] ...`. A thread: none (see Handoff). |
-| A follow-up to a running subagent, `resume` | OptChat: `tell(id, message)` for the same task only (see Same task, same thread). |
+| A follow-up to a running subagent, `resume` | OptChat: `tell(id, message)` for the same task only (briefing-a-thread, Follow up). |
 | `AskQuestion` | OptChat: ask in the chat in plain text, with the options listed. A thread: never waits; it ends its turn with the question and its recommendation in its report (see Questions). |
 | Open a todolist | A thread: the agent's todo tool if it has one, else keep the list in your reply. OptChat: keep the list in your reply or in an artifact you revise. |
-| Run another skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("cube-mode", "../<name>/SKILL.md")`. Hidden skills are installed but not listed. |
+| Run another skill (`/name`, "the **name** skill") | A thread: read `~/.cube/skills/<name>/SKILL.md` (or `../<name>/SKILL.md` from a skill) with your file tool. OptChat: `skill("briefing-a-thread", "../<name>/SKILL.md")`. Hidden skills are installed but not listed. |
 | `Grep`, `Glob` | `rg` and `find` in a thread's shell. |
 | "Use any MCP tool" | A thread has cube's own tools (artifacts, OptChat's memory read only), `gh` and `git` with cube's credentials, and HTTP(S). Other MCP servers are not there: say which evidence that leaves out. |
 
@@ -46,7 +50,7 @@ cube. A field with no row: drop it and say so.
 | subagent field | purpose | cube |
 | --- | --- | --- |
 | `subagent_type` naming the cube-mode agent | the delegate reads cube-mode first | the brief says "read `~/.cube/skills/cube-mode/SKILL.md` in full first": [`../agents/cube-mode-agent.md`](../agents/cube-mode-agent.md) is the template |
-| `subagent_type: comment-sicko` | a reviewer that did not write the comments | a fresh thread briefed with [`../../no-comments/agents/comment-sicko.md`](../../no-comments/agents/comment-sicko.md) (see Independent review) |
+| `subagent_type: comment-sicko` | a reviewer that did not write the comments | a fresh thread briefed with [`../../no-comments/agents/comment-sicko.md`](../../no-comments/agents/comment-sicko.md) (see Review by another thread) |
 | `subagent_type: generalPurpose` | a plain worker | a thread whose brief is the worker prompt |
 | `readonly: true` | the worker must not write | the brief says "read only: no edits, no branch, no pull request"; the thread checks `git status` before reporting |
 | `readonly: false` "for MCP access" | keep tools | every thread has the same tools; nothing to set |
@@ -55,55 +59,7 @@ cube. A field with no row: drop it and say so.
 | `cloud_base_branch: <b>` | start from a pushed branch | the brief names the branch or commit to check out first |
 | `run_in_background: true` | don't hold the parent's turn | always so: OptChat's `spawn` returns at once and reports arrive later; OptChat never waits or polls (see Waiting) |
 | `file_attachments` | give the worker files | name repository paths, pull requests or artifact ids in the brief; a thread cannot read another thread's files |
-| `model` | the role's model | `model` on OptChat's `spawn` task, from the user's words in the chat (see Models); a thread cannot choose its own |
-
-## Models
-
-Only OptChat chooses a model, once per thread, with `spawn`'s `model`
-(`provider/id`, as `projects` lists them). There is no setup and no file:
-a role's line is what the user said in the chat about the models that
-cover that spawn.
-
-1. **Find it.** Read the current view for models, providers or families
-   the user asked for or ruled out: in general, for a role (`bug-fix`,
-   `arena runners`), or for this task. Zoom a line that mentions one when
-   its summary is too coarse to name the provider. The newest statement
-   that covers the spawn wins; one said for a task ends with that task.
-   When a newer general statement and an older one for this role leave
-   the user's intent unclear (did "use Y" replace "bug-fix on X"?), ask;
-   do not invent a precedence.
-2. **Match it exactly.** Find the model in `projects` by provider and id.
-   The same model name under another provider is another choice: "Opus
-   through Claude Code, not the API" is the Claude Code provider's Opus,
-   never the Anthropic API's.
-3. **Ask when it does not hold.** No statement covers the spawn, the
-   preferred model is not in `projects` or its start fails, or two
-   statements conflict: ask the user, with a proposal from `projects`,
-   before you spawn. The answer is the preference from then on; nothing
-   else stores it.
-4. **No silent fallback.** Never switch provider or family on your own,
-   and never read availability as consent. Raise or lower only among the
-   models the user's words cover. Never omit `model` to dodge the
-   question: the host default can be any model.
-5. **Panels.** A panel (arena runners, interrogate reviewers) keeps its
-   point, diverse families, only with families the user accepted. With
-   one, it is N independent tries on that model, and the report says so.
-   A seat that must be of another family (a cross-judge, a verifier) and
-   that no accepted family fills: skip it where the skill allows a skip
-   (arena's judge), and say so; otherwise ask.
-6. **Say it.** In the reply, name the model each spawn got and the
-   message it follows, so the user can correct it.
-
-- There is no model setup skill to run in cube: nothing is saved.
-- A model slug from the original stack (`claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast`) is not a
-  cube model id. Never pass one.
-- Reasoning level and fast or standard speed are part of the model id
-  only where the provider offers them as models; otherwise they are not
-  settable per thread. Say so rather than invent an id.
-- A thread runs on the model it was started with; it never switches. A
-  thread's handoff names the role for each task and may quote the user's
-  model words for it verbatim; it never picks a `provider/id`. OptChat
-  resolves the model here.
+| `model` | the role's model | `model` on OptChat's `spawn` task, from the user's words in the chat (briefing-a-thread, Models); a thread cannot choose its own |
 
 ## Delegation
 
@@ -115,7 +71,7 @@ implementer of a bug fix, feature, refactor, perf change or hillclimb
 attempt; a verifier; an explorer; a reviewer). It does that task itself,
 start to end, including the lead's hands-on steps (reproduce, verify,
 check its own diff before pushing, an author check that never stands in
-for the independent review, which is a handoff: see Independent review) and the task's own continuation,
+for the independent review, which is a handoff: see Review by another thread) and the task's own continuation,
 fixes and landing.
 
 Wherever a skill, playbook or template requires *another* agent (spawn,
@@ -140,24 +96,10 @@ when its task continues. A thread never starts a thread itself.
 Not a handoff: a deterministic script or codemod the thread writes and runs
 (a lever, not an agent), and reading code the task itself needs.
 
-***In OptChat**, a skill's fan-out is a `spawn` with one task per worker:
+OptChat runs the fan-out, gathers the reports and synthesizes them
+(briefing-a-thread, Multi-thread workflows).
 
-- Each task is a full brief ([briefing-a-thread](../../briefing-a-thread/SKILL.md)):
-  goal, project, the exact branch, pull request or head commit, the
-  worker prompt from the skill (name its path, e.g.
-  `~/.cube/skills/how/references/explorer-prompt.md`, or paste it), what
-  it may write, what it returns and when it stops. Workers do not see
-  each other or this chat as instructions.
-- Workers that write get separate branches or a scratch directory; two
-  threads never push the same branch (one owner per branch).
-- Capacity: `projects` shows free machines. Start what fits; archive done
-  threads to free slots; start the next worker as each report arrives.
-- Synthesis: read every report yourself and write the result, or, when
-  the synthesis must read code or run a check, spawn one more thread with
-  every report pasted in full. Never pass a worker's words on as a verdict.
-- A worker that drops out: go on with N-1 and say so, as the skills say.
-
-### Independent review
+### Review by another thread
 
 Independent judgment comes from a fresh thread. A review,
 verification, judging or cross-model pass is done by a thread that neither
@@ -165,23 +107,15 @@ wrote the change nor reviewed something else, started by OptChat. Its
 brief names what to review, the head commit and the criteria, never the
 author's reasoning.
 
-**The review handoff.** The lead's review and verification of a delegate's change goes to a fresh thread, because the delegate is the thread that wrote it. When the change is pushed, the author reports a handoff with one ready brief for a review-and-verification thread: the PR and its exact head SHA, the repro, measurement or pin to rerun on the real surface, the criteria (the playbook's own bar: the repro passes, the number moves past noise, behavior is unchanged), what the reviewer may not do (no edits, no pushes) and the verdict it returns (`PASS`, `PASS+NOTES` or `FAIL` with evidence). Never the author's reasoning. Then the author ends its turn. OptChat starts the reviewer, reads its verdict, and tells findings back to the author, whose fixes are the same task; a new head gets a delta review by the same reviewer thread. The author's own checks before pushing (tests, its own rerun of the repro, a reread of the diff) stay: they are author checks, reported as such, never the review.
+**The review handoff.** The lead's review and verification of a delegate's change goes to a fresh thread, because the delegate is the thread that wrote it. When the change is pushed, the author reports a handoff with one ready brief for a review-and-verification thread: the PR and its exact head SHA, the repro, measurement or pin to rerun on the real surface, the criteria (the playbook's own bar: the repro passes, the number moves past noise, behavior is unchanged), what the reviewer may not do (no edits, no pushes) and the verdict it returns (`PASS`, `PASS+NOTES` or `FAIL` with evidence). Never the author's reasoning. Then the author ends its turn. OptChat starts the reviewer and tells its findings back to the author, whose fixes are the same task (briefing-a-thread, Independent review). The author's own checks before pushing (tests, its own rerun of the repro, a reread of the diff) stay: they are author checks, reported as such, never the review.
 
 ### Same task, same thread
 
-A task's own steps stay in its author thread (its checkout and branch
-live there):
-
-- `tell` the author thread: fixes to its own work, review findings on its
-  own pull request, the user's answer to its question, going on after it
-  stopped short, landing what it made. `tell` the reviewer thread: a delta
-  review of new commits on the pull request it reviewed.
-- `spawn` a new thread: another pull request, question or review, a
-  follow-up outside the task, work in the same area after the result was
-  delivered. Never reuse a thread as a standing worker.
-- Each tell restates every directive still open for that task, so nothing rides only on the thread's memory. A thread
-  that has spent its tells (8 between two messages of the user) waits for
-  the user; do not start another thread to continue the same task.
+A tell about your task is your task: fixes to your own work, review
+findings on your own pull request, the user's answer to your question,
+going on after you stopped short, landing what you made. Work outside it
+is a new task, which OptChat gives a fresh thread (briefing-a-thread,
+Follow up).
 
 ## Questions, waiting and reports
 
@@ -223,11 +157,8 @@ step from it alone:
 
 Promise no later work: say what is left and what it waits for.
 
-**Reading a report (OptChat).** A report is evidence to check, not a
-result to pass on. Sort its claims into fact, hypothesis and unknown;
-check the pins (the head commit, and that checks ran on that commit); use
-`history(id)` when a report is short or disagrees with `threads`. Green
-CI, "should work" and an approving bot are not verdicts.
+OptChat reads a report as evidence to check (briefing-a-thread, Reading a
+report).
 
 ## Authority
 
@@ -267,7 +198,7 @@ agent's store. Cube keeps these records:
 | record | who reads it | how |
 | --- | --- | --- |
 | the user's chat with OptChat | OptChat; any thread, read only | OptChat: the view, `zoom(id, n)`, `date(id)`. A thread: its cube memory tools (`memory_zoom`, `memory_date`), when it has them |
-| a thread's conversation | OptChat | `threads`, `history(id)`, `archived_threads(query)` |
+| a thread's conversation | OptChat; a thread that has `thread_history`, for its own project only | OptChat: `threads`, `history(id)`, `archived_threads(query)`. A thread: `thread_history` when its tools list it (only threads started after cube ships it); otherwise only what OptChat puts in its brief or tells |
 | a thread's own work so far | that thread | its context; nothing else |
 | documents the user reads and comments on | OptChat and the project's threads | artifacts (`artifact_write`, `artifact_read`, `artifact_edit`) |
 | code, trails, decision logs | anyone | git: a pushed branch, a pull request, a committed file |
@@ -309,7 +240,7 @@ the skipped step made, leave a placeholder and name it.
 | `deslop` (a separate plugin) | no such skill here: run the **unslop** skill over prose and the **no-comments** skill over code comments, and say `/deslop` was skipped |
 | `control-ui`, `control-cli` (a separate plugin) | the project's own verification skill (`.agents/skills/verify-*`, see **create-verification-skill**); else Playwright's Chromium in the thread (`pnpm test:browser` style), or driving the CLI in the shell |
 | `create-skill` (a host built-in) | the **Authoring a skill** playbook plus cube's rules in cubeyard/skills' README (frontmatter, surface, links) |
-| Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat re-reads cube-mode when a turn's request needs it |
+| Custom Modes, Option+Enter | none: a thread's whole task is one task, so a skill read at its start holds for it; OptChat keeps briefing-a-thread in its context and reads it again only when it is gone or its version changed |
 | `/loop` | see Waiting |
 | Plan Mode | the Multi-phase plan playbook, written as an artifact |
 | `/visualize`, the image-generation tool, canvases | Mermaid diagrams and tables in an artifact or a reply; no generated images |
