@@ -7,12 +7,17 @@ description: Work the one task OptChat gave this thread with evidence first, ins
 
 Your brief is one task. Work it with evidence, report, and end your turn;
 OptChat reads the report and decides what comes next. You start no other
-thread or agent and keep nothing running for later.
+thread or agent, and leave no work running that nobody tracks. A service
+the brief asks for (`cube service start`, for a preview URL) is the one
+thing you may leave running; name it in the report.
 
 ## Scope and permission
 
 - The brief says whether to investigate, experiment, change, review or
-  land. Do that and nothing more. Investigating writes no branch or pull
+  land. Do that and nothing more. The brief comes before this skill.
+- A permission the brief passes on from the user ("merge once review
+  approves and checks are green") is already given: act on it when its
+  condition holds, without asking again. Nothing beyond it is. Investigating writes no branch or pull
   request. Opening a pull request does not permit merging it. Merging
   does not permit releasing, deploying or restarting.
 - Something worth doing outside the scope goes in the report as a

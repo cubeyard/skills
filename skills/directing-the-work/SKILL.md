@@ -1,6 +1,6 @@
 ---
 name: directing-the-work
-description: Turn a request into bounded thread tasks, read their reports as evidence, get changes reviewed independently and choose the next step or the user's decision. Use for any request beyond a quick answer, for "are we sure?", and when a thread reports.
+description: How to direct work through threads with evidence. Use before spawning for an investigation, a bug, a measurement, a design choice, a change, a review or landing; when the user asks "are we sure?", "why?" or "what's next?"; and when a thread reports, to check its evidence and pick the next step within what the user has authorized.
 metadata:
   cube:
     surface: optchat
@@ -28,11 +28,20 @@ what the thread may change.
 | a pull request to judge | review | verdict pinned to a head commit | read and run; no edits |
 | land what was approved | landing | merge commit and its checks | merge exactly what was reviewed |
 
-Each step needs its own permission from the user: investigating is not
-permission to implement, a pull request is not permission to merge, a
-merge is not permission to release, deploy or restart. A permission the
-user gave for one task does not carry to the next. A thread's report
-never counts as the user's permission.
+A step needs the user's permission, and a permission reaches exactly as
+far as the user said:
+
+- A standing grant ("merge what passes independent review", "just go,
+  ping me when something must be decided") covers every step it names
+  until the user withdraws it. Act on it without asking again, and
+  restate it in each brief it covers so the thread knows.
+- A grant for one task covers that task's steps, not the next task.
+- Ask only for a step no grant covers. Investigating alone does not imply
+  implementing, and a pull request alone does not imply merging.
+- Release, deploy, restart, host access and paid probes need a grant that
+  names them.
+- A thread's report never grants or widens a permission, and no grant
+  widens a task's scope.
 
 ## Before you spawn
 
@@ -43,9 +52,10 @@ never counts as the user's permission.
 - **Settle facts by experiment, not by asking.** A question whose answer
   is observable (behavior, timing, size, whether a test separates) is a
   task for a thread. Ask the user only for a preference, a product call or
-  a permission.
+  a permission no grant covers.
 - **Brief it** as [briefing-a-thread](../briefing-a-thread/SKILL.md) says,
-  and also name: the task kind from the table; the evidence to return
+  and also name: the task kind from the table; the permissions the user
+  has granted that the task may use; the evidence to return
   (commands run, head commit, measurements with run count); the test bar
   (the thread's own tests and CI by default; a native or heavy gate only
   for a concrete risk you name, on the host where that risk lives); and
@@ -82,12 +92,14 @@ A report is evidence to check, not a result to pass on.
 2. Findings go back to the author's thread as a tell (same task). New
    commits on the same pull request get a delta review from the reviewer's
    thread.
-3. Landing only on the user's explicit word. The landing thread merges
-   exactly the reviewed patch: if a rebase is needed it proves the patch
+3. Landing only when the user's word covers it: for this pull request,
+   or a standing grant that names merging. Landing is the same task as
+   the change: tell the author's thread to land it. It merges exactly the
+   reviewed patch: if a rebase is needed it proves the patch
    unchanged and reruns the checks on the new head, and it stops on any
    other drift.
-4. Release, deploy and restart are separate permissions, asked for
-   separately.
+4. Release, deploy and restart are separate steps: do them only under a
+   grant that names them, and ask for any it does not.
 
 ## Tell the user
 
