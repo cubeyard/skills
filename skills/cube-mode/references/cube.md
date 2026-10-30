@@ -248,8 +248,7 @@ agent's store. Cube keeps these records:
 Files in a thread machine are not memory: they leave with the thread, and
 no other thread sees them. A record another task needs goes to an
 artifact, a pushed branch or the report. Never read a chat or thread
-outside what the task is about, as pstack's "do not glob across
-`~/.cursor/projects`" says.
+outside what the task is about.
 
 ## Environment
 
